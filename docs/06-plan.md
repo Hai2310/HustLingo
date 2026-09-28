@@ -8,21 +8,22 @@ Giả định nhóm 3–4 người: **ứng dụng/UI**, **backend/dữ liệu**
 
 | Tuần | Trọng tâm | Bàn giao và điều kiện qua mốc |
 | --- | --- | --- |
-| 1 | Chốt phạm vi, thiết kế luồng, khảo sát Flutter Android/web, spike mic/STT/TTS, tạo repo/cấu hình | Wireframe chính, backlog có ID yêu cầu, mẫu ghi âm và phát âm chạy trên hai nền tảng hoặc quyết định thay thế có ước lượng |
-| 2 | Thiết kế dữ liệu/RLS, Auth, mẫu nội dung và quy trình kiểm duyệt | Đăng ký/đăng nhập, schema/migration, 1 chủ đề 25 từ đã rà soát, seed script, lựa chọn dịch vụ và hạn mức |
-| 3 | Danh sách/chủ đề, flashcard, TTS, responsive | Luồng đăng nhập → chọn chủ đề → học 25 thẻ chạy trên Android/web; trạng thái lỗi và quyền cơ bản |
-| 4 | 3 chủ đề còn lại, ngân hàng quiz, màn quiz | Đủ 100 từ và câu hỏi đã kiểm duyệt; quiz chạy cục bộ với dữ liệu thật; kiểm tra câu không trùng/đáp án rõ |
-| 5 | Nộp quiz trên máy chủ, tiến độ, lịch ôn | Điểm tính phía máy chủ, lưu bền, đăng nhập chéo thiết bị thấy tiến độ; RLS thử bằng hai tài khoản |
+| 1 | Chốt phạm vi và ma trận hai role, thiết kế luồng learner/admin, spike mic/STT/TTS, tạo repo/cấu hình | Wireframe learner + admin web, backlog có ID yêu cầu, mẫu ghi âm/phát âm hoặc quyết định thay thế |
+| 2 | Auth, bảng role/trạng thái, RLS/quyền ghi, mẫu nội dung và quy trình bootstrap admin | Đăng ký mặc định learner, một admin bootstrap, kiểm tra learner không tự nâng quyền; 1 chủ đề mẫu/seed |
+| 3 | Danh sách/chủ đề, bài giảng ngắn, flashcard, TTS; khung quản trị nội dung web | Learner học 25 thẻ trên Android/web; admin tạo/sửa bản nháp và xem trước trên web |
+| 4 | 3 chủ đề còn lại, ngân hàng quiz gồm câu hỏi hình ảnh, kiểm tra nội dung và phát hành | Đủ 100 từ/câu hỏi đã duyệt; ít nhất một câu hình hợp lệ trong nội dung đã phát hành; admin phát hành được chủ đề, learner không thấy bản nháp |
+| 5 | Nộp quiz trên máy chủ, tiến độ, lịch ôn | Điểm/lịch ôn chỉ ghi qua function; đăng nhập chéo thiết bị thấy tiến độ; thử truy cập trực tiếp bằng hai learner và admin |
 | 6 | Luồng luyện nói và STT | Ghi âm, quyền mic, bản chép lời, mức khớp, retry; đo độ trễ/chi phí trên Android/web |
 | 7 | Phản hồi câu viết bằng AI, hạn mức, quyền riêng tư | Phản hồi theo schema, kiểm tra nội dung/timeout, giới hạn 5 lượt/ngày, thông báo dữ liệu được gửi ra dịch vụ |
-| 8 | Tích hợp, UX/accessibility, xử lý lỗi, xóa dữ liệu | Luồng trọn vẹn không gãy; kiểm tra web 360/1280 px; quy trình xóa tài khoản; đóng lỗi P0 |
-| 9 | Kiểm thử hệ thống và thử với người học mới | Ma trận kiểm thử hoàn tất, thử ít nhất 5 người, ghi kết quả và sửa lỗi cản trở; chuẩn bị demo |
-| 10 | Ổn định, đo chỉ số, tài liệu vận hành, demo | Bản Android cài được, web truy cập được, seed/backup nội dung, biên bản nghiệm thu và video/kịch bản demo |
+| 8 | Quản trị tài khoản web, tích hợp, UX/accessibility, xóa dữ liệu | Admin tìm/khóa/mở learner, gửi reset, đổi role có log; thử token cũ; luồng chính không gãy |
+| 9 | Kiểm thử hệ thống, phân quyền và thử với người học mới | Ma trận kiểm thử hoàn tất, thử ít nhất 5 người, kiểm tra trực tiếp RLS/API và sửa lỗi cản trở |
+| 10 | Ổn định, đo chỉ số, tài liệu vận hành, demo | Bản Android, web learner/admin, seed/backup, biên bản nghiệm thu; demo phát hành nội dung và khóa tài khoản |
 
 ## Các cổng quyết định
 
 - **Cuối tuần 1:** nếu ghi âm/STT trên web không chạy ổn định, quyết định làm adapter web khác hoặc hạ luyện nói web xuống demo có thông báo rõ; không để rủi ro đến tuần 6.
 - **Cuối tuần 2:** khóa 4 chủ đề, schema và nhà cung cấp AI/STT sau khi đo chi phí/điều khoản. Không thêm tính năng ngoài P0.
+- **Cuối tuần 4:** admin phải phát hành được một chủ đề từ bản nháp; nếu quá tải, giữ form quản trị đơn giản và import hàng loạt, không làm trình soạn thảo giàu định dạng.
 - **Cuối tuần 5:** phải có đường học không phụ thuộc AI: flashcard → quiz → tiến độ → ôn. Nếu chưa có, ưu tiên hoàn tất trước khi làm tính năng AI.
 - **Cuối tuần 7:** nếu AI/STT vượt hạn mức hoặc chất lượng kém, dùng phản hồi dựa trên quy tắc cho câu viết và STT ở chế độ thử nghiệm; báo minh bạch trong demo. Không tuyên bố chấm chính xác khi chưa kiểm chứng.
 - **Đầu tuần 9:** đóng phạm vi tính năng, chỉ sửa lỗi và nội dung.
@@ -31,11 +32,11 @@ Giả định nhóm 3–4 người: **ứng dụng/UI**, **backend/dữ liệu**
 
 | Nhóm việc | Đầu ra | Phụ thuộc |
 | --- | --- | --- |
-| Thiết kế UX | Wireframe 7 màn, trạng thái lỗi/không quyền/không mạng | Phạm vi và luồng học |
-| Nội dung | 100 mục từ, ít nhất 40 câu hỏi/chủ đề để rút 10 câu/lượt, kiểm duyệt chéo | Schema nội dung |
-| Ứng dụng | Auth, danh sách, flashcard, quiz, tiến độ, nói, viết | API và thiết kế UX |
-| Backend | Migration/RLS, seed, nộp quiz, lịch ôn, Edge Functions STT/AI | Schema, tài khoản dịch vụ |
-| Chất lượng | Unit test quy tắc điểm/lịch ôn, integration test quyền dữ liệu, kiểm thử thủ công Android/web, thử người dùng | Bản tích hợp theo tuần |
+| Thiết kế UX | Wireframe màn learner và ba phần admin web, trạng thái lỗi/không quyền/không mạng | Phạm vi, ma trận quyền và luồng học |
+| Nội dung | 100 mục từ, ít nhất 40 câu hỏi/chủ đề để rút 10 câu/lượt; ảnh quiz có quyền sử dụng, mô tả và câu chữ thay thế; kiểm duyệt chéo | Schema nội dung |
+| Ứng dụng | Auth, màn learner và admin web tối giản, flashcard, quiz, tiến độ, nói, viết | API và thiết kế UX |
+| Backend | Migration/RLS, bootstrap admin, version nội dung, quản trị tài khoản, nộp quiz/ôn, Edge Functions STT/AI | Schema, tài khoản dịch vụ |
+| Chất lượng | Unit test điểm/lịch ôn, integration test role và ghi dữ liệu, kiểm thử Android/web/admin, thử người dùng | Bản tích hợp theo tuần |
 | Bàn giao | Hướng dẫn chạy, biến môi trường mẫu, script seed, test report, kịch bản demo | Chức năng đã đóng băng |
 
 ## Ước lượng và kiểm soát tiến độ

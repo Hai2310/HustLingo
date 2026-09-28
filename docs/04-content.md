@@ -41,14 +41,19 @@ Danh sách từ cụ thể được chốt ở tuần 2. Chọn từ mức A0–
 4. **Dùng:** nói từ/câu mẫu và đặt một câu mới. Hai bước này có thể mở từ chi tiết chủ đề sau flashcard, không chặn việc hoàn thành quiz.
 5. **Ôn:** từ sai và từ đến hạn xuất hiện ở màn tiến độ.
 
+## Bài giảng ngắn của chủ đề
+
+Admin biên soạn phần mở đầu gồm mục tiêu học, 2–5 đoạn hướng dẫn ngắn, 1–2 ví dụ và hình/âm thanh tùy chọn. Phần này giúp người mới hiểu chủ đề trước khi vào flashcard. Không có video hoặc định dạng phức tạp trong MVP. Dữ liệu nằm trong phiên bản nội dung của chủ đề và được xem trước trước khi phát hành.
+
 ## Quy tắc viết và kiểm duyệt
 
 - Mỗi từ có một nghĩa chính phù hợp câu ví dụ; nếu nhiều nghĩa, chỉ kiểm tra nghĩa đã dạy.
 - Câu ví dụ dài khoảng 3–10 từ, cấu trúc quen thuộc, không dựa vào kiến thức văn hóa riêng.
 - IPA dùng cùng một biến thể nhất quán; ghi biến thể được chọn trong metadata chủ đề. Âm TTS có thể khác giọng IPA, nên không dùng làm căn cứ chấm âm vị.
-- Phương án nhiễu là từ/nghĩa cùng loại nhưng không gây hai đáp án đúng. Người kiểm duyệt tự làm quiz mẫu trước khi phát hành.
+- Phương án nhiễu là từ/nghĩa cùng loại nhưng không gây hai đáp án đúng. Với câu hỏi bằng hình, ảnh phải thể hiện rõ một từ mục tiêu, không chứa chữ/nhãn tiết lộ đáp án; tránh ảnh có nhiều vật thể đều đúng với lựa chọn. Người kiểm duyệt tự làm quiz mẫu trước khi phát hành.
 - Dữ liệu có `content_version`, ngày rà soát và người duyệt. Sửa lỗi chính tả giữ ID; thay nghĩa hoặc đáp án tăng phiên bản và rà soát câu hỏi liên quan.
 - Từ, ví dụ, hình, âm thanh và bản dịch phải có nguồn hoặc người tạo trong bảng theo dõi nội dung của nhóm. Không sao chép nguyên bộ dữ liệu từ ứng dụng khác.
+- Admin nhập/sửa bản nháp trên web hoặc import dữ liệu có kiểm tra cấu trúc, xem trước, chạy kiểm tra hợp lệ rồi phát hành. Learner chỉ nhận bản đã phát hành. Thao tác phát hành ghi người và thời điểm; quy trình nhóm vẫn cần người thứ hai rà soát nội dung dù không có role kiểm duyệt riêng.
 
 ## Mẫu câu hỏi quiz
 
@@ -57,8 +62,11 @@ Danh sách từ cụ thể được chốt ở tuần 2. Chọn từ mức A0–
 | Chọn nghĩa | “mother” nghĩa là gì? A. mẹ B. bố C. chị gái | A |
 | Chọn từ | Từ tiếng Anh của “mẹ” là gì? A. father B. mother C. sister | B |
 | Điền từ bằng lựa chọn | My ___ is kind. A. mother B. rice C. kitchen | A |
+| Xem hình, chọn từ | Hiện ảnh một bát cơm. “Trong hình là gì?” A. rice B. water C. bread | A |
 
-MVP không dùng nhập tự do cho quiz để tránh nhiều cách viết đúng khó chấm. Mỗi lượt quiz 10 câu rút từ bộ câu hỏi được duyệt; nếu chưa đủ câu hỏi hợp lệ, không phát hành chủ đề.
+Ví dụ tương tự: **ảnh con hổ → chọn “tiger”** giữa ba từ tiếng Anh, nếu chủ đề có dạy từ *tiger*. Câu hỏi hình ảnh chỉ dùng cho từ có thể nhận diện rõ bằng hình; không ép từ trừu tượng như *kind* vào dạng này.
+
+Mỗi câu hỏi hình ảnh cần `image_asset`, mô tả tiếng Việt cho trình đọc màn hình và câu hỏi chữ thay thế khi ảnh tải lỗi. Cả ảnh và câu thay thế phải dẫn đến cùng một đáp án; mô tả không ghi sẵn từ tiếng Anh cần chọn. Admin kiểm tra quyền sử dụng ảnh, độ rõ trên màn nhỏ và ảnh tải được trước khi phát hành. MVP không dùng nhập tự do cho quiz để tránh nhiều cách viết đúng khó chấm. Mỗi lượt quiz 10 câu rút từ bộ câu hỏi được duyệt; nếu chưa đủ câu hỏi hợp lệ, không phát hành chủ đề.
 
 ## Đánh giá câu tự viết
 

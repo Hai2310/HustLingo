@@ -14,6 +14,7 @@ HustLingo là ứng dụng học từ vựng tiếng Anh cơ bản theo chủ đ
 | [06-plan.md](06-plan.md) | Tiến độ, mốc bàn giao, phụ thuộc và phân công |
 | [07-testing.md](07-testing.md) | Kịch bản kiểm thử, dữ liệu thử và điều kiện bàn giao |
 | [08-risks.md](08-risks.md) | Rủi ro, biện pháp giảm thiểu và quyết định cần chốt |
+| [09-access-control.md](09-access-control.md) | Hai role, ma trận quyền và quy trình nội dung/tài khoản |
 
 ## Cách dùng
 

@@ -4,7 +4,7 @@
 
 **Người mới học (A0–A1), 15 tuổi trở lên:** có thể đọc giao diện tiếng Việt, muốn học 10–15 phút/lần, dùng điện thoại Android hoặc trình duyệt máy tính. Cần từ thông dụng, ví dụ ngắn, phát âm dễ nghe và tiến độ rõ.
 
-**Người kiểm duyệt nội dung:** thành viên nhóm soạn và rà soát danh sách từ trước khi nhập dữ liệu. MVP chưa cần trang quản trị; nhập qua tệp dữ liệu có kiểm tra cấu trúc và quy trình duyệt.
+**Admin (quản trị viên/nhóm chuyên môn):** một role chung cho người soạn, rà soát, phát hành chủ đề và quản lý tài khoản. Admin dùng giao diện web; dữ liệu ban đầu có thể import/seed rồi sửa, xem trước và phát hành trên web. Quyền chi tiết ở [09-access-control.md](09-access-control.md).
 
 ## Giá trị của một phiên học
 
@@ -31,6 +31,23 @@ flowchart TD
     J --> G
     J --> C
 ```
+
+## Luồng admin trên web
+
+```mermaid
+flowchart TD
+    A[Admin đăng nhập] --> B[Trang quản trị]
+    B --> C[Nội dung]
+    C --> D[Tạo hoặc sửa bản nháp]
+    D --> E[Xem trước và kiểm tra hợp lệ]
+    E --> F[Phát hành hoặc ẩn]
+    B --> G[Tài khoản]
+    G --> H[Tìm learner]
+    H --> I[Khóa / mở / gửi link đặt lại mật khẩu]
+    G --> J[Cấp hoặc thu hồi quyền admin]
+```
+
+Sau đăng nhập, ứng dụng điều hướng theo role hiện thời. Learner không thấy màn quản trị; admin không làm bài học bằng tài khoản quản trị. Nếu tài khoản bị khóa hoặc role bị thay đổi khi đang mở ứng dụng, yêu cầu tiếp theo bị máy chủ từ chối và UI tải lại trạng thái.
 
 ## Trạng thái cần thiết
 
