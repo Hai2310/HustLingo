@@ -1,0 +1,16 @@
+
+
+- App học từ vựng tiếng Anh : 
++ về Nghe/Nói/Đọc/Viết + flashcard ôn từ vựng + A.I nói chuyện với chatbot
++ Luyện đề : Trắc nghiệm đơn giản 
++ Tích hợp A.I để chấm bài viết hoặc nói
+
+Tập trung : 
+- dành cho đối tượng begineer học tiếng Anh 
+- tập trung vào học từ vựng cơ bản Theo chủ đề cơ bản 
+- Mỗi chủ đề khoảng 20 - 30 từ
+- flash_card(phát âm, hình ảnh,từ + phiên âm) -> quiz -> a.i chấm phát âm -> a.i chấm đặt câu theo từ 
+
+1 
+Data cho từng bài học : 
+Tham khảo sản phẩm có sẵn : 
