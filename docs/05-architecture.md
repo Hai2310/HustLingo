@@ -4,13 +4,15 @@
 
 | Lớp | Lựa chọn | Vai trò |
 | --- | --- | --- |
-| Ứng dụng | Flutter/Dart | Một mã nguồn giao diện cho Android và web; cấu trúc responsive |
+| Ứng dụng | Flutter/Dart + Material 3; `go_router`, `flutter_riverpod` | Một mã nguồn giao diện cho Android/web; route và state theo feature, giao diện responsive |
 | Xác thực và dữ liệu | Supabase Auth + PostgreSQL | Tài khoản, nội dung, kết quả, lịch ôn; Row Level Security (RLS) |
-| Logic máy chủ | Supabase Edge Functions | Kiểm tra role/trạng thái, chấm điểm, quản lý nội dung/tài khoản, hạn mức, gọi STT/AI; giữ bí mật khóa dịch vụ |
-| Âm thanh | TTS hệ điều hành/trình duyệt hoặc file có quyền sử dụng; plugin ghi âm tương thích Android/web | Nghe mẫu và ghi âm ngắn |
+| Logic máy chủ | Supabase Edge Functions bằng TypeScript/Deno | Kiểm tra role/trạng thái, chấm điểm, quản lý nội dung/tài khoản, hạn mức, gọi STT/AI; giữ bí mật khóa dịch vụ |
+| Âm thanh | `record`, `flutter_tts`, file audio có quyền sử dụng khi cần | Nghe mẫu và ghi âm ngắn; thử quyền/codec trên Android và web ở tuần 1 |
 | AI/STT | Nhà cung cấp qua adapter máy chủ | Có thể thay dịch vụ, mock trong phát triển và kiểm thử |
 
 Nhóm cần làm một **spike tuần 1**: ghi âm trên Android/web, quyền mic, gửi mẫu đến STT, đo độ trễ/chi phí; đồng thời thử TTS. Nếu plugin không đạt trên web, thay bằng cơ chế ghi âm web riêng sau khi đánh giá thời gian. Không gắn toàn bộ UI vào API của một nhà cung cấp.
+
+Danh sách ngôn ngữ, package, cấu trúc thư mục, môi trường và lệnh triển khai được chốt tại [10-implementation-stack.md](10-implementation-stack.md). [Prototype](../prototype/README.md) là bản xem luồng giao diện bằng web thuần với dữ liệu giả; không thay thế ứng dụng Flutter hoặc các kiểm tra quyền phía Supabase.
 
 ```mermaid
 flowchart LR

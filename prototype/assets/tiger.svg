@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" role="img" aria-labelledby="title desc">
+  <title id="title">Con hổ</title>
+  <desc id="desc">Minh họa đầu hổ màu cam có vằn đen.</desc>
+  <rect width="600" height="400" rx="30" fill="#dff0e9"/>
+  <circle cx="300" cy="198" r="145" fill="#e8f6ee"/>
+  <path d="M189 106 155 54c-16-23-40-4-31 20l26 88M411 106l34-52c16-23 40-4 31 20l-26 88" fill="#e9914e" stroke="#704029" stroke-width="9" stroke-linejoin="round"/>
+  <path d="M182 80 156 53l11 60M418 80l26-27-11 60" fill="#f9c3b8"/>
+  <path d="M300 69c-85 0-151 64-151 144 0 85 68 143 151 143s151-58 151-143c0-80-66-144-151-144Z" fill="#eda14e" stroke="#704029" stroke-width="9"/>
+  <path d="m300 68-18 54 18 19 18-19-18-54ZM201 99l35 67-50-21M399 99l-35 67 50-21M156 192l64 31-61 18M444 192l-64 31 61 18" fill="#624035"/>
+  <path d="M216 219c0-28 27-50 60-50s55 15 55 43M384 219c0-28-27-50-60-50s-55 15-55 43" fill="#fff0d6" opacity=".45"/>
+  <ellipse cx="236" cy="228" rx="18" ry="23" fill="#453835"/><ellipse cx="364" cy="228" rx="18" ry="23" fill="#453835"/>
+  <circle cx="242" cy="220" r="5" fill="#fff"/><circle cx="370" cy="220" r="5" fill="#fff"/>
+  <ellipse cx="300" cy="286" rx="78" ry="48" fill="#fff7e8"/>
+  <path d="m277 268 23 20 23-20c-9-17-37-17-46 0Z" fill="#5c3c35"/>
+  <path d="M300 288v20m0 0c-13 10-28 10-39-1m39 1c13 10 28 10 39-1" fill="none" stroke="#5c3c35" stroke-width="7" stroke-linecap="round"/>
+  <path d="M219 280h-75m75 18h-67m229-18h75m-75 18h67" stroke="#704029" stroke-width="5" stroke-linecap="round"/>
+</svg>

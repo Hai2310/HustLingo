@@ -15,10 +15,13 @@ HustLingo là ứng dụng học từ vựng tiếng Anh cơ bản theo chủ đ
 | [07-testing.md](07-testing.md) | Kịch bản kiểm thử, dữ liệu thử và điều kiện bàn giao |
 | [08-risks.md](08-risks.md) | Rủi ro, biện pháp giảm thiểu và quyết định cần chốt |
 | [09-access-control.md](09-access-control.md) | Hai role, ma trận quyền và quy trình nội dung/tài khoản |
+| [10-implementation-stack.md](10-implementation-stack.md) | Ngôn ngữ, framework, thư viện, cấu trúc repo và bước triển khai |
 
 ## Cách dùng
 
-Tài liệu là **đề xuất cơ sở** cho nhóm 3–4 người, 10 tuần, từ dự án chưa có mã nguồn. Những mục đánh dấu **MVP** là cam kết triển khai; mục **sau MVP** chỉ làm nếu mốc nghiệm thu đã đạt. Khi thay đổi phạm vi, cập nhật đồng thời yêu cầu, lịch và kiểm thử.
+Tài liệu là **đề xuất cơ sở** cho nhóm 3–4 người, 10 tuần, từ ý tưởng chưa có ứng dụng sản phẩm. Những mục đánh dấu **MVP** là cam kết triển khai; mục **sau MVP** chỉ làm nếu mốc nghiệm thu đã đạt. Khi thay đổi phạm vi, cập nhật đồng thời yêu cầu, lịch và kiểm thử.
+
+[Clickable prototype](../prototype/README.md) minh họa các màn và luồng bấm bằng dữ liệu cục bộ. Sản phẩm chính vẫn dùng Flutter + Supabase như tài liệu 05 và 10.
 
 ## Thuật ngữ
 

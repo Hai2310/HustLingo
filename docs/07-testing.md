@@ -2,6 +2,8 @@
 
 ## Môi trường thử
 
+Các ca TC bên dưới áp dụng cho **ứng dụng Flutter + Supabase thật** của MVP. [Prototype](../prototype/README.md) chỉ kiểm tra điều hướng/giao diện và không được tính là bằng chứng đạt Auth, RLS, STT, AI hoặc đồng bộ tiến độ.
+
 - Android: một máy thật tầm trung hoặc emulator, kiểm tra mic và TTS trên máy thật trước demo.
 - Web: Chrome và Edge hoặc Firefox bản hiện có, kích thước 360 × 800 và 1280 × 800; thử trên HTTPS vì quyền mic thường cần ngữ cảnh an toàn.
 - Hai tài khoản learner thử độc lập (A, B), một tài khoản admin và một tài khoản learner bị khóa; một learner có từ cần ôn.

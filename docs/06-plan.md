@@ -8,7 +8,7 @@ Giả định nhóm 3–4 người: **ứng dụng/UI**, **backend/dữ liệu**
 
 | Tuần | Trọng tâm | Bàn giao và điều kiện qua mốc |
 | --- | --- | --- |
-| 1 | Chốt phạm vi và ma trận hai role, thiết kế luồng learner/admin, spike mic/STT/TTS, tạo repo/cấu hình | Wireframe learner + admin web, backlog có ID yêu cầu, mẫu ghi âm/phát âm hoặc quyết định thay thế |
+| 1 | Chốt phạm vi và ma trận hai role; cài Flutter/Dart, Supabase CLI; đánh giá clickable prototype; spike mic/STT/TTS | `flutter doctor` đạt môi trường Android/web, chốt package theo tài liệu 10, wireframe/luồng được duyệt, mẫu âm thanh hoặc quyết định thay thế |
 | 2 | Auth, bảng role/trạng thái, RLS/quyền ghi, mẫu nội dung và quy trình bootstrap admin | Đăng ký mặc định learner, một admin bootstrap, kiểm tra learner không tự nâng quyền; 1 chủ đề mẫu/seed |
 | 3 | Danh sách/chủ đề, bài giảng ngắn, flashcard, TTS; khung quản trị nội dung web | Learner học 25 thẻ trên Android/web; admin tạo/sửa bản nháp và xem trước trên web |
 | 4 | 3 chủ đề còn lại, ngân hàng quiz gồm câu hỏi hình ảnh, kiểm tra nội dung và phát hành | Đủ 100 từ/câu hỏi đã duyệt; ít nhất một câu hình hợp lệ trong nội dung đã phát hành; admin phát hành được chủ đề, learner không thấy bản nháp |
@@ -35,7 +35,7 @@ Giả định nhóm 3–4 người: **ứng dụng/UI**, **backend/dữ liệu**
 | Thiết kế UX | Wireframe màn learner và ba phần admin web, trạng thái lỗi/không quyền/không mạng | Phạm vi, ma trận quyền và luồng học |
 | Nội dung | 100 mục từ, ít nhất 40 câu hỏi/chủ đề để rút 10 câu/lượt; ảnh quiz có quyền sử dụng, mô tả và câu chữ thay thế; kiểm duyệt chéo | Schema nội dung |
 | Ứng dụng | Auth, màn learner và admin web tối giản, flashcard, quiz, tiến độ, nói, viết | API và thiết kế UX |
-| Backend | Migration/RLS, bootstrap admin, version nội dung, quản trị tài khoản, nộp quiz/ôn, Edge Functions STT/AI | Schema, tài khoản dịch vụ |
+| Backend | SQL migrations/RLS, bootstrap admin, version nội dung, quản trị tài khoản, nộp quiz/ôn, TypeScript Edge Functions STT/AI | Schema, tài khoản dịch vụ |
 | Chất lượng | Unit test điểm/lịch ôn, integration test role và ghi dữ liệu, kiểm thử Android/web/admin, thử người dùng | Bản tích hợp theo tuần |
 | Bàn giao | Hướng dẫn chạy, biến môi trường mẫu, script seed, test report, kịch bản demo | Chức năng đã đóng băng |
 
