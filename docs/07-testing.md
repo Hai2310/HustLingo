@@ -28,6 +28,7 @@
 | TC-15 | FR-15/16 | Admin tìm, khóa/mở learner, gửi link reset, cấp/hạ role; dùng token cũ sau thay đổi; thử hạ admin cuối cùng | Quyền có hiệu lực ngay ở API và DB; hành động có log; admin cuối cùng không bị hạ; không xem được mật khẩu/tiến độ learner |
 | TC-16 | NFR-02 | Learner dùng Supabase API trực tiếp sửa `quiz_attempts`, `review_items`, `writing_feedback`, `user_roles`, `account_status` | Mọi ghi trái phép bị từ chối; chỉ Edge Functions hợp lệ thay đổi kết quả/hạn mức/role/trạng thái |
 | TC-17 | FR-06 | Mở hàng ôn, nhận câu hỏi rồi nộp một lựa chọn; thử nộp lại, đổi ID câu, dùng phiên của người khác | `start_review` cấp câu không lộ đáp án; `submit_review` chỉ chấm đúng phiên một lần, không đổi được lịch ôn người khác |
+| TC-18 | FR-04/14 | Admin tạo câu xem hình chọn từ; thử ảnh đúng, ảnh hỏng/không có quyền, câu thay thế sai đáp án; learner làm quiz trên Android/web và bật trình đọc màn hình | Chỉ câu hợp lệ được phát hành; ảnh hiện rõ, câu chữ thay thế hoạt động khi ảnh lỗi, mô tả truy cập được; điểm vẫn do máy chủ tính |
 
 ## Kiểm thử tự động tối thiểu
 
@@ -42,7 +43,7 @@
 ## Điều kiện nghiệm thu tuần 10
 
 1. Tất cả yêu cầu P0 ở tài liệu 03 có bản chạy và bằng chứng; trường hợp FR-10 xử lý thủ công phải có quy trình và lần thực hành được ghi nhận.
-2. TC-01 đến TC-11 và TC-13 đến TC-17 đạt; TC-12 không có lỗi cản trở thao tác chính. Không còn lỗi nghiêm trọng gây mất tiến độ, sai quyền, rò dữ liệu hoặc crash trong luồng chính.
+2. TC-01 đến TC-11 và TC-13 đến TC-18 đạt; TC-12 không có lỗi cản trở thao tác chính. Không còn lỗi nghiêm trọng gây mất tiến độ, sai quyền, rò dữ liệu hoặc crash trong luồng chính.
 3. Đủ 4 × 25 từ đã kiểm duyệt và ngân hàng câu hỏi hợp lệ; không có nội dung thiếu trường bắt buộc.
 4. Demo learner trên Android và web bằng cùng tài khoản, admin phát hành một bản nháp và khóa/mở một tài khoản thử; chứng minh tiến độ đồng bộ và ít nhất một phản hồi nói/viết từ dịch vụ thật. Nếu dịch vụ ngoài lỗi trong buổi demo, dùng bản ghi kết quả kiểm thử trước đó và ghi rõ chế độ mock.
 5. Có hướng dẫn dựng môi trường, seed dữ liệu, cấu hình bí mật, tài liệu API, biên bản kiểm thử và danh sách giới hạn đã biết.

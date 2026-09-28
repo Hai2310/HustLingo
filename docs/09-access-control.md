@@ -31,7 +31,7 @@ Giao diện **web** có ba phần: (1) danh sách nội dung và trạng thái b
 ## Quy trình nội dung
 
 1. Admin tạo/nhập chủ đề ở trạng thái `draft`, sửa bài giảng, từ, câu hỏi và tài sản.
-2. Admin xem trước như learner. Máy chủ kiểm tra đủ trường bắt buộc, 20–30 từ, tối thiểu 40 câu hỏi hợp lệ, quyền dùng tài sản và câu trả lời duy nhất.
+2. Admin xem trước như learner. Máy chủ kiểm tra đủ trường bắt buộc, 20–30 từ, tối thiểu 40 câu hỏi hợp lệ, quyền dùng tài sản và câu trả lời duy nhất. Câu hình cần ảnh tải được, mô tả truy cập được và câu chữ thay thế cùng đáp án.
 3. Admin nhấn **Phát hành**; máy chủ ghi người phát hành, thời điểm và tăng `content_version`. Learner chỉ thấy phiên bản đã phát hành.
 4. Khi cần sửa nội dung đã phát hành, admin tạo bản nháp mới; phiên bản cũ vẫn phục vụ lượt quiz đang diễn ra đến khi hết hạn. Ẩn chủ đề sẽ chặn lượt học mới nhưng giữ lịch sử/tiến độ của người học.
 

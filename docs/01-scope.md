@@ -29,7 +29,7 @@ Người mới học tiếng Anh thường biết mặt chữ nhưng khó nhớ 
 | MVP | Admin quản lý chủ đề, bài giảng ngắn, từ, quiz và phát hành nội dung trên web | Có quy trình kiểm soát nội dung ngay trong sản phẩm |
 | MVP | Admin xem danh sách tài khoản, khóa/mở learner, gửi liên kết đặt lại mật khẩu, cấp/thu hồi admin | Quản trị tài khoản với đúng hai role |
 | MVP | 4 chủ đề, mỗi chủ đề 25 từ; flashcard có từ, IPA, nghĩa, ví dụ, âm thanh; hình minh họa khi có quyền sử dụng | Đủ dữ liệu để chứng minh luồng học |
-| MVP | Quiz 10 câu/chủ đề/lượt: chọn nghĩa, chọn từ theo nghĩa, điền từ bằng lựa chọn | Kiểm tra nhận biết và nhớ từ |
+| MVP | Quiz 10 câu/chủ đề/lượt: chọn nghĩa, chọn từ theo nghĩa, điền từ bằng lựa chọn và xem hình chọn từ khi có ảnh phù hợp | Kiểm tra nhận biết và nhớ từ |
 | MVP | Ôn từ sai hoặc đến hạn theo lịch đơn giản; thống kê số từ đã học và độ chính xác | Tạo vòng học lặp lại |
 | MVP | Ghi âm và STT cho từ/câu mẫu, báo “khớp/chưa khớp/không nhận diện được” | Luyện nói có phản hồi, không ngụy tạo điểm phát âm |
 | MVP | Viết 1 câu có từ mục tiêu; AI nhận xét theo mẫu cố định, giới hạn lượt/ngày | Luyện dùng từ trong ngữ cảnh |

@@ -9,7 +9,7 @@ Mã yêu cầu dùng để nối thiết kế, công việc và kiểm thử. **
 | FR-01 | P0 | Người dùng đăng ký, đăng nhập, đăng xuất bằng email/mật khẩu; phiên còn hiệu lực sau khi mở lại; thông báo lỗi đăng nhập không lộ tài khoản có tồn tại hay không. |
 | FR-02 | P0 | Danh sách hiển thị 4 chủ đề, số từ, trạng thái chưa học/đang học/đã làm quiz. Chọn chủ đề mở đúng 25 từ. |
 | FR-03 | P0 | Flashcard hiện từ, IPA, nghĩa, ví dụ, âm thanh phát lại được; hình chỉ hiện khi có tài sản đã cấp quyền. Chuyển thẻ không làm mất dữ liệu. |
-| FR-04 | P0 | Quiz tạo 10 câu từ chủ đề, có ít nhất 2 dạng câu; chỉ một đáp án đúng; không lặp cùng từ trong một lượt nếu đủ dữ liệu; nộp xong hiển thị điểm và từ sai. |
+| FR-04 | P0 | Quiz tạo 10 câu từ chủ đề, có ít nhất 2 dạng câu, trong đó ngân hàng câu hỏi có dạng xem hình chọn từ cho từ phù hợp; chỉ một đáp án đúng; không lặp cùng từ trong một lượt nếu đủ dữ liệu; nộp xong hiển thị điểm và từ sai. Câu hình có mô tả truy cập được và câu chữ thay thế khi ảnh lỗi. |
 | FR-05 | P0 | Kết quả quiz được lưu theo người dùng và chủ đề; mở trên Android/web cùng tài khoản thấy kết quả mới nhất và tổng từ đã học. Không ghi lượt chưa nộp. |
 | FR-06 | P0 | Từ sai trong quiz được đưa vào hàng ôn ngay; từ đúng được hẹn ôn sau 1 ngày. Khi ôn đúng, hẹn tiếp 3 rồi 7 ngày; khi ôn sai, hẹn lại sau 1 ngày. Giờ hẹn lưu UTC. |
 | FR-07 | P0 | Người học ghi âm tối đa 10 giây sau khi cấp quyền. STT trả bản chép lời; hệ thống chuẩn hóa chữ hoa/dấu câu rồi so với từ/câu mẫu để hiển thị khớp, chưa khớp hoặc không nhận diện được. Tối đa 10 lượt/người/ngày; không gọi đó là điểm phát âm. |
@@ -28,6 +28,7 @@ Mã yêu cầu dùng để nối thiết kế, công việc và kiểm thử. **
 
 - Một chủ đề có 20–30 từ; bản bàn giao dùng 25 từ. Mỗi từ có ID ổn định để giữ tiến độ khi sửa chính tả/nội dung.
 - Quiz chọn câu hỏi từ cùng phiên bản bộ nội dung. Khi cập nhật dữ liệu, giữ ID và không thay đáp án đúng mà không tăng phiên bản.
+- Câu hỏi hình chỉ được phát hành khi ảnh đã có quyền sử dụng, tải được và không lộ từ tiếng Anh trong ảnh; câu chữ thay thế giữ cùng đáp án. Chủ đề có câu hình hợp lệ thì mỗi lượt quiz ưu tiên ít nhất một câu hình; bản demo có ít nhất một câu hình trong nội dung đã phát hành.
 - Điểm quiz = số câu đúng / 10 × 100, làm tròn số nguyên. Chỉ kết quả nộp thành công mới được tính.
 - “Đã học qua” là tổng số từ thuộc các chủ đề người học đã hoàn thành ít nhất một quiz; không đồng nghĩa đã thành thạo. Độ chính xác quiz tổng hợp = tổng câu đúng / tổng câu đã nộp.
 - Từ sai cần ôn được đánh dấu ngay; lịch ôn dùng quy tắc FR-06. MVP không khẳng định thuật toán lặp lại ngắt quãng tối ưu.

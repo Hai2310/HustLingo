@@ -32,7 +32,7 @@ flowchart LR
 | `profiles` | `user_id`, `display_name`, `account_status`, `created_at` | `active`/`disabled`; người dùng chỉ tự sửa `display_name` |
 | `user_roles` | `user_id`, `role`, `updated_at` | Chỉ `admin`/`learner`; chỉ máy chủ ghi; không đặt role trong metadata client tự sửa |
 | `vocabulary` | `id`, `topic_id`, `word`, `ipa`, `part_of_speech`, `meaning_vi`, `example_en`, `example_vi`, `accepted_speech`, `image_asset`, `audio_asset`, `sort_order`, `content_version` | `topic_id` khóa ngoại; ID từ giữ ổn định |
-| `quiz_items` | `id`, `topic_id`, `vocabulary_id`, `type`, `prompt`, `options_json`, `correct_option_id`, `explanation_vi`, `content_version` | Chỉ máy chủ/luật quiz được quyền xác nhận đáp án; client có thể hiển thị đáp án sau nộp |
+| `quiz_items` | `id`, `topic_id`, `vocabulary_id`, `type`, `prompt`, `image_asset`, `image_alt_vi`, `fallback_prompt_vi`, `options_json`, `correct_option_id`, `explanation_vi`, `content_version` | Với `type = image_to_word`, ba trường ảnh/mô tả/câu thay thế là bắt buộc; đáp án đúng chỉ máy chủ đọc |
 | `quiz_sessions` | `id`, `user_id`, `topic_id`, `quiz_item_ids`, `content_version`, `expires_at`, `submitted_at` | Giữ bộ 10 câu đã cấp; chỉ nộp một lần; dọn phiên hết hạn |
 | `quiz_attempts` | `id`, `user_id`, `topic_id`, `content_version`, `score`, `submitted_at` | Mỗi lượt nộp là một bản ghi |
 | `quiz_answers` | `attempt_id`, `quiz_item_id`, `selected_option_id`, `is_correct` | Phục vụ từ cần ôn và kiểm tra điểm |
@@ -65,6 +65,8 @@ Các tên dưới đây là hợp đồng logic cho Edge Functions; URI thực t
 | `admin_users` | hành động `list`, `set_status`, `send_reset_link`, `set_role` và tài khoản đích | Danh sách/tình trạng thao tác; lỗi 403 nếu không phải admin, 409 nếu hạ quyền admin cuối cùng |
 
 `submit_quiz` phải tính điểm phía máy chủ từ `quiz_items`; không tin điểm client. Sau khi nộp, cập nhật `review_items` trong cùng giao dịch để tránh điểm và lịch ôn lệch nhau. `start_quiz` trả 10 câu không kèm đáp án đúng; `submit_quiz` chỉ chấp nhận đúng bộ câu của phiên và chỉ nộp một lần. Không đặt đáp án đúng trong bundle ứng dụng.
+
+Với `image_to_word`, `start_quiz` ưu tiên chọn ít nhất một câu hình khi chủ đề có câu hợp lệ, trả đường dẫn ảnh có quyền đọc cho learner, `image_alt_vi` và `fallback_prompt_vi`, nhưng không trả `correct_option_id`. Client hiển thị câu chữ thay thế nếu tải ảnh lỗi; trình đọc màn hình dùng mô tả tiếng Việt. Admin chỉ phát hành nếu ảnh và câu chữ thay thế hợp lệ, cùng trỏ tới một đáp án.
 
 `start_review` chọn từ đến hạn của người học, cấp một câu hỏi không lộ đáp án và lưu `review_sessions`. `submit_review` kiểm tra phiên, quyền sở hữu, hạn dùng và lựa chọn trước khi chấm/cập nhật lịch ôn trong cùng giao dịch. Các function learner đều yêu cầu role `learner` và trạng thái `active`; function admin yêu cầu role `admin` và trạng thái `active`.
 
