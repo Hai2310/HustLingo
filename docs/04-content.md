@@ -41,6 +41,10 @@ Danh sách từ cụ thể được chốt ở tuần 2. Chọn từ mức A0–
 4. **Dùng:** nói từ/câu mẫu và đặt một câu mới. Hai bước này có thể mở từ chi tiết chủ đề sau flashcard, không chặn việc hoàn thành quiz.
 5. **Ôn:** từ sai và từ đến hạn xuất hiện ở màn tiến độ.
 
+## Bài giảng ngắn của chủ đề
+
+Admin biên soạn phần mở đầu gồm mục tiêu học, 2–5 đoạn hướng dẫn ngắn, 1–2 ví dụ và hình/âm thanh tùy chọn. Phần này giúp người mới hiểu chủ đề trước khi vào flashcard. Không có video hoặc định dạng phức tạp trong MVP. Dữ liệu nằm trong phiên bản nội dung của chủ đề và được xem trước trước khi phát hành.
+
 ## Quy tắc viết và kiểm duyệt
 
 - Mỗi từ có một nghĩa chính phù hợp câu ví dụ; nếu nhiều nghĩa, chỉ kiểm tra nghĩa đã dạy.
@@ -49,6 +53,7 @@ Danh sách từ cụ thể được chốt ở tuần 2. Chọn từ mức A0–
 - Phương án nhiễu là từ/nghĩa cùng loại nhưng không gây hai đáp án đúng. Người kiểm duyệt tự làm quiz mẫu trước khi phát hành.
 - Dữ liệu có `content_version`, ngày rà soát và người duyệt. Sửa lỗi chính tả giữ ID; thay nghĩa hoặc đáp án tăng phiên bản và rà soát câu hỏi liên quan.
 - Từ, ví dụ, hình, âm thanh và bản dịch phải có nguồn hoặc người tạo trong bảng theo dõi nội dung của nhóm. Không sao chép nguyên bộ dữ liệu từ ứng dụng khác.
+- Admin nhập/sửa bản nháp trên web hoặc import dữ liệu có kiểm tra cấu trúc, xem trước, chạy kiểm tra hợp lệ rồi phát hành. Learner chỉ nhận bản đã phát hành. Thao tác phát hành ghi người và thời điểm; quy trình nhóm vẫn cần người thứ hai rà soát nội dung dù không có role kiểm duyệt riêng.
 
 ## Mẫu câu hỏi quiz
 
