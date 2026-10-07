@@ -9,11 +9,5 @@
 - `hooks/`: state chat/call UI.
 - `types/`: tutor/message/scenario.
 
-## Hiện tại
-Không nối STT/LLM/TTS thật. Tab public vẫn trống cho tới khi thành viên chủ động triển khai.
-
-## Không tự sửa
-Supabase/Auth/Layout chung. Future AI service phải thống nhất interface với Backend/Core.
-
 ## Start
 Code UI trong `screens/TutorScreen.tsx`; tab `app/(tabs)/tutor.tsx` đã trỏ tới file này.
