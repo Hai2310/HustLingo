@@ -1,41 +1,22 @@
 <div align="center">
 
-
-
 # 🎓 HustLingo
-
-
 
 ### **Học tiếng Anh theo lộ trình rõ ràng · Luyện tập có hệ thống · Đồng bộ trên mọi thiết bị**
 
-
-
 [![HustLingo](https://img.shields.io/badge/HustLingo-HUST%20English-C8102E?style=for-the-badge&logo=bookstack&logoColor=white)](#)
-
 [![Expo](https://img.shields.io/badge/Expo-React%20Native-111827?style=for-the-badge&logo=expo&logoColor=white)](https://expo.dev/)
-
 [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-
 [![Supabase](https://img.shields.io/badge/Supabase-Backend-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
 
-
-
 [![Web](https://img.shields.io/badge/Web-Ready-38BDF8?style=flat-square&logo=googlechrome&logoColor=white)](#)
-
 [![Android](https://img.shields.io/badge/Android-Ready-34A853?style=flat-square&logo=android&logoColor=white)](#)
-
 [![iOS](https://img.shields.io/badge/iOS-Ready-111827?style=flat-square&logo=apple&logoColor=white)](#)
-
 [![Team](https://img.shields.io/badge/Team-4%20Members-8B5CF6?style=flat-square&logo=github&logoColor=white)](#team-hustlingo)
-
-
 
 </div>
 
-
-
 ---
-
 
 ## 🚀 Giới thiệu về HustLingo
 
@@ -304,2110 +285,1057 @@ Tức là không chỉ là một bộ flashcard hoặc một chatbot, mà là **
 
 
 
-## 🌟 Điểm nổi bật**
-
-
+## 🌟 Điểm nổi bật
 
 | | Module | Mục tiêu |
-
 |---|---|---|
-
-| 📘 | ****Bài học**** | CEFR A1-C1, Vocabulary, Grammar, Listening, Speaking, Reading, Writing |
-
-| 🧠 | ****Luyện tập**** | Quiz, Flashcard, Review, Spaced Repetition, TOEIC, IELTS |
-
-| 💬 | ****Gia sư AI**** | Tutor, Scenario, Chat UI, Call UI và kiến trúc STT → LLM → TTS |
-
-| ⚙️ | ****Backend**** | Supabase Auth, Progress, Saved Words, Subscription, RLS, Sync |
-
-| 📚 | ****Dữ liệu**** | 10.000 từ tiếng Anh dùng chung cho toàn bộ project |
-
-| 📱 | ****Đa nền tảng**** | Web · Android · iOS với một codebase Expo |
-
-
+| 📘 | **Bài học** | CEFR A1-C1, Vocabulary, Grammar, Listening, Speaking, Reading, Writing |
+| 🧠 | **Luyện tập** | Quiz, Flashcard, Review, Spaced Repetition, TOEIC, IELTS |
+| 💬 | **Gia sư AI** | Tutor, Scenario, Chat UI, Call UI và kiến trúc STT → LLM → TTS |
+| ⚙️ | **Backend** | Supabase Auth, Progress, Saved Words, Subscription, RLS, Sync |
+| 📚 | **Dữ liệu** | 10.000 từ tiếng Anh dùng chung cho toàn bộ project |
+| 📱 | **Đa nền tảng** | Web · Android · iOS với một codebase Expo |
 
 ---
 
-
-
-# 👥 Team HustLingo**
-
-
+# 👥 Team HustLingo
 
 | Thành viên | GitHub | Phụ trách | Khu vực code chính |
-
 |---|---|---|---|
+| **Huy** | [@HuyAA-DD](https://github.com/HuyAA-DD) | 📘 **Bài học** | `src/features/lessons/` |
+| **Dương** | [@smileviel](https://github.com/smileviel) | 🧠 **Luyện tập** | `src/features/practice/` |
+| **Khánh** | [@hdkhanh12](https://github.com/hdkhanh12) | 💬 **Gia sư AI** | `src/features/tutor/` |
+| **Hải** | [@Hai2310](https://github.com/Hai2310) | ⚙️ **Backend / Core** | `src/services/`, `src/contexts/`, `supabase/` |
 
-| ****Huy**** | [@HuyAA-DD](https://github.com/HuyAA-DD) | 📘 ****Bài học**** | `src/features/lessons/` |
-
-| ****Dương**** | [@smileviel](https://github.com/smileviel) | 🧠 ****Luyện tập**** | `src/features/practice/` |
-
-| ****Khánh**** | [@hdkhanh12](https://github.com/hdkhanh12) | 💬 ****Gia sư AI**** | `src/features/tutor/` |
-
-| ****Hải**** | [@Hai2310](https://github.com/Hai2310) | ⚙️ ****Backend / Core**** | `src/services/`, `src/contexts/`, `supabase/` |
-
-
-
-**### Màu nhận diện module**
-
-
+### Màu nhận diện module
 
 ![Lessons](https://img.shields.io/badge/Huy-Bài%20học-60A5FA?style=for-the-badge)
-
 ![Practice](https://img.shields.io/badge/Dương-Luyện%20tập-34D399?style=for-the-badge)
-
 ![Tutor](https://img.shields.io/badge/Khánh-Gia%20sư%20AI-A78BFA?style=for-the-badge)
-
 ![Backend](https://img.shields.io/badge/Hải-Backend-F59E0B?style=for-the-badge)
 
-
-
 ---
 
+# 🏠 Tổng quan sản phẩm
 
-
-# 🏠 Trải nghiệm người dùng & các tab chính**
-
-
-
-HustLingo được thiết kế theo hướng ****Guest-first****:
-
-
+HustLingo được thiết kế theo hướng **Guest-first**:
 
 ```text
-
 Mở ứng dụng
-
-     ↓
-
+     ↓
 Vào Home ngay
-
-     ↓
-
+     ↓
 Học / luyện tập ở Guest Mode
-
-     ↓
-
+     ↓
 Lưu local bằng AsyncStorage
-
-     ↓
-
+     ↓
 Đăng nhập khi cần đồng bộ
-
-     ↓
-
+     ↓
 Supabase
-
 ```
 
-
-
-**### Các tab chính**
-
-
+### Các tab chính
 
 ```text
-
 🏠 Trang chủ
-
 📘 Bài học
-
 🧠 Luyện tập
-
 💬 Gia sư AI
-
 👤 Hồ sơ
-
 ```
 
-
-
-\> Ba tab ****Bài học****, ****Luyện tập**** và ****Gia sư AI**** hiện được giữ sạch ở public UI để Huy, Dương và Khánh xây chức năng riêng mà không ảnh hưởng Home/Profile/Settings/backend.
-
-
+> Ba tab **Bài học**, **Luyện tập** và **Gia sư AI** hiện được giữ sạch ở public UI để Huy, Dương và Khánh xây chức năng riêng mà không ảnh hưởng Home/Profile/Settings/backend.
 
 ---
 
-
-
-# 🧭 Kiến trúc tổng quan hệ thống**
-
-
+# 🧭 Kiến trúc tổng quan hệ thống
 
 ![HustLingo System Architecture](docs/architecture/01-system-overview.png)
 
-
-
-## Luồng tổng quát**
-
-
+## Luồng tổng quát
 
 ```text
-
 Người dùng
-
-    │
-
-    ▼
-
+    │
+    ▼
 Expo + React Native + TypeScript
-
-    │
-
-    ▼
-
+    │
+    ▼
 Expo Router
-
-    │
-
-    ├── Home
-
-    ├── Lessons
-
-    ├── Practice
-
-    ├── AI Tutor
-
-    └── Profile
-
-    │
-
-    ▼
-
+    │
+    ├── Home
+    ├── Lessons
+    ├── Practice
+    ├── AI Tutor
+    └── Profile
+    │
+    ▼
 State / Context
-
-    │
-
-    ├── AuthContext
-
-    ├── LearningContext
-
-    └── SubscriptionContext
-
-    │
-
-    ▼
-
+    │
+    ├── AuthContext
+    ├── LearningContext
+    └── SubscriptionContext
+    │
+    ▼
 Service Layer
-
-    │
-
-    ├── authService
-
-    ├── progressService
-
-    ├── savedWordService
-
-    └── subscriptionService
-
-    │
-
-    ├───────────────┐
-
-    ▼               ▼
-
-AsyncStorage      Supabase
-
-Guest Mode        Account Data
-
+    │
+    ├── authService
+    ├── progressService
+    ├── savedWordService
+    └── subscriptionService
+    │
+    ├───────────────┐
+    ▼               ▼
+AsyncStorage      Supabase
+Guest Mode        Account Data
 ```
 
-
-
-**### Nguyên tắc kiến trúc**
-
-
+### Nguyên tắc kiến trúc
 
 | Folder | Trách nhiệm |
-
 |---|---|
-
 | `app/` | Route và entry screen |
-
 | `src/features/` | Chức năng riêng của từng module |
-
 | `src/components/` | Component dùng chung |
-
 | `src/contexts/` | State toàn app |
-
 | `src/services/` | Giao tiếp backend / local storage |
-
 | `src/data/` | Data học tập dùng chung |
-
 | `src/theme/` | Design system |
-
 | `supabase/` | Database, migration, RLS |
-
-
 
 ---
 
-
-
-# 🔐 Luồng đăng nhập & đồng bộ dữ liệu**
-
-
+# 🔐 Luồng đăng nhập & đồng bộ dữ liệu
 
 ![HustLingo Auth and Data Flow](docs/architecture/02-auth-data-flow.png)
 
-
-
 HustLingo không bắt user đăng nhập ngay.
 
-
-
-## Guest Mode**
-
-
+## Guest Mode
 
 Guest vẫn có thể:
 
-
-
 - học bài;
-
 - làm flashcard;
-
 - làm quiz;
-
 - làm exam;
-
 - lưu progress;
-
 - lưu saved words;
-
 - lưu settings;
-
 - lưu draft.
-
-
 
 Dữ liệu Guest được lưu tại:
 
-
-
 ```text
-
 AsyncStorage
-
 ```
 
-
-
-## Khi đăng nhập**
-
-
+## Khi đăng nhập
 
 ```text
-
 Guest Data
-
-    ↓
-
+    ↓
 Supabase Auth
-
-    ↓
-
+    ↓
 Merge Local Progress
-
-    ↓
-
+    ↓
 Supabase PostgreSQL
-
-    ↓
-
+    ↓
 Sync Web ↔ Android ↔ iOS
-
 ```
-
-
 
 Các phương thức Auth:
 
-
-
 ```text
-
 Email
-
 Google
-
 Facebook
-
 ```
 
-
-
-## RLS**
-
-
+## RLS
 
 Dữ liệu user phải được bảo vệ bằng Row Level Security.
 
-
-
 Ví dụ logic:
 
-
-
 ```text
-
 auth.uid() = user_id
-
 ```
-
-
 
 User A không được đọc hoặc sửa dữ liệu của User B.
 
-
-
 ---
 
-
-
-# 🧩 Kiến trúc 4 module chính**
-
-
+# 🧩 Kiến trúc 4 module chính
 
 ![HustLingo Team Modules](docs/architecture/03-team-modules.png)
 
-
-
 Tất cả module dùng chung:
 
-
-
 ```text
-
 Shared Layer
-
 ├── Theme
-
 ├── Common Components
-
 ├── Motion
-
 ├── Types
-
 ├── Utils
-
 └── AsyncStorage
-
 ```
-
-
 
 ---
 
-
-
-# 🗂️ Cấu trúc project**
-
-
+# 🗂️ Cấu trúc project
 
 ```text
-
 HustLingo/
-
 │
-
 ├── app/
-
-│   ├── _layout.tsx
-
-│   ├── index.tsx
-
-│   │
-
-│   ├── (tabs)/
-
-│   │   ├── _layout.tsx
-
-│   │   ├── home.tsx
-
-│   │   ├── lessons.tsx
-
-│   │   ├── practice.tsx
-
-│   │   ├── tutor.tsx
-
-│   │   └── profile.tsx
-
-│   │
-
-│   ├── (auth)/
-
-│   │   ├── signin.tsx
-
-│   │   ├── signup.tsx
-
-│   │   └── ...
-
-│   │
-
-│   ├── settings.tsx
-
-│   ├── pricing.tsx
-
-│   └── ...
-
+│   ├── _layout.tsx
+│   ├── index.tsx
+│   │
+│   ├── (tabs)/
+│   │   ├── _layout.tsx
+│   │   ├── home.tsx
+│   │   ├── lessons.tsx
+│   │   ├── practice.tsx
+│   │   ├── tutor.tsx
+│   │   └── profile.tsx
+│   │
+│   ├── (auth)/
+│   │   ├── signin.tsx
+│   │   ├── signup.tsx
+│   │   └── ...
+│   │
+│   ├── settings.tsx
+│   ├── pricing.tsx
+│   └── ...
 │
-
 ├── src/
-
-│   ├── components/
-
-│   │   ├── common/
-
-│   │   ├── home/
-
-│   │   ├── auth/
-
-│   │   ├── navigation/
-
-│   │   └── motion/
-
-│   │
-
-│   ├── features/
-
-│   │   ├── lessons/
-
-│   │   ├── practice/
-
-│   │   ├── tutor/
-
-│   │   └── backend/
-
-│   │
-
-│   ├── contexts/
-
-│   ├── services/
-
-│   ├── data/
-
-│   ├── hooks/
-
-│   ├── types/
-
-│   ├── utils/
-
-│   ├── constants/
-
-│   └── theme/
-
+│   ├── components/
+│   │   ├── common/
+│   │   ├── home/
+│   │   ├── auth/
+│   │   ├── navigation/
+│   │   └── motion/
+│   │
+│   ├── features/
+│   │   ├── lessons/
+│   │   ├── practice/
+│   │   ├── tutor/
+│   │   └── backend/
+│   │
+│   ├── contexts/
+│   ├── services/
+│   ├── data/
+│   ├── hooks/
+│   ├── types/
+│   ├── utils/
+│   ├── constants/
+│   └── theme/
 │
-
 ├── assets/
-
 │
-
 ├── docs/
-
-│   └── architecture/
-
-│       ├── 01-system-overview.png
-
-│       ├── 02-auth-data-flow.png
-
-│       └── 03-team-modules.png
-
+│   └── architecture/
+│       ├── 01-system-overview.png
+│       ├── 02-auth-data-flow.png
+│       └── 03-team-modules.png
 │
-
 ├── supabase/
-
-│   └── migrations/
-
+│   └── migrations/
 │
-
 ├── scripts/
-
 │
-
 ├── .env.example
-
 ├── app.config.js
-
 ├── eas.json
-
 ├── package.json
-
 ├── tsconfig.json
-
 └── README.md
-
 ```
-
-
 
 ---
 
+# 📁 Giải thích từng khu vực
 
-
-# 📁 Giải thích từng khu vực**
-
-
-
-## `app/` — Route & Screen Entry**
-
-
+## `app/` — Route & Screen Entry
 
 `app/` chỉ nên giữ các route và entry screen.
 
-
-
 Ví dụ:
 
-
-
 ```text
-
 app/(tabs)/lessons.tsx
-
 ```
-
-
 
 có thể chỉ cần:
 
-
-
 ```tsx
-
 export { default } from "@/features/lessons/screens/LessonsScreen";
-
 ```
-
-
 
 Không nên đưa data lớn hoặc business logic vào `app/`.
 
-
-
 ---
 
-
-
-## `src/features/` — Nơi 3 thành viên frontend làm việc chính**
-
-
+## `src/features/` — Nơi 3 thành viên frontend làm việc chính
 
 ```text
-
 src/features/
-
 ├── lessons/
-
 ├── practice/
-
 └── tutor/
-
 ```
-
-
 
 Mỗi module tổ chức theo:
 
-
-
 ```text
-
 feature/
-
 ├── README.md
-
 ├── screens/
-
 ├── components/
-
 ├── data/
-
 ├── hooks/
-
 └── types/
-
 ```
-
-
 
 ---
 
-
-
-## `src/components/common/` — Shared UI**
-
-
+## `src/components/common/` — Shared UI
 
 Ví dụ:
 
-
-
 ```text
-
 AppCard
-
 Buttons
-
 Screen
-
 PageHeader
-
 SectionTitle
-
 SkillCard
-
 HustLogo
-
 AmbientBackground
-
 ```
-
-
 
 Component chỉ dùng riêng một module phải để trong module đó.
 
-
-
 ---
 
-
-
-## `src/components/home/`**
-
-
+## `src/components/home/`
 
 Chỉ dành cho Trang chủ:
 
-
-
 ```text
-
 HeroSlideshow
-
 PricingTeaser
-
 ```
-
-
 
 ---
 
-
-
-## `src/components/auth/`**
-
-
+## `src/components/auth/`
 
 Dùng cho:
 
-
-
 ```text
-
 Sign In
-
 Sign Up
-
 Forgot Password
-
 OAuth UI
-
 ```
-
-
 
 ---
 
-
-
-## `src/components/navigation/`**
-
-
+## `src/components/navigation/`
 
 Component điều hướng dùng chung:
 
-
-
 ```text
-
 AnimatedTabIcon
-
 ```
-
-
 
 Bottom Tab cấu hình ở:
 
-
-
 ```text
-
 app/(tabs)/_layout.tsx
-
 ```
-
-
 
 ---
 
-
-
-## `src/components/motion/`**
-
-
+## `src/components/motion/`
 
 Animation dùng chung:
 
-
-
 ```text
-
 FadeIn
-
 SlideIn
-
 PressableScale
-
 AnimatedProgress
-
 ```
-
-
 
 ---
 
-
-
-## `src/contexts/`**
-
-
+## `src/contexts/`
 
 Global state:
 
-
-
 ```text
-
 AuthContext
-
 LearningContext
-
 SubscriptionContext
-
 ```
-
-
 
 Các module được sử dụng Context nhưng không tự ý thay đổi contract chung.
 
-
-
 ---
 
-
-
-## `src/services/`**
-
-
+## `src/services/`
 
 Lớp giao tiếp backend/local storage:
 
-
-
 ```text
-
 supabase.ts
-
 authService.ts
-
 progressService.ts
-
 savedWordService.ts
-
 subscriptionService.ts
-
 ```
 
-
-
-**### Không nên**
-
-
+### Không nên
 
 ```ts
-
 await supabase
-
-  .from("learning_progress")
-
-  .insert(...);
-
+  .from("learning_progress")
+  .insert(...);
 ```
-
-
 
 trực tiếp trong screen.
 
-
-
-**### Nên**
-
-
+### Nên
 
 ```ts
-
 await progressService.completeLesson(...);
-
 ```
-
-
 
 ---
 
-
-
-## `src/data/`**
-
-
+## `src/data/`
 
 Data dùng chung toàn project.
 
-
-
 Quan trọng nhất:
 
-
-
 ```text
-
 src/data/vocabulary-en.ts
-
 ```
 
-
-
-chứa ****10.000 từ tiếng Anh****.
-
-
+chứa **10.000 từ tiếng Anh**.
 
 ---
 
-
-
-## `src/theme/`**
-
-
+## `src/theme/`
 
 Design system:
 
-
-
 ```text
-
 colors
-
 spacing
-
 typography
-
 radius
-
 motion
-
 layout
-
 ```
-
-
 
 Không để mỗi thành viên tự tạo một hệ màu/style khác.
 
-
-
 ---
 
-
-
-## `assets/`**
-
-
+## `assets/`
 
 Chứa:
 
-
-
 ```text
-
 logo
-
 image
-
 audio
-
 icon
-
 splash
-
 ```
-
-
 
 ---
 
-
-
-## `supabase/`**
-
-
+## `supabase/`
 
 Backend schema:
 
-
-
 ```text
-
 migration
-
 RLS
-
 trigger
-
 index
-
 database definition
-
 ```
-
-
 
 Phần này thuộc Backend/Core.
 
-
-
 ---
 
+# 📘 Huy — Module Bài học
 
+GitHub: **[@HuyAA-DD](https://github.com/HuyAA-DD)**
 
-# 📘 Huy — Module Bài học**
-
-
-
-GitHub: ****[@HuyAA-DD](**&#x68;ttps://github.com/HuyAA-D&#x44;**)****
-
-
-
-## Entry**
-
-
+## Entry
 
 ```text
-
 app/(tabs)/lessons.tsx
-
 ```
 
-
-
-## Folder làm việc chính**
-
-
+## Folder làm việc chính
 
 ```text
-
 src/features/lessons/
-
 ```
 
-
-
-## Cấu trúc đề xuất**
-
-
+## Cấu trúc đề xuất
 
 ```text
-
 src/features/lessons/
-
 ├── README.md
-
 ├── screens/
-
-│   ├── LessonsScreen.tsx
-
-│   ├── LessonDetailScreen.tsx
-
-│   ├── TopicScreen.tsx
-
-│   └── LessonCompleteScreen.tsx
-
+│   ├── LessonsScreen.tsx
+│   ├── LessonDetailScreen.tsx
+│   ├── TopicScreen.tsx
+│   └── LessonCompleteScreen.tsx
 │
-
 ├── components/
-
-│   ├── LessonCard.tsx
-
-│   ├── TopicCard.tsx
-
-│   ├── LevelSelector.tsx
-
-│   ├── LessonProgress.tsx
-
-│   ├── VocabularySection.tsx
-
-│   ├── GrammarSection.tsx
-
-│   ├── ListeningSection.tsx
-
-│   ├── SpeakingSection.tsx
-
-│   ├── ReadingSection.tsx
-
-│   └── WritingSection.tsx
-
+│   ├── LessonCard.tsx
+│   ├── TopicCard.tsx
+│   ├── LevelSelector.tsx
+│   ├── LessonProgress.tsx
+│   ├── VocabularySection.tsx
+│   ├── GrammarSection.tsx
+│   ├── ListeningSection.tsx
+│   ├── SpeakingSection.tsx
+│   ├── ReadingSection.tsx
+│   └── WritingSection.tsx
 │
-
 ├── data/
-
 ├── hooks/
-
 └── types/
-
 ```
 
-
-
-## Chức năng cần xây**
-
-
+## Chức năng cần xây
 
 ```text
-
 Lessons Hub
-
 ↓
-
 CEFR A1-C1
-
 ↓
-
 Topic
-
 ↓
-
 Lesson
-
 ├── Vocabulary
-
 ├── Grammar
-
 ├── Listening
-
 ├── Speaking
-
 ├── Reading
-
 └── Writing
-
 ↓
-
 Lesson Progress
-
 ```
-
-
 
 Dùng vocabulary:
 
-
-
 ```ts
-
 import { vocabulary } from "@/features/lessons/data/vocabulary";
-
 ```
-
-
 
 Không tạo một bản 10.000 từ khác.
 
-
-
 ---
 
+# 🧠 Dương — Module Luyện tập
 
+GitHub: **[@smileviel](https://github.com/smileviel)**
 
-# 🧠 Dương — Module Luyện tập**
-
-
-
-GitHub: ****[@smileviel](**&#x68;ttps://github.com/smilevie&#x6C;**)****
-
-
-
-## Entry**
-
-
+## Entry
 
 ```text
-
 app/(tabs)/practice.tsx
-
 ```
 
-
-
-## Folder làm việc chính**
-
-
+## Folder làm việc chính
 
 ```text
-
 src/features/practice/
-
 ```
 
-
-
-## Cấu trúc đề xuất**
-
-
+## Cấu trúc đề xuất
 
 ```text
-
 src/features/practice/
-
 ├── screens/
-
-│   ├── PracticeScreen.tsx
-
-│   ├── VocabularyQuizScreen.tsx
-
-│   ├── GrammarQuizScreen.tsx
-
-│   ├── FlashcardScreen.tsx
-
-│   ├── ReviewScreen.tsx
-
-│   ├── ListeningPracticeScreen.tsx
-
-│   ├── SpeakingPracticeScreen.tsx
-
-│   ├── ReadingPracticeScreen.tsx
-
-│   ├── WritingPracticeScreen.tsx
-
-│   ├── ExamScreen.tsx
-
-│   └── ResultScreen.tsx
-
+│   ├── PracticeScreen.tsx
+│   ├── VocabularyQuizScreen.tsx
+│   ├── GrammarQuizScreen.tsx
+│   ├── FlashcardScreen.tsx
+│   ├── ReviewScreen.tsx
+│   ├── ListeningPracticeScreen.tsx
+│   ├── SpeakingPracticeScreen.tsx
+│   ├── ReadingPracticeScreen.tsx
+│   ├── WritingPracticeScreen.tsx
+│   ├── ExamScreen.tsx
+│   └── ResultScreen.tsx
 │
-
 ├── components/
-
-│   ├── PracticeCard.tsx
-
-│   ├── QuestionCard.tsx
-
-│   ├── AnswerOption.tsx
-
-│   ├── Flashcard.tsx
-
-│   ├── PracticeProgress.tsx
-
-│   ├── ExamTimer.tsx
-
-│   ├── QuestionNavigator.tsx
-
-│   └── ResultCard.tsx
-
+│   ├── PracticeCard.tsx
+│   ├── QuestionCard.tsx
+│   ├── AnswerOption.tsx
+│   ├── Flashcard.tsx
+│   ├── PracticeProgress.tsx
+│   ├── ExamTimer.tsx
+│   ├── QuestionNavigator.tsx
+│   └── ResultCard.tsx
 │
-
 ├── data/
-
 ├── hooks/
-
 └── types/
-
 ```
 
-
-
-## Chức năng cần xây**
-
-
+## Chức năng cần xây
 
 ```text
-
 Practice Hub
-
 ├── Vocabulary Quiz
-
 ├── Grammar Quiz
-
 ├── Flashcard
-
 ├── Spaced Repetition
-
 ├── Review
-
 ├── Listening
-
 ├── Speaking
-
 ├── Reading
-
 ├── Writing
-
 ├── TOEIC
-
 └── IELTS
-
 ```
-
-
 
 ---
 
+# 💬 Khánh — Module Gia sư AI
 
+GitHub: **[@hdkhanh12](https://github.com/hdkhanh12)**
 
-# 💬 Khánh — Module Gia sư AI**
-
-
-
-GitHub: ****[@hdkhanh12](**&#x68;ttps://github.com/hdkhanh1&#x32;**)****
-
-
-
-## Entry**
-
-
+## Entry
 
 ```text
-
 app/(tabs)/tutor.tsx
-
 ```
 
-
-
-## Folder làm việc chính**
-
-
+## Folder làm việc chính
 
 ```text
-
 src/features/tutor/
-
 ```
 
-
-
-## Cấu trúc đề xuất**
-
-
+## Cấu trúc đề xuất
 
 ```text
-
 src/features/tutor/
-
 ├── screens/
-
-│   ├── TutorScreen.tsx
-
-│   ├── TutorDetailScreen.tsx
-
-│   ├── ScenarioScreen.tsx
-
-│   ├── TutorChatScreen.tsx
-
-│   └── TutorCallScreen.tsx
-
+│   ├── TutorScreen.tsx
+│   ├── TutorDetailScreen.tsx
+│   ├── ScenarioScreen.tsx
+│   ├── TutorChatScreen.tsx
+│   └── TutorCallScreen.tsx
 │
-
 ├── components/
-
-│   ├── TutorCard.tsx
-
-│   ├── TutorAvatar.tsx
-
-│   ├── ScenarioCard.tsx
-
-│   ├── ChatBubble.tsx
-
-│   ├── ChatInput.tsx
-
-│   ├── TypingIndicator.tsx
-
-│   ├── VoiceWave.tsx
-
-│   ├── CallControls.tsx
-
-│   └── CallStatus.tsx
-
+│   ├── TutorCard.tsx
+│   ├── TutorAvatar.tsx
+│   ├── ScenarioCard.tsx
+│   ├── ChatBubble.tsx
+│   ├── ChatInput.tsx
+│   ├── TypingIndicator.tsx
+│   ├── VoiceWave.tsx
+│   ├── CallControls.tsx
+│   └── CallStatus.tsx
 │
-
 ├── data/
-
-│   ├── tutors.ts
-
-│   ├── scenarios.ts
-
-│   ├── demoMessages.ts
-
-│   └── vocabulary.ts
-
+│   ├── tutors.ts
+│   ├── scenarios.ts
+│   ├── demoMessages.ts
+│   └── vocabulary.ts
 │
-
 ├── hooks/
-
 └── types/
-
 ```
 
-
-
-## Giai đoạn hiện tại**
-
-
+## Giai đoạn hiện tại
 
 Ưu tiên:
 
-
-
 ```text
-
 Tutor List
-
 Scenario
-
 Tutor Detail
-
 Chat UI
-
 Call UI
-
 Voice Wave
-
 Demo Conversation
-
 ```
 
-
-
-## Giai đoạn AI thật**
-
-
+## Giai đoạn AI thật
 
 ```text
-
 Microphone
-
 ↓
-
 STT
-
 ↓
-
 LLM
-
 ↓
-
 TTS
-
 ↓
-
 Audio Output
-
 ```
 
-
-
-\> [!WARNING]
-
-\> Không đưa API key hoặc secret AI trực tiếp vào frontend.
-
-
+> [!WARNING]
+> Không đưa API key hoặc secret AI trực tiếp vào frontend.
 
 ---
 
+# ⚙️ Hải — Backend / Core
 
+GitHub: **[@Hai2310](https://github.com/Hai2310)**
 
-# ⚙️ Hải — Backend / Core**
-
-
-
-GitHub: ****[@Hai2310](**&#x68;ttps://github.com/Hai231&#x30;**)****
-
-
-
-## Folder phụ trách**
-
-
+## Folder phụ trách
 
 ```text
-
 src/services/
-
 src/contexts/
-
 src/features/backend/
-
 supabase/
-
 ```
 
-
-
-## Trách nhiệm chính**
-
-
+## Trách nhiệm chính
 
 ```text
-
 Auth
-
 ├── Email
-
 ├── Google
-
 └── Facebook
 
-
-
 Database
-
 ├── profiles
-
 ├── learning_progress
-
 ├── saved_words
-
 ├── feedback
-
 ├── subscriptions
-
 └── user_settings
 
-
-
 Sync
-
 ├── Guest
-
 ├── AsyncStorage
-
 └── Supabase
 
-
-
 Security
-
 └── RLS
-
 ```
-
-
 
 Nếu frontend cần backend mới, frontend mô tả contract cần dùng.
 
-
-
 Ví dụ:
 
-
-
 ```ts
-
 completeLesson({
-
-  lessonId,
-
-  progress,
-
-  completedAt
-
+  lessonId,
+  progress,
+  completedAt
 });
-
 ```
-
-
 
 Backend phụ trách schema, migration, RLS và service.
 
-
-
 ---
 
-
-
-# 📚 Dataset 10.000 từ**
-
-
+# 📚 Dataset 10.000 từ
 
 Nguồn duy nhất:
 
-
-
 ```text
-
 src/data/vocabulary-en.ts
-
 ```
-
-
 
 ID:
 
-
-
 ```text
-
 local-en-00001
-
 ...
-
 local-en-10000
-
 ```
-
-
 
 Ba module dùng qua:
 
-
-
 ```text
-
 src/features/lessons/data/vocabulary.ts
-
 src/features/practice/data/vocabulary.ts
-
 src/features/tutor/data/vocabulary.ts
-
 ```
 
-
-
-**### Vì sao không copy 3 lần?**
-
-
+### Vì sao không copy 3 lần?
 
 - tránh duplicate data;
-
 - giảm dung lượng;
-
 - không lệch phiên bản;
-
 - chỉ có một source of truth.
 
-
-
-\> [!TIP]
-
-\> `src/data/vocabulary-en.ts` là ****shared read-only dataset****.
-
-
+> [!TIP]
+> `src/data/vocabulary-en.ts` là **shared read-only dataset**.
 
 ---
 
-
-
-# 🔐 Core files — không tự ý sửa**
-
-
+# 🔐 Core files — không tự ý sửa
 
 ```text
-
 app/_layout.tsx
-
 app/(tabs)/_layout.tsx
 
-
-
 src/contexts/AuthContext.tsx
-
 src/contexts/LearningContext.tsx
-
-
 
 src/services/supabase.ts
 
-
-
 supabase/migrations/
 
-
-
 package.json
-
 app.config.js
-
 eas.json
-
 tsconfig.json
-
 ```
-
-
 
 Khi cần thay đổi shared/core:
 
-
-
 ```text
-
 Trao đổi trong nhóm
-
 ↓
-
 Thống nhất interface
-
 ↓
-
 Backend/Core cập nhật
-
 ↓
-
 Feature sử dụng
-
 ```
-
-
 
 ---
 
+# 🚀 Quick Start
 
-
-# 🚀 Quick Start**
-
-
-
-## Cài dependency**
-
-
+## Cài dependency
 
 ```bash
-
 npm install
-
 ```
 
-
-
-## Tạo `.env`**
-
-
+## Tạo `.env`
 
 Windows PowerShell:
 
-
-
 ```powershell
-
 Copy-Item .env.example .env
-
 ```
-
-
 
 Cấu hình:
 
-
-
 ```env
-
 EXPO_PUBLIC_SUPABASE_URL=
-
 EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
-
 ```
-
-
 
 Không commit `.env`.
 
-
-
 ---
 
-
-
-## Chạy Web**
-
-
+## Chạy Web
 
 ```bash
-
 npx expo start --web --clear
-
 ```
-
-
 
 Mặc định:
 
-
-
 ```text
-
 http://localhost:8081
-
 ```
-
-
 
 ---
 
-
-
-## Test giao diện điện thoại trên Chrome**
-
-
+## Test giao diện điện thoại trên Chrome
 
 ```text
-
 F12
-
 Ctrl + Shift + M
-
 ```
-
-
 
 ---
 
-
-
-## Chạy điện thoại thật**
-
-
+## Chạy điện thoại thật
 
 ```bash
-
 npx expo start --tunnel
-
 ```
-
-
 
 Quét QR bằng Expo Go.
 
-
-
 ---
 
-
-
-## Android Emulator**
-
-
+## Android Emulator
 
 ```bash
-
 npx expo start --android
-
 ```
-
-
 
 ---
 
-
-
-# ✅ Kiểm tra code**
-
-
+# ✅ Kiểm tra code
 
 Trước khi đưa code chung vào project:
 
-
-
 ```bash
-
 npm run typecheck
-
 ```
-
-
 
 ```bash
-
 npm run validate
-
 ```
-
-
 
 Nếu có team validator:
 
-
-
 ```bash
-
 node scripts/validate-team-structure.mjs
-
 ```
-
-
 
 Kết quả mong muốn:
 
-
-
 ```text
-
 PASS
-
 ```
-
-
 
 ---
 
-
-
-# 🎨 Quy tắc UI**
-
-
+# 🎨 Quy tắc UI
 
 Mỗi màn cần kiểm tra:
 
-
-
 ```text
-
 Mobile
-
 Tablet
-
 Desktop Web
-
 ```
-
-
 
 Nên xử lý đủ:
 
-
-
 ```text
-
 Loading
-
 Empty
-
 Error
-
 Normal
-
 Completed
-
 ```
-
-
 
 Dùng design system chung:
 
-
-
 ```text
-
 src/theme/
-
 ```
-
-
 
 Không tự chọn màu và spacing khác hoàn toàn với project.
 
-
-
 ---
 
-
-
-# 🔑 Security**
-
-
+# 🔑 Security
 
 Không commit:
 
-
-
 ```text
-
 .env
-
 API secret
-
 private token
-
 SUPABASE_SERVICE_ROLE_KEY
-
 AI provider secret
-
 ```
-
-
 
 Không bao giờ đưa service-role key vào Expo frontend.
 
-
-
 User data phải được bảo vệ bằng RLS.
 
-
-
 ---
 
-
-
-# ☑️ Checklist trước khi đưa code vào bản chung**
-
-
+# ☑️ Checklist trước khi đưa code vào bản chung
 
 - [ ] Code đúng folder phụ trách.
-
 - [ ] Không sửa Core ngoài phạm vi.
-
 - [ ] Không duplicate dataset 10.000 từ.
-
 - [ ] Không commit secret.
-
 - [ ] Không gọi Supabase trực tiếp trong screen nếu đã có service.
-
 - [ ] Type/interface rõ ràng.
-
 - [ ] Hạn chế `any`.
-
 - [ ] UI chạy trên mobile.
-
 - [ ] UI chạy trên web.
-
 - [ ] Navigation hoạt động.
-
 - [ ] Loading state có.
-
 - [ ] Empty state có.
-
 - [ ] Error state có.
-
 - [ ] `npm run typecheck` PASS.
-
 - [ ] `npm run validate` PASS.
-
 - [ ] Không phá Home.
-
 - [ ] Không phá Profile.
-
 - [ ] Không phá Auth.
 
-
-
 ---
 
-
-
-# 📌 Ownership**
-
-
+# 📌 Ownership
 
 | Khu vực | Folder | Owner |
-
 |---|---|---|
-
-| 🏠 ****Trang chủ / Core UI**** | `app/(tabs)/home.tsx`, `src/components/home/` | Hải / Core |
-
-| 📘 ****Bài học**** | `src/features/lessons/` | Huy — [@HuyAA-DD](https://github.com/HuyAA-DD) |
-
-| 🧠 ****Luyện tập**** | `src/features/practice/` | Dương — [@smileviel](https://github.com/smileviel) |
-
-| 💬 ****Gia sư AI**** | `src/features/tutor/` | Khánh — [@hdkhanh12](https://github.com/hdkhanh12) |
-
-| ⚙️ ****Backend**** | `src/services/`, `src/contexts/`, `supabase/` | Hải — [@Hai2310](https://github.com/Hai2310) |
-
-| 🎨 ****Shared UI**** | `src/components/common/` | Core |
-
-| 🧭 ****Navigation**** | `app/(tabs)/_layout.tsx` | Core |
-
-| 🎯 ****Theme**** | `src/theme/` | Core |
-
-| 📚 ****10.000 Vocabulary**** | `src/data/vocabulary-en.ts` | Shared Read-only |
-
-
+| 🏠 **Trang chủ / Core UI** | `app/(tabs)/home.tsx`, `src/components/home/` | Hải / Core |
+| 📘 **Bài học** | `src/features/lessons/` | Huy — [@HuyAA-DD](https://github.com/HuyAA-DD) |
+| 🧠 **Luyện tập** | `src/features/practice/` | Dương — [@smileviel](https://github.com/smileviel) |
+| 💬 **Gia sư AI** | `src/features/tutor/` | Khánh — [@hdkhanh12](https://github.com/hdkhanh12) |
+| ⚙️ **Backend** | `src/services/`, `src/contexts/`, `supabase/` | Hải — [@Hai2310](https://github.com/Hai2310) |
+| 🎨 **Shared UI** | `src/components/common/` | Core |
+| 🧭 **Navigation** | `app/(tabs)/_layout.tsx` | Core |
+| 🎯 **Theme** | `src/theme/` | Core |
+| 📚 **10.000 Vocabulary** | `src/data/vocabulary-en.ts` | Shared Read-only |
 
 ---
 
-
-
-# 🎯 Nguyên tắc quan trọng nhất**
-
-
+# 🎯 Nguyên tắc quan trọng nhất
 
 ```text
-
 Huy
-
 → Lessons
 
-
-
 Dương
-
 → Practice
 
-
-
 Khánh
-
 → Tutor
 
-
-
 Hải
-
 → Backend / Core
 
-
-
 Shared code
-
 → chỉ thay đổi khi cả nhóm thống nhất
-
 ```
 
-
-
 ---
-
-
 
 <div align="center">
 
+### 🎓 **HustLingo**
 
-
-**### 🎓 **HustLingo****
-
-
-
-****Learn clearly · Practice consistently · Progress together****
-
-
+**Learn clearly · Practice consistently · Progress together**
 
 ![Lessons](https://img.shields.io/badge/Lessons-Huy-60A5FA?style=flat-square)
-
 ![Practice](https://img.shields.io/badge/Practice-Dương-34D399?style=flat-square)
-
 ![Tutor](https://img.shields.io/badge/AI%20Tutor-Khánh-A78BFA?style=flat-square)
-
 ![Backend](https://img.shields.io/badge/Backend-Hải-F59E0B?style=flat-square)
 
-
-
-****Expo · React Native · TypeScript · Supabase****
-
-
+**Expo · React Native · TypeScript · Supabase**
 
 </div>
