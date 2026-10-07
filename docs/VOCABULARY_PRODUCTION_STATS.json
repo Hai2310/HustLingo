@@ -1,0 +1,46 @@
+{
+  "rawRecords": 10000,
+  "productionRecords": 4129,
+  "reviewQueueRecords": 5871,
+  "uniqueTerms": 10000,
+  "productionByLevel": {
+    "A1": 697,
+    "A2": 786,
+    "B1": 1077,
+    "B2": 975,
+    "C1": 594
+  },
+  "productionByTopic": {
+    "food": 226,
+    "daily": 3253,
+    "communication": 34,
+    "family": 60,
+    "workplace": 43,
+    "education": 78,
+    "society": 33,
+    "health": 61,
+    "business": 94,
+    "technology": 31,
+    "environment": 98,
+    "culture": 27,
+    "academic": 25,
+    "shopping": 17,
+    "travel": 49
+  },
+  "toeicHigh": 202,
+  "ieltsHigh": 326,
+  "cmudictPronunciation": 6820,
+  "curatedOverrides": 387,
+  "sourceFrequencyCore": 4207,
+  "sourceLegacyFill": 5793,
+  "reviewFlags": {
+    "pronunciation-unverified": 3180,
+    "dictionary-sense-risk": 124,
+    "dictionary-markup": 119,
+    "translation-review": 17,
+    "profanity": 2,
+    "legacy-dictionary-fill": 5793,
+    "compound-review": 837,
+    "dated-sensitive-term": 1
+  }
+}

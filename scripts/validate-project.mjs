@@ -42,10 +42,20 @@ for (const requiredDep of ['@supabase/supabase-js', 'expo-font', 'expo-auth-sess
 }
 if (pkg.dependencies?.['expo-font'] !== '~14.0.12') failures.push('package.json: expo-font must be ~14.0.12 for Expo SDK 54 web compatibility');
 
-const vocab = fs.readFileSync(path.join(root, 'src/data/vocabulary-en.ts'), 'utf8');
-const nonEnglishCodes = [...vocab.matchAll(/"languageCode":"([^"]+)"/g)].map(m => m[1]).filter(x => x !== 'en');
+const vocabJsonPath = path.join(root, 'src/data/vocabulary-en.json');
+const vocabTsPath = path.join(root, 'src/data/vocabulary-en.ts');
+let count = 0;
+let nonEnglishCodes = [];
+if (fs.existsSync(vocabJsonPath)) {
+  const vocabData = JSON.parse(fs.readFileSync(vocabJsonPath, 'utf8'));
+  count = vocabData.length;
+  nonEnglishCodes = vocabData.map((item) => item.languageCode).filter((code) => code !== 'en');
+} else {
+  const vocab = fs.readFileSync(vocabTsPath, 'utf8');
+  nonEnglishCodes = [...vocab.matchAll(/"languageCode":"([^"]+)"/g)].map(m => m[1]).filter(x => x !== 'en');
+  count = (vocab.match(/"id":"local-en-/g) || []).length;
+}
 if (nonEnglishCodes.length) failures.push(`Vocabulary contains non-English languageCode values: ${[...new Set(nonEnglishCodes)].join(', ')}`);
-const count = (vocab.match(/"id":"local-en-/g) || []).length;
 if (count < 9000) failures.push(`Vocabulary bank unexpectedly small: ${count}`);
 
 for (const required of [
