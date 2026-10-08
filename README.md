@@ -357,6 +357,8 @@ Supabase
 
 ![HustLingo System Architecture](docs/architecture/01-system-overview.png)
 
+[Nguồn sơ đồ và cách dựng lại ảnh](docs/architecture/README.md).
+
 ## Luồng tổng quát
 
 ```text

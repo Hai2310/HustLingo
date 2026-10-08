@@ -1,0 +1,38 @@
+digraph SystemOverview {
+  graph [rankdir=TB, bgcolor="white", pad="0.35", nodesep="0.6", ranksep="0.65", splines=ortho,
+         fontname="Arial", fontsize=24, fontcolor="#9b1730", labelloc=t,
+         label="HustLingo — Kiến trúc tổng quan hệ thống\n "];
+  node [shape=box, style="rounded,filled", fontname="Arial", fontsize=15,
+        margin="0.22,0.18", color="#cbd5e1", fillcolor="#ffffff", fontcolor="#243445", penwidth=1.2];
+  edge [color="#71839b", penwidth=1.4, arrowsize=0.75];
+
+  user [label="Người dùng\nWeb · Android · iOS", fillcolor="#fcecf0", color="#dc3655"];
+  frontend [label="Frontend\nExpo + React Native + TypeScript\nExpo Router", fillcolor="#eaf3ff", color="#74a2d5"];
+  ui [label="UI & Navigation\nHome · Bài học · Luyện tập\nGia sư AI · Hồ sơ"];
+  state [label="State / Context\nAuthContext · LearningContext\nSubscriptionContext", fillcolor="#f0eaff", color="#a48bdd"];
+  services [label="Service Layer\nauthService · progressService\nsavedWordService · subscriptionService", fillcolor="#eaf7ee", color="#78b88a"];
+  content [label="Learning Content\nVocabulary · Grammar · Lessons\nExam data", fillcolor="#eaf3ff", color="#74a2d5"];
+  deploy [label="Deployment\nWeb: Vercel / Cloudflare Pages\nMobile: EAS Build → App stores", fillcolor="#eaf7ee", color="#78b88a"];
+  local [label="Local Storage — AsyncStorage\nGuest progress · Settings · Draft", fillcolor="#fff1e8", color="#e7a27c"];
+  backend [label="Supabase Backend", fillcolor="#fcecf0", color="#dc3655"];
+  auth [label="Supabase Auth\nEmail · Google · Facebook"];
+  db [label="PostgreSQL Database\nProfiles · Learning progress · Saved words\nFeedback · Subscriptions · Settings"];
+  storage [label="Supabase Storage\nẢnh · Audio · File khi cần"];
+
+  user -> frontend;
+  frontend -> ui;
+  ui -> state;
+  state -> services;
+  content -> ui;
+  frontend -> deploy;
+  services -> local;
+  services -> backend;
+  backend -> auth;
+  backend -> db;
+  backend -> storage;
+
+  { rank=same; content; frontend; }
+  { rank=same; ui; deploy; }
+  { rank=same; local; backend; }
+  { rank=same; auth; db; storage; }
+}
