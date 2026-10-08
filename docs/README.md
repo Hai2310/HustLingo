@@ -21,7 +21,9 @@ HustLingo là ứng dụng học từ vựng tiếng Anh cơ bản theo chủ đ
 
 Tài liệu là **đề xuất cơ sở** cho nhóm 3–4 người, 10 tuần, từ ý tưởng chưa có ứng dụng sản phẩm. Những mục đánh dấu **MVP** là cam kết triển khai; mục **sau MVP** chỉ làm nếu mốc nghiệm thu đã đạt. Khi thay đổi phạm vi, cập nhật đồng thời yêu cầu, lịch và kiểm thử.
 
-[Clickable prototype](../prototype/README.md) minh họa các màn và luồng bấm bằng dữ liệu cục bộ. Sản phẩm chính vẫn dùng Flutter + Supabase như tài liệu 05 và 10.
+[Clickable prototype](../prototype/README.md) minh họa các màn và luồng bấm bằng dữ liệu cục bộ. Tài liệu 05 và 10 mô tả đề xuất Flutter + Supabase tại thời điểm được viết.
+
+**Trạng thái sau khi merge `origin/main`:** repo hiện có mã ứng dụng Expo/React Native/TypeScript từ nhánh `main`. Các tài liệu 05 và 10 vẫn ghi quyết định Flutter trước đó; chúng cần được nhóm chốt lại theo mã hiện tại trước khi dùng làm hướng dẫn triển khai. Prototype web thuần vẫn là bản minh họa riêng.
 
 ## Thuật ngữ
 
