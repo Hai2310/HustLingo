@@ -1,73 +1,47 @@
-# 04. Nội dung học tập
+# 04. Nội dung và dữ liệu học tập
 
-## Kế hoạch nội dung MVP
+## Nguồn dùng chung theo README
 
-| Chủ đề | 25 từ theo nhóm | Tình huống đặt câu | Ví dụ từ mẫu |
-| --- | --- | --- | --- |
-| Gia đình và con người | quan hệ gia đình, tuổi, mô tả đơn giản | Giới thiệu người thân | mother, brother, kind |
-| Nhà ở và đồ vật | phòng, đồ dùng, vị trí | Mô tả nhà/phòng | kitchen, table, under |
-| Đồ ăn và đồ uống | món phổ biến, bữa ăn, sở thích | Gọi món/nói sở thích | rice, water, breakfast |
-| Hoạt động hằng ngày | động từ và mốc thời gian cơ bản | Kể lịch sinh hoạt | wake up, study, evening |
+Vocabulary, grammar, listening, speaking, reading, writing, TOEIC/IELTS và review chia sẻ data layer. Lessons dạy nội dung, Practice dùng để luyện/ôn, Tutor dùng một phần làm ngữ cảnh tương lai; feature chỉ giữ mapping/config hoặc adapter riêng, không nhân bản kho từ.
 
-Danh sách từ cụ thể được chốt ở tuần 2. Chọn từ mức A0–A1, có ích trong giao tiếp thường ngày, tránh từ nhiều nghĩa khó trong ví dụ đầu tiên. Mỗi chủ đề cần đủ từ để sinh câu hỏi với ba phương án nhiễu hợp lý.
+README mô tả đích `src/data/vocabulary/` và các thư mục theo kỹ năng. Hiện repo dùng `src/data/vocabulary-en.json` nạp qua `src/data/vocabulary-en.ts`, cùng các file dữ liệu mẫu tại `src/features/*/data/`. Chưa di chuyển thư mục trong lần cập nhật docs này.
 
-## Cấu trúc một mục từ
+## Chất lượng từ vựng
 
-```json
-{
-  "id": "family_mother",
-  "topic_id": "family",
-  "content_version": 1,
-  "word": "mother",
-  "part_of_speech": "noun",
-  "ipa": "/ˈmʌðər/",
-  "meaning_vi": "mẹ",
-  "example_en": "My mother is kind.",
-  "example_vi": "Mẹ tôi tốt bụng.",
-  "accepted_speech": ["mother"],
-  "image_asset": null,
-  "audio_asset": null,
-  "sort_order": 1
-}
-```
+- `ENGLISH_VOCABULARY`: 10.000 raw records phục vụ tương thích/rà soát.
+- `PRODUCTION_VOCABULARY`: 4.129 bản ghi qua cổng chất lượng; vẫn cần duyệt nghĩa/ví dụ trước khi đưa vào bài bàn giao.
+- `VOCABULARY_REVIEW_QUEUE`: 5.871 bản ghi chưa được phép đưa mặc định vào luồng học.
+- `cefrLevel` hiện là ước lượng tần suất; `toeicRelevance`/`ieltsRelevance` là mức liên quan, không phải nguồn bài thi chính thức.
 
-`audio_asset = null` nghĩa là dùng TTS trên thiết bị/trình duyệt. Nếu có file âm thanh do nhóm tự tạo hoặc được phép sử dụng, điền đường dẫn và ưu tiên phát file. Hình là tùy chọn; không lấy ảnh từ sản phẩm khác nếu không có quyền sử dụng.
+Schema TypeScript hiện có gồm `id`, `term`, `translation`, `ipa/pronunciation`, `partOfSpeech`, `exampleSentence`, `exampleTranslation`, `topicId`, `cefrLevel`, nguồn/confidence/quality. Synonyms, antonyms, collocations và verified trong README là mục tiêu bổ sung metadata, chưa có đầy đủ. Xem [VOCABULARY_DATA_PRODUCTION.md](VOCABULARY_DATA_PRODUCTION.md).
 
-## Cấu trúc bài học của một từ
+## Manifest nội dung bản 10 tuần
 
-1. **Nhận biết:** xem từ và nghe âm thanh, đoán nghĩa trước khi lật thẻ.
-2. **Hiểu:** đọc nghĩa, từ loại và một câu ví dụ ngắn với bản dịch.
-3. **Nhớ:** trả lời câu hỏi chọn nghĩa hoặc chọn từ trong quiz.
-4. **Dùng:** nói từ/câu mẫu và đặt một câu mới. Hai bước này có thể mở từ chi tiết chủ đề sau flashcard, không chặn việc hoàn thành quiz.
-5. **Ôn:** từ sai và từ đến hạn xuất hiện ở màn tiến độ.
+| Mảng | Tập mẫu cần bàn giao |
+| --- | --- |
+| Vocabulary/Grammar | Ít nhất một topic đã duyệt và bài ngữ pháp có giải thích/ví dụ/câu luyện; ID nối được Lessons/Practice |
+| Listening | Ít nhất một bài audio/TTS có transcript và câu hỏi |
+| Speaking | Ít nhất một prompt/câu mẫu, nghe mẫu hoặc điều khiển luyện nói; ghi rõ chưa có đánh giá phát âm thật |
+| Reading | Ít nhất một đoạn đọc và câu hỏi có đáp án/giải thích |
+| Writing | Ít nhất một prompt và lưu draft; không giả phản hồi AI |
+| TOEIC/IELTS | Mỗi loại ít nhất một bộ rút gọn có cấu trúc câu hỏi, thời gian và kết quả mẫu |
+| Tutor | Emma/David, scenario và demo messages, không có hội thoại AI runtime |
 
-## Bài giảng ngắn của chủ đề
+Tập bàn giao phải ghi ID, người soạn/duyệt, nguồn/license và phiên bản; không đồng nghĩa đã phủ đủ A1–C1. Có thể chọn 100 từ để kiểm thử, nhưng không cố định sản phẩm chỉ có 100 từ.
 
-Admin biên soạn phần mở đầu gồm mục tiêu học, 2–5 đoạn hướng dẫn ngắn, 1–2 ví dụ và hình/âm thanh tùy chọn. Phần này giúp người mới hiểu chủ đề trước khi vào flashcard. Không có video hoặc định dạng phức tạp trong MVP. Dữ liệu nằm trong phiên bản nội dung của chủ đề và được xem trước trước khi phát hành.
+## Câu hỏi quiz và ảnh
 
-## Quy tắc viết và kiểm duyệt
+| Dạng | Ví dụ |
+| --- | --- |
+| Chọn nghĩa | mother → chọn “mẹ” |
+| Chọn từ theo nghĩa | “mẹ” → chọn mother |
+| Điền từ bằng lựa chọn | My ___ is kind. → mother |
+| Xem ảnh chọn từ | Ảnh con hổ → chọn tiger giữa tiger/lion/bear |
 
-- Mỗi từ có một nghĩa chính phù hợp câu ví dụ; nếu nhiều nghĩa, chỉ kiểm tra nghĩa đã dạy.
-- Câu ví dụ dài khoảng 3–10 từ, cấu trúc quen thuộc, không dựa vào kiến thức văn hóa riêng.
-- IPA dùng cùng một biến thể nhất quán; ghi biến thể được chọn trong metadata chủ đề. Âm TTS có thể khác giọng IPA, nên không dùng làm căn cứ chấm âm vị.
-- Phương án nhiễu là từ/nghĩa cùng loại nhưng không gây hai đáp án đúng. Với câu hỏi bằng hình, ảnh phải thể hiện rõ một từ mục tiêu, không chứa chữ/nhãn tiết lộ đáp án; tránh ảnh có nhiều vật thể đều đúng với lựa chọn. Người kiểm duyệt tự làm quiz mẫu trước khi phát hành.
-- Dữ liệu có `content_version`, ngày rà soát và người duyệt. Sửa lỗi chính tả giữ ID; thay nghĩa hoặc đáp án tăng phiên bản và rà soát câu hỏi liên quan.
-- Từ, ví dụ, hình, âm thanh và bản dịch phải có nguồn hoặc người tạo trong bảng theo dõi nội dung của nhóm. Không sao chép nguyên bộ dữ liệu từ ứng dụng khác.
-- Admin nhập/sửa bản nháp trên web hoặc import dữ liệu có kiểm tra cấu trúc, xem trước, chạy kiểm tra hợp lệ rồi phát hành. Learner chỉ nhận bản đã phát hành. Thao tác phát hành ghi người và thời điểm; quy trình nhóm vẫn cần người thứ hai rà soát nội dung dù không có role kiểm duyệt riêng.
+Câu ảnh cần `imageAsset`, `imageAltVi`, `fallbackPromptVi`; ảnh rõ một mục tiêu, không ghi từ đáp án, có quyền sử dụng và tải được trên Android/web. Câu chữ thay thế và ảnh dẫn tới cùng đáp án. Bài học phải dạy từ mục tiêu trước khi kiểm tra; không ép từ trừu tượng vào câu ảnh.
 
-## Mẫu câu hỏi quiz
+Bài tự luyện cục bộ có thể chứa đáp án để phản hồi offline. Ngân hàng dùng cho kết quả được server xác nhận phải tách riêng, không đóng gói đáp án trong app. Bài học/quy tắc nội dung admin P1 dùng draft → review → publish; câu đang làm giữ đúng phiên bản cũ.
 
-| Dạng | Ví dụ | Đáp án |
-| --- | --- | --- |
-| Chọn nghĩa | “mother” nghĩa là gì? A. mẹ B. bố C. chị gái | A |
-| Chọn từ | Từ tiếng Anh của “mẹ” là gì? A. father B. mother C. sister | B |
-| Điền từ bằng lựa chọn | My ___ is kind. A. mother B. rice C. kitchen | A |
-| Xem hình, chọn từ | Hiện ảnh một bát cơm. “Trong hình là gì?” A. rice B. water C. bread | A |
+## Quy tắc kiểm duyệt
 
-Ví dụ tương tự: **ảnh con hổ → chọn “tiger”** giữa ba từ tiếng Anh, nếu chủ đề có dạy từ *tiger*. Câu hỏi hình ảnh chỉ dùng cho từ có thể nhận diện rõ bằng hình; không ép từ trừu tượng như *kind* vào dạng này.
-
-Mỗi câu hỏi hình ảnh cần `image_asset`, mô tả tiếng Việt cho trình đọc màn hình và câu hỏi chữ thay thế khi ảnh tải lỗi. Cả ảnh và câu thay thế phải dẫn đến cùng một đáp án; mô tả không ghi sẵn từ tiếng Anh cần chọn. Admin kiểm tra quyền sử dụng ảnh, độ rõ trên màn nhỏ và ảnh tải được trước khi phát hành. MVP không dùng nhập tự do cho quiz để tránh nhiều cách viết đúng khó chấm. Mỗi lượt quiz 10 câu rút từ bộ câu hỏi được duyệt; nếu chưa đủ câu hỏi hợp lệ, không phát hành chủ đề.
-
-## Đánh giá câu tự viết
-
-Ứng dụng gửi `word`, `meaning_vi`, `example_en`, câu của người học và yêu cầu phản hồi bằng tiếng Việt. Phản hồi cần cho biết từ mục tiêu có được dùng đúng ngữ cảnh không, chỉ ra tối đa hai lỗi quan trọng, đưa một câu sửa/gợi ý. Câu đúng cũng nhận lời xác nhận ngắn. Không suy đoán trình độ tổng quát từ một câu.
+Một nghĩa chính phù hợp ngữ cảnh; ví dụ ngắn, chính xác; distractors không tạo nhiều đáp án đúng. TTS/IPA có thể khác giọng, không dùng để tuyên bố chấm âm vị. Kiểm tra ID unique, đáp án thuộc options, tài sản tồn tại, time limit và tags đúng. AI sinh nội dung phải được người duyệt trước khi công bố.

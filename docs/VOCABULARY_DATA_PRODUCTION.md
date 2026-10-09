@@ -1,5 +1,7 @@
 # HustLingo Vocabulary — Production Data
 
+Theo hướng data layer dùng chung trong [README chính](../README.md), tài liệu này mô tả bộ dữ liệu thực tế. Đường dẫn hiện tại là `src/data/vocabulary-en.json` và `src/data/vocabulary-en.ts`; thư mục `src/data/vocabulary/` trong README là cấu trúc dự kiến. Xem [04-content.md](04-content.md) để chọn tập nội dung bàn giao cho Lessons/Practice/Tutor.
+
 ## Mục tiêu
 
 Patch này chuyển bộ dữ liệu cũ thành mô hình **production-safe** thay vì đưa cả 10.000 record cũ trực tiếp cho người học.

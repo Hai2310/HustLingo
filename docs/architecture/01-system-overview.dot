@@ -1,38 +1,41 @@
 digraph SystemOverview {
-  graph [rankdir=TB, bgcolor="white", pad="0.35", nodesep="0.6", ranksep="0.65", splines=ortho,
+  graph [rankdir=LR, newrank=true, bgcolor="white", pad="0.4", nodesep="0.6", ranksep="1.0", splines=polyline,
          fontname="Arial", fontsize=24, fontcolor="#9b1730", labelloc=t,
-         label="HustLingo — Kiến trúc tổng quan hệ thống\n "];
+         label="HustLingo — Ứng dụng, dữ liệu và triển khai\n "];
   node [shape=box, style="rounded,filled", fontname="Arial", fontsize=15,
-        margin="0.22,0.18", color="#cbd5e1", fillcolor="#ffffff", fontcolor="#243445", penwidth=1.2];
-  edge [color="#71839b", penwidth=1.4, arrowsize=0.75];
+        margin="0.25,0.2", color="#cbd5e1", fillcolor="#ffffff", fontcolor="#243445", penwidth=1.2];
+  edge [color="#62758e", penwidth=1.5, arrowsize=0.8, fontname="Arial", fontsize=13, fontcolor="#42546b"];
 
-  user [label="Người dùng\nWeb · Android · iOS", fillcolor="#fcecf0", color="#dc3655"];
-  frontend [label="Frontend\nExpo + React Native + TypeScript\nExpo Router", fillcolor="#eaf3ff", color="#74a2d5"];
-  ui [label="UI & Navigation\nHome · Bài học · Luyện tập\nGia sư AI · Hồ sơ"];
-  state [label="State / Context\nAuthContext · LearningContext\nSubscriptionContext", fillcolor="#f0eaff", color="#a48bdd"];
-  services [label="Service Layer\nauthService · progressService\nsavedWordService · subscriptionService", fillcolor="#eaf7ee", color="#78b88a"];
-  content [label="Learning Content\nVocabulary · Grammar · Lessons\nExam data", fillcolor="#eaf3ff", color="#74a2d5"];
-  deploy [label="Deployment\nWeb: Vercel / Cloudflare Pages\nMobile: EAS Build → App stores", fillcolor="#eaf7ee", color="#78b88a"];
-  local [label="Local Storage — AsyncStorage\nGuest progress · Settings · Draft", fillcolor="#fff1e8", color="#e7a27c"];
-  backend [label="Supabase Backend", fillcolor="#fcecf0", color="#dc3655"];
-  auth [label="Supabase Auth\nEmail · Google · Facebook"];
-  db [label="PostgreSQL Database\nProfiles · Learning progress · Saved words\nFeedback · Subscriptions · Settings"];
-  storage [label="Supabase Storage\nẢnh · Audio · File khi cần"];
+  user [label="Người dùng", fillcolor="#fcecf0", color="#dc3655"];
+  app [label="ỨNG DỤNG EXPO\nReact Native + TypeScript\n\nGiao diện + Expo Router\nHiển thị màn hình và nhận thao tác\n\nAuthContext + LearningContext\nGiữ trạng thái dùng chung khi app chạy\n\nSupabase client + supabaseData\nGửi yêu cầu tới backend",
+       fillcolor="#eaf3ff", color="#74a2d5"];
+  deploy [label="CÔNG NGHỆ TRIỂN KHAI\nWeb: Expo export + EAS Deploy\nMobile: EAS Build — Android / iOS\nBackend: Supabase Cloud",
+          fillcolor="#fff8e6", color="#d2ad55"];
 
-  user -> frontend;
-  frontend -> ui;
-  ui -> state;
-  state -> services;
-  content -> ui;
-  frontend -> deploy;
-  services -> local;
-  services -> backend;
-  backend -> auth;
-  backend -> db;
-  backend -> storage;
+  subgraph cluster_local {
+    label="TRÊN THIẾT BỊ / TRÌNH DUYỆT";
+    fontname="Arial"; fontsize=16; fontcolor="#577088";
+    style="rounded"; color="#cbd5e1"; margin=20;
+    content [label="Nội dung đóng gói\nsrc/data/\nTừ vựng và dữ liệu mẫu", fillcolor="#eaf3ff", color="#74a2d5"];
+    local [label="AsyncStorage\nLưu tiến độ guest và dữ liệu cục bộ\nGiữ phiên đăng nhập trên máy", fillcolor="#fff1e8", color="#e7a27c"];
+  }
 
-  { rank=same; content; frontend; }
-  { rank=same; ui; deploy; }
-  { rank=same; local; backend; }
-  { rank=same; auth; db; storage; }
+  subgraph cluster_cloud {
+    label="SUPABASE — TRÊN MÁY CHỦ";
+    fontname="Arial"; fontsize=16; fontcolor="#577088";
+    style="rounded"; color="#cbd5e1"; margin=20;
+    auth [label="Supabase Auth\nXác thực và cấp phiên đăng nhập", fillcolor="#f0eaff", color="#a48bdd"];
+    db [label="PostgreSQL + RLS\nHồ sơ · Tiến độ tài khoản · Góp ý\nKiểm soát quyền truy cập dữ liệu", fillcolor="#eaf7ee", color="#78b88a"];
+  }
+
+  user -> app [label="thao tác"];
+  app -> content [label="đọc nội dung"];
+  app -> local [label="đọc / lưu trên máy"];
+  app -> auth [label="đăng nhập / đăng xuất"];
+  app -> db [label="đọc hồ sơ / đồng bộ tiến độ\ngửi góp ý"];
+  app -> deploy [label="build / phát hành\n(kế hoạch triển khai)", style=dashed, color="#a07f35", fontcolor="#8a6a25", constraint=false];
+
+  { rank=same; app; deploy; }
+  { rank=same; content; local; auth; db; }
+  content -> local -> auth -> db [style=invis, weight=20];
 }
