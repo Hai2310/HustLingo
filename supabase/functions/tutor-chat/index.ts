@@ -94,7 +94,7 @@ Deno.serve(async (request) => {
   if (!scenario) return json({ error: 'Unknown scenario.' }, 400);
   if (!body?.sessionId || !body?.tutorId || !body?.action) return json({ error: 'Invalid tutor request.' }, 400);
 
-  const providerKey = Deno.env.get('AI_API_KEY');
+  const providerKey = Deno.env.get('OPENAI_API_KEY') || Deno.env.get('AI_API_KEY');
   if (!providerKey) return json({ error: 'AI service is not configured yet.' }, 503);
 
   const { data: existingSession } = await supabase
@@ -115,7 +115,7 @@ Deno.serve(async (request) => {
   }
 
   const baseUrl = (Deno.env.get('AI_BASE_URL') || 'https://api.openai.com/v1').replace(/\/$/, '');
-  const model = Deno.env.get('AI_MODEL') || 'gpt-4o-mini';
+  const model = Deno.env.get('OPENAI_MODEL') || Deno.env.get('AI_MODEL') || 'gpt-4o-mini';
   const actionInstruction = body.action === 'hint'
     ? 'Give one short hint. Do not answer for the learner.'
     : body.action === 'correct'

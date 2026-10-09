@@ -42,9 +42,9 @@ Tutor text chat chạy qua Supabase Edge Function, không gọi AI provider tr�
 
 ```bash
 supabase db push
-supabase secrets set AI_API_KEY=<provider-key>
+supabase secrets set OPENAI_API_KEY=<provider-key>
 supabase secrets set AI_BASE_URL=https://api.openai.com/v1
-supabase secrets set AI_MODEL=gpt-4o-mini
+supabase secrets set OPENAI_MODEL=gpt-4o-mini
 supabase functions deploy tutor-chat
 ```
 
