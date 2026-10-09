@@ -1,43 +1,35 @@
 # 08. Rủi ro và quyết định
 
+## Quyết định theo README
+
+| ID | Quyết định |
+| --- | --- |
+| D-01 | Expo/React Native/TypeScript/Expo Router, một codebase hướng web/Android/iOS |
+| D-02 | Guest-first, AsyncStorage → đăng nhập Supabase → merge/sync account |
+| D-03 | Giữ Lessons/Practice/Tutor/Backend-Core và ownership Huy/Dương/Khánh/Hải |
+| D-04 | Kho từ và learning data dùng chung; không nhân bản dataset giữa features |
+| D-05 | Tutor UI/demo trước; STT → LLM → TTS thật ở giai đoạn tiếp theo |
+| D-06 | Bản 10 tuần bàn giao các tập kỹ năng/luyện thi mẫu, không tuyên bố đủ toàn bộ A1–C1 |
+| D-07 | Hai role account admin/learner; guest không có quyền account; admin UI là P1 bổ sung |
+| D-08 | Deploy theo README/DEPLOYMENT: Expo export + EAS Deploy, EAS Build, Supabase Cloud |
+
 ## Sổ rủi ro
 
-| Rủi ro | Khả năng / ảnh hưởng | Dấu hiệu sớm | Giảm thiểu và phương án dự phòng | Chủ trì |
-| --- | --- | --- | --- | --- |
-| Ghi âm/STT khác nhau giữa Android và web | Cao / cao | Spike tuần 1 không chạy trên một nền tảng | Thử thiết bị thật và HTTPS sớm; tách adapter âm thanh theo nền tảng; nếu vẫn lỗi, báo giới hạn và ưu tiên luồng học/quiz ổn định | Ứng dụng |
-| STT không phản ánh phát âm thực | Cao / trung bình | Người nói sai âm nhưng transcript vẫn đúng | Chỉ hiển thị mức khớp văn bản; không chấm điểm ngữ âm; thu phản hồi người thử để cải thiện hướng dẫn | Sản phẩm |
-| AI phản hồi sai hoặc quá dài | Trung bình / cao | JSON sai schema, sửa câu sai nghĩa | Giới hạn đầu vào/đầu ra, prompt cố định, kiểm tra schema, mẫu kiểm duyệt thủ công; lỗi thì cho thử lại | Backend/nội dung |
-| Vượt hạn mức/chi phí dịch vụ | Trung bình / cao | Số lượt/độ trễ tăng nhanh | Hạn mức 5 câu viết/ngày, giới hạn audio, dashboard dùng dịch vụ, cảnh báo ngân sách; có mock cho demo | Backend |
-| Nội dung 100 từ/câu hỏi không kịp hoặc sai | Trung bình / cao | Tuần 2 chưa duyệt xong chủ đề đầu | Mẫu dữ liệu và checklist ngay tuần 1; chia chủ đề theo người; rà soát chéo; đóng băng nội dung tuần 4 | Nội dung |
-| Ảnh quiz mơ hồ, hỏng hoặc thiếu quyền sử dụng | Trung bình / trung bình | Nhiều lựa chọn cùng đúng, ảnh không tải trên web/Android | Chỉ dùng ảnh đã kiểm tra nguồn, có một đáp án rõ; lưu mô tả/câu chữ thay thế và thử trên hai nền tảng trước phát hành | Nội dung/ứng dụng |
-| RLS hoặc khóa API cấu hình sai | Trung bình / rất cao | Tài khoản A thấy dữ liệu B; khóa trong bundle | Kiểm thử hai tài khoản tuần 2 và 5; khóa chỉ ở server; review migration trước demo | Backend |
-| Learner tự ghi điểm/lịch ôn hoặc tự nâng role qua API trực tiếp | Trung bình / rất cao | Có chính sách owner-write trên bảng kết quả/role; request client gửi `is_admin` | Thu hồi quyền ghi client, chỉ Edge Functions ghi sau kiểm tra; thử DB trực tiếp bằng JWT learner | Backend |
-| Admin bị hạ/khóa nhưng token cũ còn quyền, hoặc mất admin cuối cùng | Trung bình / cao | Quyền dựa vào claim token cũ; không có ràng buộc admin cuối | Tra role/trạng thái hiện thời ở mỗi API và RLS; bảo vệ admin cuối trong giao dịch; kiểm thử token cũ | Backend |
-| Giao diện quản trị nội dung/tài khoản quá lớn cho 10 tuần | Trung bình / cao | Tuần 3 chưa có bản nháp xem trước; form mở rộng thành CMS | Chỉ hỗ trợ bài giảng ngắn, form đơn giản, seed/import hàng loạt; không làm video, phân quyền nhiều cấp hoặc báo cáo học viên | Quản lý dự án |
-| Quy trình xóa dữ liệu không hoàn chỉnh | Trung bình / cao | Dữ liệu còn ở bảng phụ/storage | Thiết kế quan hệ xóa từ đầu; chạy thử với tài khoản giả tuần 8; công bố thời gian xử lý nếu dùng hỗ trợ thủ công | Backend |
-| Thiếu máy Mac để kiểm thử iOS | Cao / thấp với MVP | Không có thiết bị/xcode tuần 1 | Chốt Android + web là hai nền tảng nghiệm thu; không quảng bá phát hành iOS | Quản lý dự án |
-
-## Quyết định đã đề xuất
-
-| ID | Quyết định | Lý do / hệ quả |
+| Rủi ro | Hệ quả | Xử lý |
 | --- | --- | --- |
-| D-01 | MVP nhắm Android và web bằng Flutter | Đủ đa nền tảng trong điều kiện 10 tuần; iOS là giai đoạn sau nếu có điều kiện kiểm thử |
-| D-02 | Trục học là 4 chủ đề × 25 từ → flashcard → quiz → ôn | Có thể biên soạn và kiểm tra nội dung trọn vẹn |
-| D-03 | Luyện nói dùng STT để so văn bản | Trung thực về năng lực kỹ thuật và chi phí; không tuyên bố chấm phát âm chi tiết |
-| D-04 | AI chỉ phản hồi một câu ngắn theo từ mục tiêu | Rõ tiêu chí, dễ giới hạn chi phí và kiểm duyệt hơn chatbot mở |
-| D-05 | Dùng Supabase làm backend, AI/STT qua Edge Functions | Rút thời gian dựng Auth/DB và giữ khóa API phía máy chủ |
-| D-06 | Chỉ có hai role `admin` và `learner`; admin gồm quản trị viên và nhóm chuyên môn | Dễ quản lý trong 10 tuần; quy trình rà soát chéo là quy ước nhóm, không phải role riêng |
-| D-07 | Admin web quản lý bản nháp/phát hành nội dung và tài khoản; learner không ghi trực tiếp kết quả học | Quyền tối thiểu, bảo vệ điểm/lịch ôn/hạn mức và nội dung chưa phát hành |
+| README rộng, màn ba features hiện còn trống | Không kịp 10 tuần | Manifest mẫu theo từng module, tích hợp hàng tuần, ưu tiên P0 trước admin/AI thật |
+| Gán 10.000 từ thành nội dung “chuẩn” | Dạy từ/nghĩa/CEFR chưa kiểm chứng | Phân biệt 10.000 raw, 4.129 production, 5.871 review; duyệt tập bàn giao |
+| Đường dẫn/services dự kiến bị hiểu là đã có | Thành viên import sai/chạy lệnh không tồn tại | Bản đồ hiện có và đích tổ chức lại ở tài liệu 10; kiểm tra trước khi di chuyển |
+| Guest mất tiến độ khi Auth đổi account | Người học mất dữ liệu | Snapshot guest trước đổi khóa, import IDs và retry/idempotency |
+| Hai thiết bị ghi đè state/cộng counters | Sai progress | Merge transaction/event IDs; không chỉ upsert snapshot hoặc cộng lượt cũ |
+| Owner-update profiles cho phép đổi role/status | Tự nâng quyền | Grants theo cột hoặc bảng riêng; kiểm JWT trực tiếp, disabled status ở DB/API |
+| Tiến độ client bị hiểu là kết quả xác minh | Người dùng sửa local/own progress | Ghi rõ thống kê tự luyện; entitlement/hạn mức/kết quả server tách riêng |
+| OAuth redirect sai Android/web | Không đăng nhập/merge được | Thử Google/Facebook/cancel/callback sớm trên hai nền tảng |
+| Quiz ảnh/audio thiếu nguồn hoặc tải lỗi | Sai câu hỏi/trải nghiệm | Kiểm license/asset, alt/fallback, đủ một đáp án |
+| Tutor demo bị quảng cáo là AI thật | Hiểu sai chức năng | Nhãn demo rõ; không gửi dữ liệu dịch vụ ngoài khi chưa có runtime |
+| iOS chưa có thiết bị/build kiểm thử | Tuyên bố đa nền tảng quá mức | Giữ iOS mục tiêu, công bố riêng bằng chứng kiểm thử |
+| Validator chỉ kiểm H.1 trống hoặc lỗi thời | PASS giả về chức năng | Cập nhật validator khi feature bắt đầu có UI; thêm smoke/integration tests |
 
-## Việc cần chốt ở tuần 1–2
+## Thay đổi cần theo dõi
 
-| Câu hỏi | Hạn chốt | Người quyết định | Dữ liệu cần có |
-| --- | --- | --- | --- |
-| Nhóm thực tế có bao nhiêu người/giờ mỗi tuần? | Tuần 1 | Nhóm/giảng viên | Lịch và kỹ năng thành viên |
-| Nhà cung cấp STT/LLM nào được phép dùng, hạn mức và xử lý dữ liệu ra sao? | Tuần 2 | Backend + quản lý | Spike độ trễ, chi phí, điều khoản, độ chính xác mẫu |
-| Có thiết bị Android thật và môi trường web HTTPS để thử mic không? | Tuần 1 | Ứng dụng | Danh sách thiết bị và bản thử |
-| Ai duyệt nội dung tiếng Anh và tài sản hình/âm? | Tuần 1 | Nội dung | Checklist và nguồn/giấy phép |
-| Ai giữ tài khoản admin đầu tiên và ai được phép cấp admin tiếp theo? | Tuần 1 | Nhóm/giảng viên | Danh sách nhân sự, quy trình bootstrap và bàn giao |
-| Có yêu cầu giảng viên về nền tảng, công nghệ, báo cáo hoặc tiêu chí điểm không? | Tuần 1 | Quản lý dự án | Đề bài chính thức |
-
-Nếu giả định ban đầu thay đổi, sửa [01-scope.md](01-scope.md), [03-requirements.md](03-requirements.md), [06-plan.md](06-plan.md) và [07-testing.md](07-testing.md) trong cùng lần cập nhật để phạm vi, lịch và điều kiện nghiệm thu không mâu thuẫn.
+Mọi thay đổi shared/core cần thống nhất interface giữa feature và Hải. Thêm provider AI, Storage, admin schema, subscription hoặc cổng thanh toán cần cập nhật kiến trúc/quyền/test trước khi tích hợp. Nếu phải đổi cam kết 10 tuần, sửa tài liệu 01/03/06/07 cùng lúc; README chính vẫn là cơ sở định hướng.

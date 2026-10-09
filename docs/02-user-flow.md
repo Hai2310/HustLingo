@@ -1,67 +1,30 @@
-# 02. Người dùng và luồng học
+# 02. Người dùng và luồng sử dụng
 
-## Người dùng mục tiêu
+## Guest và tài khoản
 
-**Người mới học (A0–A1), 15 tuổi trở lên:** có thể đọc giao diện tiếng Việt, muốn học 10–15 phút/lần, dùng điện thoại Android hoặc trình duyệt máy tính. Cần từ thông dụng, ví dụ ngắn, phát âm dễ nghe và tiến độ rõ.
+Người dùng mở Home ngay ở chế độ guest. Guest có thể mở Lessons/Practice, lưu từ, làm quiz/bộ luyện thi mẫu, xem tiến độ và thử Tutor demo; dữ liệu nằm trên thiết bị bằng AsyncStorage. Guest không có JWT hay quyền quản trị. Xóa dữ liệu ứng dụng/trình duyệt có thể làm mất dữ liệu này.
 
-**Admin (quản trị viên/nhóm chuyên môn):** một role chung cho người soạn, rà soát, phát hành chủ đề và quản lý tài khoản. Admin dùng giao diện web; dữ liệu ban đầu có thể import/seed rồi sửa, xem trước và phát hành trên web. Quyền chi tiết ở [09-access-control.md](09-access-control.md).
+Khi muốn đồng bộ, người dùng đăng nhập bằng email, Google hoặc Facebook qua Supabase Auth. App lấy snapshot guest trước khi chuyển sang khóa lưu của account, cho người dùng chọn nhập tiến độ, hợp nhất theo ID ổn định và chỉ đánh dấu đã nhập khi server xác nhận. Thử lại không tạo lượt trùng; account khác trên cùng máy không tự nhận lại snapshot đã nhập. Đây là luồng cần bổ sung, mã hiện tại chưa chuyển đầy đủ guest sang account.
 
-## Giá trị của một phiên học
+## Luồng Lessons và Practice
 
-1. Chọn chủ đề và xem mục tiêu, số từ, tiến độ.
-2. Xem flashcard: mặt trước là từ/hình; mặt sau là IPA, nghĩa tiếng Việt, ví dụ và âm thanh. Người học đánh dấu “đã xem”; không ép phải nhớ sau một lần.
-3. Làm quiz 10 câu được tạo từ bộ từ của chủ đề. Sau mỗi câu, xem đáp án và giải thích ngắn. Cuối lượt, xem điểm và các từ sai.
-4. Với từ cần luyện, người học có thể ghi âm từ hoặc câu mẫu. Ứng dụng hiển thị bản chép lời STT và mức khớp. Có nút thử lại và hướng dẫn khi mic bị từ chối.
-5. Viết một câu dùng từ đang học. AI trả nhận xét tối đa 3 ý: có dùng đúng từ không, lỗi cần sửa, một câu gợi ý. Người học có thể gửi lại trong hạn mức.
-6. Màn tiến độ đưa từ sai/đến hạn vào hàng ôn. Người học có thể rời ứng dụng sau quiz và trở lại sau.
+1. Home → Lessons Hub → level A1–C1 → topic → lesson.
+2. Mở vocabulary, grammar hoặc bài kỹ năng mẫu; xem hướng dẫn, ví dụ và tài sản hợp lệ.
+3. Chuyển sang Practice: flashcard, vocabulary/grammar quiz, luyện kỹ năng hoặc bộ TOEIC/IELTS rút gọn.
+4. Xem kết quả/giải thích, lưu từ cần học, đưa từ chưa nhớ vào review.
+5. Review cấp câu hỏi và lựa chọn trước khi nhận câu trả lời; cập nhật lịch ôn và LearningContext.
+6. Profile/Progress hiển thị kết quả tự luyện; guest chỉ có dữ liệu trên máy, account có trạng thái đang đồng bộ/đã đồng bộ/lỗi.
 
-## Sơ đồ màn hình MVP
+Quiz ảnh “ảnh con hổ → chọn tiger” cần nội dung đã dạy, ảnh rõ và có quyền sử dụng; có mô tả truy cập được và câu chữ thay thế khi tải lỗi.
 
-```mermaid
-flowchart TD
-    A[Đăng ký / đăng nhập] --> B[Danh sách chủ đề]
-    B --> C[Chi tiết chủ đề]
-    C --> D[Flashcard]
-    D --> E[Quiz]
-    E --> F[Kết quả và từ cần ôn]
-    F --> G[Ôn tập]
-    C --> H[Luyện nói]
-    C --> I[Đặt câu]
-    B --> J[Tiến độ]
-    J --> G
-    J --> C
-```
+## Luồng Tutor của bản 10 tuần
 
-## Luồng admin trên web
+Chọn Emma/David → scenario → Tutor detail → chat UI hoặc call UI. Chat dùng demo messages; call hiển thị trạng thái kết nối, mic/speaker và kết thúc. Gắn nhãn demo, không giả nhận xét của AI hoặc cuộc gọi thật. STT/LLM/TTS qua server là giai đoạn tiếp theo.
 
-```mermaid
-flowchart TD
-    A[Admin đăng nhập] --> B[Trang quản trị]
-    B --> C[Nội dung]
-    C --> D[Tạo hoặc sửa bản nháp]
-    D --> E[Xem trước và kiểm tra hợp lệ]
-    E --> F[Phát hành hoặc ẩn]
-    B --> G[Tài khoản]
-    G --> H[Tìm learner]
-    H --> I[Khóa / mở / gửi link đặt lại mật khẩu]
-    G --> J[Cấp hoặc thu hồi quyền admin]
-```
+## Luồng admin bổ sung
 
-Sau đăng nhập, ứng dụng điều hướng theo role hiện thời. Learner không thấy màn quản trị; admin không làm bài học bằng tài khoản quản trị. Nếu tài khoản bị khóa hoặc role bị thay đổi khi đang mở ứng dụng, yêu cầu tiếp theo bị máy chủ từ chối và UI tải lại trạng thái.
+Account admin mở khu vực quản trị web khi chức năng P1 được triển khai: tạo/import draft → sửa từ/bài/quiz/ảnh → xem trước → kiểm tra → phát hành/ẩn; tìm account → khóa/mở → gửi reset link → cấp/hạ admin có audit. Learner và guest chỉ xem nội dung được công bố. UI kiểm role để điều hướng; backend vẫn kiểm quyền.
 
-## Trạng thái cần thiết
+## Trạng thái cần xử lý
 
-- Lần đầu: giới thiệu ngắn, đăng ký/đăng nhập, danh sách chủ đề.
-- Đang học: lưu chỉ số thẻ đã xem cục bộ cho phiên; khi hoàn thành quiz mới ghi kết quả lâu dài. Nếu thoát giữa quiz, cho bắt đầu lại; không tính lượt chưa nộp.
-- Mic không cấp quyền hoặc không hỗ trợ: hiện hướng dẫn và vẫn cho học, quiz, đặt câu.
-- STT không nghe rõ: hiện bản chép lời nếu có; không trừ tiến độ, cho thử lại.
-- AI/STT lỗi hoặc hết hạn mức: hiện thông báo cụ thể, giữ câu đã nhập và cho thử sau. Quiz/ôn tập không phụ thuộc AI.
-- Mất mạng: hiển thị trạng thái kết nối; không hứa lưu kết quả chưa gửi lên máy chủ. Trước khi rời màn có thay đổi chưa đồng bộ, báo rõ.
-
-## Nguyên tắc UX
-
-- Một nhiệm vụ chính mỗi màn; nút tiếp theo luôn rõ.
-- Văn bản tiếng Việt ngắn, hạn chế thuật ngữ. Luôn có đáp án đúng sau quiz.
-- Không dùng màu làm tín hiệu duy nhất; kèm chữ và biểu tượng.
-- Có phụ đề/bản viết cho âm thanh, chạm mục tiêu đủ lớn, hỗ trợ phóng to chữ và thao tác bàn phím trên web.
-- Không đưa nhận xét AI dưới dạng “chấm điểm chính xác”.
+Loading, empty, error, normal, completed phải có ở các màn chính. Mất mạng giữ bản local và hiển thị chưa đồng bộ; không giả báo đã lưu trên cloud. OAuth hủy/lỗi cho thử lại và giữ guest. Nếu account bị khóa, API từ chối và UI cập nhật trạng thái; bản local không được coi là quyền tiếp tục gọi API.

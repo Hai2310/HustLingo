@@ -18,6 +18,8 @@
 
 ---
 
+> **Lưu ý sau khi hợp nhất nhánh:** Mã ứng dụng hiện tại dùng Expo / React Native / TypeScript. [Bộ tài liệu dự án](docs/README.md) và [clickable prototype](prototype/README.md) được tạo ở giai đoạn lên ý tưởng với đề xuất Flutter; chúng là tài liệu tham khảo và cần được đối chiếu trước khi dùng làm hướng dẫn triển khai cho mã hiện tại.
+
 
 ## 🚀 Giới thiệu về HustLingo
 
@@ -355,43 +357,23 @@ Supabase
 
 ![HustLingo System Architecture](docs/architecture/01-system-overview.png)
 
-## Luồng tổng quát
+[Nguồn sơ đồ và cách dựng lại ảnh](docs/architecture/README.md).
 
-```text
-Người dùng
-    │
-    ▼
-Expo + React Native + TypeScript
-    │
-    ▼
-Expo Router
-    │
-    ├── Home
-    ├── Lessons
-    ├── Practice
-    ├── AI Tutor
-    └── Profile
-    │
-    ▼
-State / Context
-    │
-    ├── AuthContext
-    ├── LearningContext
-    └── SubscriptionContext
-    │
-    ▼
-Service Layer
-    │
-    ├── authService
-    ├── progressService
-    ├── savedWordService
-    └── subscriptionService
-    │
-    ├───────────────┐
-    ▼               ▼
-AsyncStorage      Supabase
-Guest Mode        Account Data
-```
+## Cách đọc sơ đồ
+
+Mũi tên đi từ **bên thực hiện thao tác đến thành phần được gọi hoặc truy cập**. Mỗi đường có nhãn chỉ rõ thao tác; phản hồi trả về được lược bỏ để sơ đồ dễ đọc. Đây là quan hệ giữa các thành phần hiện có, không phải thứ tự bắt buộc của một phiên học.
+
+Đường **nét đứt** tới ô “Công nghệ triển khai” mô tả kế hoạch build/phát hành: web dùng Expo export + EAS Deploy, mobile dùng EAS Build, backend chạy trên Supabase Cloud. Hướng dẫn ở [DEPLOYMENT.md](DEPLOYMENT.md).
+
+| Quan hệ | Ý nghĩa |
+| --- | --- |
+| Người dùng → Ứng dụng | Thao tác trên màn hình |
+| Ứng dụng → Nội dung đóng gói | Đọc từ vựng và dữ liệu mẫu từ `src/data/` |
+| Ứng dụng → AsyncStorage | Đọc/lưu tiến độ guest, dữ liệu cục bộ và phiên đăng nhập trên máy |
+| Ứng dụng → Supabase Auth | Đăng nhập, đăng xuất và nhận phiên xác thực |
+| Ứng dụng → PostgreSQL + RLS | Đọc hồ sơ, đồng bộ tiến độ tài khoản và gửi góp ý qua Supabase client |
+
+Bên trong ứng dụng, **UI/Expo Router** hiển thị và điều hướng; **AuthContext/LearningContext** giữ trạng thái dùng chung trong lúc app chạy; **Supabase client/supabaseData** giao tiếp với backend. Context thuộc ứng dụng, AsyncStorage nằm trên thiết bị, còn Auth và PostgreSQL nằm trên máy chủ. Các gói subscription và Supabase Storage là phần mở rộng, chưa được đưa vào sơ đồ thành phần hiện có.
 
 ### Nguyên tắc kiến trúc
 

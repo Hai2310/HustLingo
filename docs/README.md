@@ -1,28 +1,30 @@
 # Tài liệu dự án HustLingo
 
-HustLingo là ứng dụng học từ vựng tiếng Anh cơ bản theo chủ đề. Bộ tài liệu này chuyển ý tưởng trong [`Idea_UDDNT.txt`](../Idea_UDDNT.txt) thành một MVP có thể xây dựng, chạy thử và đánh giá trong **10 tuần**.
+## Cơ sở cập nhật
 
-## Đọc theo thứ tự
+Bộ tài liệu này triển khai chi tiết hướng trong [README chính](../README.md): **Expo + React Native + TypeScript + Expo Router**, bốn module Lessons/Practice/Tutor/Backend-Core, chế độ guest trước khi đăng nhập, AsyncStorage cho dữ liệu cục bộ và Supabase cho Auth/đồng bộ. README chính là cơ sở định hướng sản phẩm; docs phân biệt **định hướng**, **hiện trạng mã** và **mốc bàn giao đề xuất 10 tuần**.
+
+## Danh mục
 
 | Tài liệu | Nội dung |
 | --- | --- |
-| [01-scope.md](01-scope.md) | Mục tiêu, giả định, phạm vi MVP và chỉ số thành công |
-| [02-user-flow.md](02-user-flow.md) | Người dùng mục tiêu, hành trình và luồng màn hình |
-| [03-requirements.md](03-requirements.md) | Yêu cầu chức năng, phi chức năng và tiêu chí nghiệm thu |
-| [04-content.md](04-content.md) | Giáo trình mẫu, chuẩn dữ liệu từ vựng và quy tắc biên soạn |
-| [05-architecture.md](05-architecture.md) | Kiến trúc, mô hình dữ liệu, API và xử lý AI/âm thanh |
-| [06-plan.md](06-plan.md) | Tiến độ, mốc bàn giao, phụ thuộc và phân công |
-| [07-testing.md](07-testing.md) | Kịch bản kiểm thử, dữ liệu thử và điều kiện bàn giao |
-| [08-risks.md](08-risks.md) | Rủi ro, biện pháp giảm thiểu và quyết định cần chốt |
-| [09-access-control.md](09-access-control.md) | Hai role, ma trận quyền và quy trình nội dung/tài khoản |
+| [01-scope.md](01-scope.md) | Tầm nhìn README và phạm vi bản 10 tuần |
+| [02-user-flow.md](02-user-flow.md) | Guest, account, Lessons, Practice, Tutor và admin |
+| [03-requirements.md](03-requirements.md) | Yêu cầu có thể kiểm chứng, P0/P1/roadmap |
+| [04-content.md](04-content.md) | Kho từ dùng chung, nội dung kỹ năng và quiz ảnh |
+| [05-architecture.md](05-architecture.md) | Thành phần, dữ liệu, đồng bộ, API hiện có/dự kiến |
+| [06-plan.md](06-plan.md) | Phân công bốn thành viên và mốc 10 tuần |
+| [07-testing.md](07-testing.md) | Kiểm thử guest, sync, modules, RLS và nghiệm thu |
+| [08-risks.md](08-risks.md) | Rủi ro và quyết định theo hướng mới |
+| [09-access-control.md](09-access-control.md) | Hai role tài khoản, guest và quản trị |
+| [10-implementation-stack.md](10-implementation-stack.md) | Công nghệ, ngôn ngữ, thư mục, chạy/build/deploy |
+| [VOCABULARY_DATA_PRODUCTION.md](VOCABULARY_DATA_PRODUCTION.md) | Kết quả kiểm tra bộ dữ liệu từ vựng |
+| [architecture/README.md](architecture/README.md) | Ảnh sơ đồ và nguồn Graphviz |
 
-## Cách dùng
+## Hiện trạng cần hiểu đúng
 
-Tài liệu là **đề xuất cơ sở** cho nhóm 3–4 người, 10 tuần, từ dự án chưa có mã nguồn. Những mục đánh dấu **MVP** là cam kết triển khai; mục **sau MVP** chỉ làm nếu mốc nghiệm thu đã đạt. Khi thay đổi phạm vi, cập nhật đồng thời yêu cầu, lịch và kiểm thử.
+Repo đã có khung Expo, các context/service Supabase, nội dung mẫu và migration cơ bản. Lessons/Practice/Tutor còn là màn trống; nhiều thư mục/package/service trong README là cấu trúc dự kiến. Đường dẫn nguồn từ hiện tại là `src/data/vocabulary-en.json` và `src/data/vocabulary-en.ts`; cấu trúc `src/data/vocabulary/` trong README là đích tổ chức lại, chưa tồn tại.
 
-## Thuật ngữ
+10.000 là số bản ghi nguồn, trong đó 4.129 qua cổng dữ liệu production và 5.871 chờ rà soát; không phải 10.000 mục đã kiểm duyệt toàn bộ. CEFR hiện là ước lượng. `npm run validate` kiểm tra khung H.1, không chứng minh luồng học đã hoàn thành.
 
-- **Chủ đề:** nhóm 20–30 từ cùng bối cảnh, ví dụ “Gia đình”.
-- **Phiên học:** một lần người học đi qua flashcard rồi quiz của một chủ đề.
-- **STT:** nhận dạng lời nói thành chữ. Kết quả chỉ phản ánh mức khớp với từ/câu mẫu, không phải điểm phát âm ngữ âm.
-- **AI phản hồi câu:** mô hình ngôn ngữ nhận xét câu do người học tự viết theo từ mục tiêu.
+Hai role `admin`/`learner` và công cụ quản trị được giữ từ yêu cầu trước đây; chúng là phần bổ sung vào Backend/Core. Guest không phải role thứ ba. Role/status phải do máy chủ kiểm soát; tiến độ guest và bản đồng bộ client là dữ liệu tự luyện, chưa phải điểm thi được máy chủ xác nhận.

@@ -1,48 +1,35 @@
 # 06. Kế hoạch triển khai 10 tuần
 
-## Cách tổ chức
+## Phân công theo README
 
-Giả định nhóm 3–4 người: **ứng dụng/UI**, **backend/dữ liệu**, **nội dung/UX**, **kiểm thử/tích hợp**. Nếu chỉ có 3 người, gộp nội dung/UX với kiểm thử, nhưng vẫn cần người thứ hai rà soát tiếng Anh. Mỗi tuần có bản chạy được hoặc bằng chứng rõ; không đợi đến cuối kỳ mới tích hợp.
+| Thành viên | Phần việc chính |
+| --- | --- |
+| Huy | Lessons Hub, level/topic/lesson, vocabulary/grammar và bài kỹ năng mẫu tại `src/features/lessons/` |
+| Dương | Practice Hub, quiz/flashcard/review, bài luyện kỹ năng và TOEIC/IELTS rút gọn tại `src/features/practice/` |
+| Khánh | Tutor list/detail/scenario, chat/call UI, demo conversation tại `src/features/tutor/` |
+| Hải | Auth, guest/account sync, schema/RLS, services/context/core, build/deploy; điều phối admin P1 |
 
-## Lịch và mốc bàn giao
+Shared/core đổi theo interface nhóm thống nhất. Mỗi tuần tích hợp một bản chạy; từng module dùng dữ liệu chung và trạng thái loading/empty/error/normal/completed. Không đồng nghĩa toàn bộ A1–C1 hay dữ liệu 10.000 từ đã được biên soạn đủ.
 
-| Tuần | Trọng tâm | Bàn giao và điều kiện qua mốc |
+## Mốc đề xuất
+
+| Tuần | Công việc song song | Bàn giao |
 | --- | --- | --- |
-| 1 | Chốt phạm vi và ma trận hai role, thiết kế luồng learner/admin, spike mic/STT/TTS, tạo repo/cấu hình | Wireframe learner + admin web, backlog có ID yêu cầu, mẫu ghi âm/phát âm hoặc quyết định thay thế |
-| 2 | Auth, bảng role/trạng thái, RLS/quyền ghi, mẫu nội dung và quy trình bootstrap admin | Đăng ký mặc định learner, một admin bootstrap, kiểm tra learner không tự nâng quyền; 1 chủ đề mẫu/seed |
-| 3 | Danh sách/chủ đề, bài giảng ngắn, flashcard, TTS; khung quản trị nội dung web | Learner học 25 thẻ trên Android/web; admin tạo/sửa bản nháp và xem trước trên web |
-| 4 | 3 chủ đề còn lại, ngân hàng quiz gồm câu hỏi hình ảnh, kiểm tra nội dung và phát hành | Đủ 100 từ/câu hỏi đã duyệt; ít nhất một câu hình hợp lệ trong nội dung đã phát hành; admin phát hành được chủ đề, learner không thấy bản nháp |
-| 5 | Nộp quiz trên máy chủ, tiến độ, lịch ôn | Điểm/lịch ôn chỉ ghi qua function; đăng nhập chéo thiết bị thấy tiến độ; thử truy cập trực tiếp bằng hai learner và admin |
-| 6 | Luồng luyện nói và STT | Ghi âm, quyền mic, bản chép lời, mức khớp, retry; đo độ trễ/chi phí trên Android/web |
-| 7 | Phản hồi câu viết bằng AI, hạn mức, quyền riêng tư | Phản hồi theo schema, kiểm tra nội dung/timeout, giới hạn 5 lượt/ngày, thông báo dữ liệu được gửi ra dịch vụ |
-| 8 | Quản trị tài khoản web, tích hợp, UX/accessibility, xóa dữ liệu | Admin tìm/khóa/mở learner, gửi reset, đổi role có log; thử token cũ; luồng chính không gãy |
-| 9 | Kiểm thử hệ thống, phân quyền và thử với người học mới | Ma trận kiểm thử hoàn tất, thử ít nhất 5 người, kiểm tra trực tiếp RLS/API và sửa lỗi cản trở |
-| 10 | Ổn định, đo chỉ số, tài liệu vận hành, demo | Bản Android, web learner/admin, seed/backup, biên bản nghiệm thu; demo phát hành nội dung và khóa tài khoản |
+| 1 | Chạy Expo Android/web; kiểm kê routes trống, schemas/data; thống nhất UI và contracts | Mỗi thành viên chạy cùng repo; manifest nội dung mẫu và ma trận P0/P1 |
+| 2 | Hải sửa role/status/RLS và Auth; Huy/Dương dựng hubs; Khánh dựng tutor/scenario | Learner không tự nâng role; guest vào 3 module; không lộ dữ liệu chéo |
+| 3 | Vocabulary/grammar lessons, flashcard/quiz; Tutor detail/chat demo; thử OAuth | Một topic từ Lessons sang Practice; chat demo; email/Google/Facebook callback có bằng chứng |
+| 4 | Bài listening/speaking/reading/writing mẫu và practice tương ứng; saved words; call UI | Mỗi kỹ năng có một tập mẫu thao tác được; call có nhãn demo và nút điều khiển |
+| 5 | Review 1/3/7, result/progress; tập TOEIC/IELTS rút gọn; merge contract và event IDs | Cấp câu ôn trước khi nộp; hai bộ luyện thi có timer/navigation/result |
+| 6 | Guest snapshot/import, retry/idempotency, cloud sync; tích hợp các modules | Đăng nhập sau guest không mất tiến độ hoặc nhập lặp; account khác không nhận dữ liệu cũ |
+| 7 | Thử đồng bộ hai thiết bị, offline và OAuth cancellation; nội dung/ảnh quiz/accessibility | Android và web dùng cùng account thấy state đúng; ảnh hỏng có fallback |
+| 8 | Ổn định P0, feedback/xóa dữ liệu, Expo export/EAS build; admin P1 nếu P0 đạt | Bản thử web/mobile, checklist triển khai; admin draft/publish/account nếu đã làm |
+| 9 | Kiểm thử hệ thống/RLS/sync, thử với ít nhất 5 người; sửa lỗi | Ma trận tài liệu 07 có bằng chứng; 4/5 người tự hoàn thành một lesson + practice |
+| 10 | Đóng băng nội dung, sửa lỗi cuối, demo/biên bản, hướng dẫn vận hành | Bản Android/web; Tutor demo rõ; trạng thái iOS và P1 chưa làm được công bố |
 
-## Các cổng quyết định
+## Cổng kiểm soát
 
-- **Cuối tuần 1:** nếu ghi âm/STT trên web không chạy ổn định, quyết định làm adapter web khác hoặc hạ luyện nói web xuống demo có thông báo rõ; không để rủi ro đến tuần 6.
-- **Cuối tuần 2:** khóa 4 chủ đề, schema và nhà cung cấp AI/STT sau khi đo chi phí/điều khoản. Không thêm tính năng ngoài P0.
-- **Cuối tuần 4:** admin phải phát hành được một chủ đề từ bản nháp; nếu quá tải, giữ form quản trị đơn giản và import hàng loạt, không làm trình soạn thảo giàu định dạng.
-- **Cuối tuần 5:** phải có đường học không phụ thuộc AI: flashcard → quiz → tiến độ → ôn. Nếu chưa có, ưu tiên hoàn tất trước khi làm tính năng AI.
-- **Cuối tuần 7:** nếu AI/STT vượt hạn mức hoặc chất lượng kém, dùng phản hồi dựa trên quy tắc cho câu viết và STT ở chế độ thử nghiệm; báo minh bạch trong demo. Không tuyên bố chấm chính xác khi chưa kiểm chứng.
-- **Đầu tuần 9:** đóng phạm vi tính năng, chỉ sửa lỗi và nội dung.
+Cuối tuần 3 phải có một luồng Lessons → Practice và Auth chạy. Cuối tuần 6 phải có guest → account sync; nếu chưa đạt, dừng mở rộng nội dung và P1 để sửa luồng này. Tuần 8 chỉ bắt đầu admin P1 khi P0 có smoke test đạt. AI runtime thật, thanh toán và đề/lộ trình đầy đủ chỉ sau khi P0 ổn định; không thay demo bằng lời tuyên bố AI thật.
 
-## Phân rã công việc chính
+## Bàn giao và phụ thuộc
 
-| Nhóm việc | Đầu ra | Phụ thuộc |
-| --- | --- | --- |
-| Thiết kế UX | Wireframe màn learner và ba phần admin web, trạng thái lỗi/không quyền/không mạng | Phạm vi, ma trận quyền và luồng học |
-| Nội dung | 100 mục từ, ít nhất 40 câu hỏi/chủ đề để rút 10 câu/lượt; ảnh quiz có quyền sử dụng, mô tả và câu chữ thay thế; kiểm duyệt chéo | Schema nội dung |
-| Ứng dụng | Auth, màn learner và admin web tối giản, flashcard, quiz, tiến độ, nói, viết | API và thiết kế UX |
-| Backend | Migration/RLS, bootstrap admin, version nội dung, quản trị tài khoản, nộp quiz/ôn, Edge Functions STT/AI | Schema, tài khoản dịch vụ |
-| Chất lượng | Unit test điểm/lịch ôn, integration test role và ghi dữ liệu, kiểm thử Android/web/admin, thử người dùng | Bản tích hợp theo tuần |
-| Bàn giao | Hướng dẫn chạy, biến môi trường mẫu, script seed, test report, kịch bản demo | Chức năng đã đóng băng |
-
-## Ước lượng và kiểm soát tiến độ
-
-Với 3–4 người × 10–15 giờ × 10 tuần, tổng năng lực khoảng **300–600 giờ**, gồm cả học công nghệ, nội dung và kiểm thử. Ước lượng này là giả định cần xác nhận ở tuần 1. Mỗi tuần giữ backlog nhỏ, ghi người phụ trách, ngày dự kiến, trạng thái, bằng chứng demo và lỗi. Nếu một hạng mục P0 trễ hơn 1 tuần, bỏ P1 trước và giảm độ bóng giao diện trước khi giảm độ đúng của dữ liệu/quyền riêng tư.
-
-## Định nghĩa hoàn thành cho một hạng mục
-
-Mã chạy trên Android và web nếu hạng mục có giao diện; dữ liệu lỗi được xử lý; có kiểm thử phù hợp; người khác trong nhóm rà soát; tài liệu yêu cầu/API được cập nhật; có ảnh/chạy thử cho mốc tuần. Không coi việc chỉ vẽ màn hình là hoàn thành chức năng.
+Backend/Core công bố typed contract trước khi UI tích hợp. Lessons và Practice cùng dùng ID từ/topic/lesson và version nội dung. Tutor dùng scenario/demo data riêng cùng theme. Nội dung/asset có người duyệt; bảng tổng hợp manifest giúp kiểm thử biết bài nào nằm trong bản demo. Trạng thái đã có, đang làm và roadmap phải được ghi rõ trong biên bản tuần.

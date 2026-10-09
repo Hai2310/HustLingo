@@ -1,0 +1,38 @@
+digraph AuthDataFlow {
+  graph [rankdir=TB, bgcolor="white", pad="0.35", nodesep="0.7", ranksep="0.85", splines=polyline,
+         fontname="Arial", fontsize=24, fontcolor="#9b1730", labelloc=t,
+         label="HustLingo — Luồng đăng nhập và đồng bộ dữ liệu\n "];
+  node [shape=box, style="rounded,filled", fontname="Arial", fontsize=15,
+        margin="0.24,0.2", color="#cbd5e1", fillcolor="#ffffff", fontcolor="#243445", penwidth=1.2];
+  edge [color="#71839b", penwidth=1.4, arrowsize=0.75];
+
+  start [label="Mở app — Guest Mode\nKhông bắt đăng nhập", fillcolor="#eaf3ff", color="#74a2d5", group="left"];
+  learn [label="Học / Luyện tập\nBài học · Flashcard · Quiz · Exam", fillcolor="#eaf7ee", color="#78b88a", group="center"];
+  local [label="AsyncStorage\nProgress · Saved words\nSettings · Draft", fillcolor="#fff1e8", color="#e7a27c", group="right"];
+  login [label="User chọn đăng nhập", fillcolor="#fcecf0", color="#dc3655", group="center"];
+  auth [label="Supabase Auth\nEmail · Google · Facebook", group="auth"];
+  merge [label="Merge local progress\nGuest → Account", fillcolor="#f0eaff", color="#a48bdd", group="right"];
+  offline [label="Offline / Mất mạng\nTiếp tục dùng local data\nSync lại khi online", group="center"];
+  sync [label="Đồng bộ nhiều thiết bị\nWeb ↔ Android ↔ iOS", fillcolor="#eaf3ff", color="#74a2d5", group="auth"];
+  db [label="Supabase PostgreSQL\nProfiles · Learning progress\nSaved words · Subscriptions", fillcolor="#fcecf0", color="#dc3655", group="right"];
+  rls [label="RLS Security\nauth.uid() chỉ đọc/sửa dữ liệu của chính user", fillcolor="#eaf7ee", color="#78b88a", group="right"];
+
+  { rank=same; start; learn; local; }
+  { rank=same; login; auth; merge; }
+  { rank=same; offline; sync; db; }
+
+  start -> learn;
+  learn -> local;
+  learn -> login [weight=20];
+  login -> auth;
+  auth -> merge;
+  local -> merge;
+  merge -> db;
+  learn -> offline [minlen=2, tailport=w, headport=w];
+  offline -> sync;
+  db -> sync [constraint=false, tailport=w, headport=e];
+  db -> rls;
+  sync -> db [style=invis, weight=10];
+  login -> offline [style=invis, weight=20];
+  auth -> sync [style=invis, weight=20];
+}
