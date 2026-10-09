@@ -35,3 +35,18 @@ eas deploy
 ```
 
 Sau khi deploy web, thêm URL `https://<domain>/oauth` vào Supabase Redirect URLs.
+
+## Tutor AI Edge Function
+
+Tutor text chat chạy qua Supabase Edge Function, không gọi AI provider trực tiếp từ Expo.
+
+```bash
+supabase db push
+supabase secrets set AI_API_KEY=<provider-key>
+supabase secrets set AI_BASE_URL=https://api.openai.com/v1
+supabase secrets set AI_MODEL=gpt-4o-mini
+supabase functions deploy tutor-chat
+```
+
+Không đưa `AI_API_KEY` vào `.env`, `EXPO_PUBLIC_*` hoặc app bundle. Khi chưa cấu hình
+Edge Function, guest mode dùng local fallback để có thể kiểm tra UI và luồng session.

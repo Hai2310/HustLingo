@@ -3,11 +3,19 @@
 **Owner:** Thành viên Gia sư AI.
 
 ## Được code
-- `screens/`: Tutor list, scenario, chat/call UI sau này.
-- `components/`: TutorCard, ChatBubble, VoiceWave, CallControls...
-- `data/`: Emma/David, scenarios, demo messages và toàn bộ 10.000 vocabulary để dùng cho context/prompt sau này.
-- `hooks/`: state chat/call UI.
-- `types/`: tutor/message/scenario.
+- `screens/`: Tutor home, tutor detail, scenario, chat và summary.
+- `components/`: TutorAvatar, TutorCard, ScenarioCard, ChatBubble, CorrectionCard và TypingIndicator.
+- `data/`: Emma/David, scenario metadata, demo messages và adapter vocabulary dùng chung.
+- `hooks/`: session state, message sending, correction/hint và summary.
+- `services/`: API adapter, local fallback và session storage.
+- `types/`: tutor, scenario, message, session, correction và API contract.
 
 ## Start
-Code UI trong `screens/TutorScreen.tsx`; tab `app/(tabs)/tutor.tsx` đã trỏ tới file này.
+Tab `app/(tabs)/tutor.tsx` mở Tutor Home. Luồng hiện tại là:
+
+```text
+Tutor Home → Scenario → Chat → Summary
+```
+
+Khi Supabase đã cấu hình và user đăng nhập, `services/tutorApi.ts` gọi Edge Function
+`tutor-chat`. Khi chưa có backend/AI key, guest dùng local fallback để UI vẫn chạy.

@@ -198,7 +198,7 @@ TTS
 Audio / Conversation
 ```
 
-Ở giai đoạn hiện tại, team ưu tiên hoàn thiện **Tutor UI, Scenario, Chat UI, Call UI và interaction flow** trước khi kết nối AI runtime thật.
+Tutor hiện ưu tiên vertical slice **Tutor UI → Scenario → Text Chat → Correction → Summary**. AI runtime thật được gọi qua server/Edge Function; voice STT/TTS là phase mở rộng sau khi text flow ổn định.
 
 ### ☁️ Guest-first & đồng bộ dữ liệu
 

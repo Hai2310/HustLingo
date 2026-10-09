@@ -29,7 +29,7 @@ Chế độ kết quả server tương lai: start_quiz/start_review phải cấp
 
 ## Kiểm tra tự động và giới hạn hiện tại
 
-`npm run typecheck` kiểm TypeScript sau khi cài dependency. `npm run validate` kiểm baseline H.1 và hiện còn yêu cầu các màn/route feature trống; phải cập nhật gate khi triển khai tính năng, không dùng PASS hiện tại để nói UI đã hoàn thiện. `node scripts/validate-vocabulary-production.mjs` kiểm raw IDs/quality/labels và số lượng.
+`npm run typecheck` kiểm TypeScript sau khi cài dependency. `npm run validate` kiểm các invariant của repo và không còn coi Tutor là màn trống. Tutor cần smoke/integration test riêng cho navigation, local fallback, Edge Function, ownership và lỗi provider. `node scripts/validate-vocabulary-production.mjs` kiểm raw IDs/quality/labels và số lượng.
 
 `validate-team-structure.mjs` hiện tìm IDs trong file TS trong khi payload ở JSON; `validate-learning-data.mjs` và các validator theo kỹ năng trong README là mục tiêu chưa có. Không ghi các lệnh đó là gate đã chạy thành công. Unit tests đề xuất cho scoring/review/merge idempotency, integration JWT/RLS và sync hai máy; UI smoke theo ma trận trên.
 

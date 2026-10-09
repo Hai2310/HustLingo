@@ -6,18 +6,18 @@
 
 Mũi tên chỉ thao tác ứng dụng gọi/đọc/ghi; đường nét đứt là build/phát hành. UI/Expo Router, AuthContext/LearningContext và Supabase client/supabaseData thuộc ứng dụng Expo. AsyncStorage và nội dung đóng gói nằm trên máy; Supabase Auth/PostgreSQL nằm trên cloud. Deploy: Expo export + EAS Deploy, EAS Build, Supabase Cloud.
 
-Supabase client (`src/services/supabase.ts`) cấu hình kết nối và session. `supabaseData.ts` là adapter **chạy phía client** thực hiện get/update profile, get/put progress, feedback. RLS/SQL grants ở DB quyết định quyền thật. SubscriptionContext, Storage và AI runtime chưa là thành phần hoàn thiện hiện tại.
+Supabase client (`src/services/supabase.ts`) cấu hình kết nối và session. `supabaseData.ts` là adapter **chạy phía client** thực hiện get/update profile, get/put progress, feedback. Tutor dùng thêm `supabase.functions.invoke` để gọi Edge Function `tutor-chat`; provider secret chỉ nằm ở server. RLS/SQL grants ở DB quyết định quyền thật. SubscriptionContext và voice AI vẫn là phần mở rộng.
 
 ## Hiện trạng và mục tiêu
 
 | Thành phần | Hiện có | Cần bổ sung |
 | --- | --- | --- |
-| Routes/features | Home/Profile/Auth và các folder Lessons/Practice/Tutor | Các màn ba module còn trống, nối luồng/data và UI thật |
+| Routes/features | Home/Profile/Auth và Tutor Home → Scenario → Chat → Summary | Lessons/Practice UI và Tutor voice/session sync nâng cao |
 | Account | Supabase Auth, `profiles` chứa role/status | Chặn tự sửa role/status; guard account disabled ở DB/API |
 | Tiến độ | `learning_progress.state` JSON, AsyncStorage theo user ID | Guest import, ID lượt, merge chống trùng và tránh mất update |
 | Feedback | Bảng `feedback` ghi góp ý người dùng | Error/retry và validation đầu vào |
 | Metadata mới | README dự kiến saved_words/subscriptions/user_settings | Chỉ migration khi có contract; saved words hiện nằm trong LearningState |
-| Admin/AI | Chưa có backend nghiệp vụ riêng | P1 admin functions; AI/STT/entitlement ở server giai đoạn sau |
+| Admin/AI | Tutor chat Edge Function contract, tutor session/message/memory migration | Deploy provider thật, STT/TTS, quota, memory extraction và P1 admin functions |
 
 `role/status` hiện nằm trong hàng profiles có quyền owner-update cả bảng. Cần giới hạn cột hồ sơ người dùng được sửa hoặc tách bảng chỉ server ghi; không coi mã UI chỉ gửi tên hiển thị là đủ bảo vệ.
 
