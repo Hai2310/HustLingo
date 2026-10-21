@@ -7,6 +7,9 @@ import ts from 'typescript';
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const vocabularyPath = resolve(projectRoot, 'src/data/vocabulary-en.json');
 const grammarPath = resolve(projectRoot, 'src/features/lessons/data/grammar.ts');
+const contentPath = resolve(projectRoot, 'src/data/content.ts');
+const tutorsPath = resolve(projectRoot, 'src/features/tutor/data/tutors.ts');
+const tutorMessagesPath = resolve(projectRoot, 'src/features/tutor/data/demoMessages.ts');
 const backendEnvPath = resolve(projectRoot, '.env.backend.local');
 const appEnvPath = resolve(projectRoot, '.env');
 const batchSize = 500;
@@ -52,8 +55,8 @@ function loadBackendEnv() {
   }
 }
 
-function loadGrammarPoints() {
-  const source = readFileSync(grammarPath, 'utf8');
+function loadTypeScriptModule(sourcePath) {
+  const source = readFileSync(sourcePath, 'utf8');
   const result = ts.transpileModule(source, {
     reportDiagnostics: true,
     compilerOptions: {
@@ -68,13 +71,36 @@ function loadGrammarPoints() {
     throw new Error(errors.map((diagnostic) => ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')).join('\n'));
   }
 
-  const grammarModule = { exports: {} };
-  new Function('exports', 'module', result.outputText)(grammarModule.exports, grammarModule);
-  const points = grammarModule.exports.grammarPoints;
+  const loadedModule = { exports: {} };
+  new Function('exports', 'module', result.outputText)(loadedModule.exports, loadedModule);
+  return loadedModule.exports;
+}
+
+function loadGrammarPoints() {
+  const points = loadTypeScriptModule(grammarPath).grammarPoints;
   if (!Array.isArray(points) || points.length === 0) {
     throw new Error('Không đọc được grammarPoints từ src/features/lessons/data/grammar.ts.');
   }
   return points;
+}
+
+function loadLearningCatalogs() {
+  const content = loadTypeScriptModule(contentPath);
+  const tutorCatalog = loadTypeScriptModule(tutorsPath);
+  const tutorExamples = loadTypeScriptModule(tutorMessagesPath);
+  const requiredArrays = [
+    ['learningTopics', content.learningTopics],
+    ['listeningLessons', content.listeningLessons],
+    ['readingLessons', content.readingLessons],
+    ['writingPrompts', content.writingPrompts],
+    ['speakingPhrases', content.speakingPhrases],
+    ['tutorScenarios', content.tutorScenarios],
+    ['tutors', tutorCatalog.tutors],
+  ];
+  for (const [name, value] of requiredArrays) {
+    if (!Array.isArray(value)) throw new Error(`Không đọc được ${name} từ dữ liệu nguồn TypeScript.`);
+  }
+  return { ...content, ...tutorCatalog, ...tutorExamples };
 }
 
 function toVocabularyRow(entry) {
@@ -165,15 +191,110 @@ function toGrammarRows(points) {
   return { grammarPoints, grammarExamples, grammarLessons, grammarItems };
 }
 
-function buildTopics(vocabulary) {
-  const topicIds = new Set(vocabulary.map((entry) => entry.topicId).filter(Boolean));
-  return [...topicIds].map((id) => ({
+function buildTopics(vocabulary, learningTopics = []) {
+  const topicIds = [...new Set(vocabulary.map((entry) => entry.topicId).filter(Boolean))].sort();
+  const topics = new Map(topicIds.map((id, index) => [id, {
     id,
     title: topicTitles[id] || vocabulary.find((entry) => entry.topicId === id)?.topic || id,
+    description: null,
+    subtitle: null,
+    icon: null,
+    cefr_level: null,
+    accent_color: null,
+    sort_order: 101 + index,
     is_published: vocabulary.some(
       (entry) => entry.topicId === id && entry.quality === 'production' && entry.isActive !== false
     ),
+  }]));
+
+  learningTopics.forEach((topic, index) => {
+    const current = topics.get(topic.id) || {
+      id: topic.id,
+      title: topic.title,
+      description: null,
+      subtitle: null,
+      icon: null,
+      cefr_level: null,
+      accent_color: null,
+      sort_order: 0,
+      is_published: true,
+    };
+    topics.set(topic.id, {
+      ...current,
+      title: topic.title,
+      description: topic.subtitle || null,
+      subtitle: topic.subtitle || null,
+      icon: topic.icon || null,
+      cefr_level: topic.level || null,
+      accent_color: topic.accent || null,
+      sort_order: index + 1,
+      is_published: true,
+    });
+  });
+  return [...topics.values()];
+}
+
+function buildPracticeRows(content) {
+  const catalogs = [
+    ['listening', content.listeningLessons],
+    ['reading', content.readingLessons],
+    ['writing', content.writingPrompts],
+    ['speaking', content.speakingPhrases],
+  ];
+  return catalogs.flatMap(([skill, entries]) => entries.map((entry, index) => {
+    const { id, level, title, ...payload } = entry;
+    return {
+      id,
+      skill,
+      cefr_level: level,
+      title: title ?? null,
+      payload,
+      sort_order: index + 1,
+      is_published: true,
+    };
   }));
+}
+
+function buildTutorRows(content) {
+  const tutors = content.tutors.map((tutor, index) => ({
+    id: tutor.id,
+    name: tutor.name,
+    role: tutor.role,
+    initials: tutor.initials,
+    description: tutor.description,
+    tone: tutor.tone ?? null,
+    accent_color: tutor.accent ?? null,
+    sort_order: index + 1,
+    is_published: true,
+  }));
+  const tutorIdsByName = new Map(tutors.map((tutor) => [tutor.name.toLowerCase(), tutor.id]));
+  const scenarios = content.tutorScenarios.map((scenario, index) => {
+    const tutorId = tutorIdsByName.get(scenario.tutor.toLowerCase());
+    if (!tutorId) throw new Error(`Không tìm thấy tutor '${scenario.tutor}' cho scenario ${scenario.id}.`);
+    return {
+      id: scenario.id,
+      tutor_id: tutorId,
+      title: scenario.title,
+      subtitle: scenario.subtitle,
+      level: scenario.level,
+      icon: scenario.icon,
+      sort_order: index + 1,
+      is_published: true,
+    };
+  });
+  const scenarioIds = new Set(scenarios.map((scenario) => scenario.id));
+  const messages = Object.entries(content.DEMO_MESSAGES).flatMap(([scenarioId, entries]) => {
+    if (!scenarioIds.has(scenarioId)) {
+      throw new Error(`Không tìm thấy scenario '${scenarioId}' cho demo conversation.`);
+    }
+    return entries.map((entry, index) => ({
+      scenario_id: scenarioId,
+      position: index + 1,
+      role: entry.role,
+      text: entry.text,
+    }));
+  });
+  return { tutors, scenarios, messages };
 }
 
 function buildVocabularyLessons(vocabulary) {
@@ -244,9 +365,12 @@ async function main() {
     throw new Error('Không đọc được dữ liệu từ src/data/vocabulary-en.json.');
   }
   const grammar = toGrammarRows(loadGrammarPoints());
-  const topics = buildTopics(vocabulary);
+  const content = loadLearningCatalogs();
+  const topics = buildTopics(vocabulary, content.learningTopics);
   const vocabularyRows = vocabulary.map(toVocabularyRow);
   const vocabularyLessons = buildVocabularyLessons(vocabulary);
+  const practiceRows = buildPracticeRows(content);
+  const tutorCatalog = buildTutorRows(content);
   const lessons = [...grammar.grammarLessons, ...vocabularyLessons.lessons];
   const lessonItems = [...grammar.grammarItems, ...vocabularyLessons.items];
 
@@ -260,12 +384,18 @@ async function main() {
   await upsertInBatches(client, 'grammar_examples', grammar.grammarExamples, 'grammar_point_id,position');
   await upsertInBatches(client, 'lessons', lessons, 'id');
   await upsertInBatches(client, 'lesson_items', lessonItems, 'lesson_id,position');
+  await upsertInBatches(client, 'practice_content', practiceRows, 'id');
+  await upsertInBatches(client, 'ai_tutors', tutorCatalog.tutors, 'id');
+  await upsertInBatches(client, 'tutor_scenarios', tutorCatalog.scenarios, 'id');
+  await upsertInBatches(client, 'tutor_scenario_messages', tutorCatalog.messages, 'scenario_id,position');
 
   const publishedVocabularyCount = vocabularyRows.filter((row) => row.is_published).length;
   console.log(
     `Đã nhập ${topics.length} chủ đề, ${vocabularyRows.length} từ vựng ` +
       `(${publishedVocabularyCount} công khai), ${grammar.grammarPoints.length} điểm grammar, ` +
-      `${grammar.grammarExamples.length} ví dụ và ${lessons.length} lesson.`
+      `${grammar.grammarExamples.length} ví dụ và ${lessons.length} lesson; ` +
+      `${practiceRows.length} nội dung luyện tập, ${tutorCatalog.tutors.length} gia sư, ` +
+      `${tutorCatalog.scenarios.length} tình huống và ${tutorCatalog.messages.length} tin nhắn mẫu.`
   );
 }
 

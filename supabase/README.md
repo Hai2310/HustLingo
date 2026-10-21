@@ -7,10 +7,10 @@ Supabase cung cấp:
 - PostgreSQL hosted.
 - Row Level Security (RLS).
 - Profile, learning progress, feedback.
-- Danh mục nội dung: chủ đề, từ vựng, grammar và lesson liên kết.
+- Danh mục nội dung cho Bài học, Luyện tập và Gia sư AI.
 
-Schema nằm trong các file `migrations/`. Migration nội dung là
-`migrations/202610160001_content_catalog.sql`.
+Schema nằm trong các file `migrations/`. Nội dung feature được khai báo trong
+`202610160001_content_catalog.sql` và `202610210001_practice_tutor_catalogs.sql`.
 
 ## Cách nhanh nhất
 
@@ -63,7 +63,12 @@ erDiagram
   LESSONS ||--o{ LESSON_ITEMS : contains
   VOCABULARY_ENTRIES ||--o{ LESSON_ITEMS : included_in
   GRAMMAR_POINTS ||--o{ LESSON_ITEMS : included_in
+  AI_TUTORS ||--o{ TUTOR_SCENARIOS : leads
+  TUTOR_SCENARIOS ||--o{ TUTOR_SCENARIO_MESSAGES : includes
 ```
+
+`PRACTICE_CONTENT` lưu listening, reading, writing và speaking theo skill. Nội dung
+được truy vấn qua `learningContentService` tại `src/services/learningContent.ts`.
 
 ## Nhập dữ liệu học tập
 
@@ -85,8 +90,15 @@ chmod 600 .env
 npm run db:seed:content
 ```
 
-Importer đọc `SUPABASE_URL` và `SUPABASE_SECRET_KEY` từ file backend này (hoặc environment của terminal), không đọc hay in key ra log. Nếu project chỉ còn legacy key, script cũng chấp nhận `SUPABASE_SERVICE_ROLE_KEY`. Nó đọc `src/data/vocabulary-en.json` và `src/features/lessons/data/grammar.ts`, rồi upsert theo lô. Nó đưa vào đủ 10.000 từ vựng, 98 điểm grammar cùng ví dụ; các bản production được công khai, còn bản review được lưu ở trạng thái riêng tư nhờ RLS. Nó tạo lesson từ từng điểm grammar và nhóm từ vựng theo chủ đề/trình độ. Có thể chạy lại sau khi cập nhật dữ liệu nguồn.
+Importer đọc `SUPABASE_URL` và `SUPABASE_SECRET_KEY` từ file backend này (hoặc environment của terminal), không đọc hay in key ra log. Nếu project chỉ còn legacy key, script cũng chấp nhận `SUPABASE_SERVICE_ROLE_KEY`. Sau khi chạy tất cả migration, chạy `npm run db:seed:content`. Script upsert theo lô từ vocabulary, grammar, chủ đề, lesson và các nguồn practice/tutor hiện có. Các bản vocabulary production được công khai, bản review giữ riêng tư theo RLS. Script có thể chạy lại sau khi cập nhật nguồn.
+
+Nguồn hiện tại có 10.000 mục từ vựng, 98 điểm grammar cùng ví dụ, 11 mục luyện tập
+(3 listening, 2 reading, 3 writing, 3 speaking), 2 gia sư, 6 tình huống và 4 tin nhắn
+hội thoại mẫu. Đây là toàn bộ nội dung hiện có trong project; có thể thêm bản ghi mới
+ở nguồn dữ liệu rồi chạy lại importer.
 
 Lấy Project URL ở nút Connect của project; lấy secret key trong Settings → API Keys. Dùng key `sb_secret_...` cho importer. Secret key có quyền cao, bỏ qua RLS; chỉ giữ trong file local bị ignore hoặc môi trường backend, không gửi qua chat, không thêm tiền tố `EXPO_PUBLIC_`, không commit và không đưa vào app Expo. Publishable key của app vẫn là biến `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Migration cấp quyền đọc nội dung đã publish cho anon/authenticated, còn client không có quyền sửa nội dung.
 
-Màn hình Lessons ưu tiên tải grammar đã publish từ Supabase khi app có cấu hình; nếu chưa cấu hình, chưa nhập dữ liệu hoặc đang offline thì dùng bộ grammar đóng gói làm dự phòng. `supabaseData.getVocabulary()` cung cấp truy vấn từ vựng phân trang/lọc để nối vào màn hình từ vựng.
+Các feature dùng `learningContentService` để truy vấn nội dung đã publish. `supabaseData`
+chỉ giữ các thao tác hồ sơ, tiến độ học và feedback của tài khoản. UI tab Bài học,
+Luyện tập và Gia sư hiện vẫn để trống theo trạng thái giao diện đã thống nhất.
