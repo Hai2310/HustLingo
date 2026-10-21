@@ -30,8 +30,18 @@ eas build --platform android --profile preview
 Deploy web:
 
 ```bash
+npx eas-cli@latest login
 npx expo export --platform web
-eas deploy
+npx eas-cli@latest deploy --prod
 ```
 
-Sau khi deploy web, thêm URL `https://<domain>/oauth` vào Supabase Redirect URLs.
+Lần deploy đầu tiên, EAS sẽ yêu cầu đăng nhập nếu chưa có phiên, liên kết hoặc tạo EAS project, rồi chọn subdomain. URL production sẽ có dạng `https://<subdomain>.expo.app`.
+
+Sau khi deploy web, thêm các URL sau vào Supabase Dashboard → Authentication → URL Configuration → Redirect URLs:
+
+```text
+https://<subdomain>.expo.app/oauth
+hustlingo://oauth
+```
+
+Thay `<subdomain>` bằng tên đã chọn trong EAS. Luồng web lấy callback từ domain đang mở; luồng native dùng scheme `hustlingo://oauth`, nên sau này build app iOS/Android không cần thay callback trong mã nguồn. Google Client Secret tiếp tục được lưu riêng trong Supabase Auth provider.

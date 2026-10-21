@@ -2,7 +2,7 @@ import 'react-native-url-polyfill/auto';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
-import { AppState } from 'react-native';
+import { AppState, Platform } from 'react-native';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL?.trim();
 const supabaseKey = (
@@ -24,7 +24,9 @@ export const supabase = createClient(
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: false,
-      flowType: 'implicit',
+      // Web uses PKCE and exchanges the callback code in app/oauth.tsx.
+      // Native keeps the existing deep-link token flow.
+      flowType: Platform.OS === 'web' ? 'pkce' : 'implicit',
     },
   }
 );

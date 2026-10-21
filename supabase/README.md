@@ -3,7 +3,7 @@
 HustLingo 1.1 không cần Express, PostgreSQL tự host, Docker hoặc Docker Compose.
 Supabase cung cấp:
 
-- Auth: email/password, Google, Facebook.
+- Auth: email/password and Google.
 - PostgreSQL hosted.
 - Row Level Security (RLS).
 - Profile, learning progress, feedback.
@@ -18,10 +18,37 @@ Schema nằm trong các file `migrations/`. Migration nội dung là
 2. Mở SQL Editor.
 3. Chạy lần lượt các migration trong `migrations/`.
 4. Project Settings / Connect: copy Project URL và Publishable key vào `.env`.
-5. Authentication -> Providers: bật Google và Facebook.
+5. Authentication -> Providers: bật Google.
 6. Authentication -> URL Configuration: thêm redirect URL của app.
 
 Không đưa `service_role` key vào app Expo.
+
+## Bật đăng nhập Google cho Expo Web
+
+Luồng web dùng Supabase OAuth với PKCE. Callback nằm tại `/oauth`; không cần
+thêm Google Client ID hoặc Client Secret vào `.env` của Expo.
+
+1. Trong Google Cloud Console, tạo hoặc chọn project rồi mở Google Auth Platform.
+2. Cấu hình Branding và Audience; khi ứng dụng ở chế độ Testing, thêm các tài khoản Google cần thử làm test users. Trong Data Access, bảo đảm có scope `openid` cùng email và hồ sơ cơ bản.
+3. Tạo OAuth Client ID loại **Web application**.
+4. Trong **Authorized JavaScript origins**, thêm `http://localhost:8081` và `https://hustlingo.expo.app`.
+5. Trong **Authorized redirect URIs**, thêm callback URL được hiển thị ở Supabase Dashboard → Authentication → Sign In / Providers → Google. Đây thường là `https://<project-ref>.supabase.co/auth/v1/callback`; dùng đúng URL trong Dashboard.
+6. Sao chép Client ID và Client Secret vào cấu hình Google provider tại Supabase Dashboard → Authentication → Sign In / Providers → Google, bật provider và lưu.
+7. Trong Supabase Dashboard → Authentication → URL Configuration → Redirect URLs, thêm các địa chỉ app cần dùng:
+
+   ```text
+   http://localhost:8081/oauth
+   http://127.0.0.1:8081/oauth
+   hustlingo://oauth
+   https://hustlingo.expo.app/oauth
+   ```
+
+   Domain production là `https://hustlingo.expo.app`. Nếu chỉ dùng web, có thể bỏ dòng `hustlingo://oauth`.
+
+Client Secret chỉ lưu trong Supabase Dashboard. Không gửi secret qua chat, không thêm
+tiền tố `EXPO_PUBLIC_`, và không lưu secret trong `.env` của frontend. Khi đổi port
+Expo hoặc domain web, cập nhật cả Authorized JavaScript origins (Google) và Redirect
+URLs (Supabase).
 
 ## Quan hệ dữ liệu
 
