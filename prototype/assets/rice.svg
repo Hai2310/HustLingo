@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" role="img" aria-labelledby="title desc">
+  <title id="title">Bát cơm</title>
+  <desc id="desc">Một bát cơm trắng đặt trên nền màu be.</desc>
+  <rect width="600" height="400" rx="30" fill="#f8ecd9"/>
+  <circle cx="478" cy="90" r="38" fill="#f5d69d" opacity=".6"/>
+  <ellipse cx="300" cy="330" rx="188" ry="28" fill="#d8baa1" opacity=".55"/>
+  <path d="M142 210c2-54 69-102 158-102s156 48 158 102H142Z" fill="#fffdf7"/>
+  <path d="M155 216c13 80 55 126 145 126s132-46 145-126H155Z" fill="#7357c8"/>
+  <path d="M178 227c14 61 51 98 122 98s108-37 122-98" fill="none" stroke="#9f89e5" stroke-width="12" opacity=".55"/>
+  <ellipse cx="300" cy="211" rx="158" ry="28" fill="#e9e2dc"/>
+  <ellipse cx="300" cy="200" rx="150" ry="31" fill="#fffefa"/>
+  <g fill="#f2f0e8">
+    <ellipse cx="228" cy="165" rx="17" ry="8" transform="rotate(-22 228 165)"/>
+    <ellipse cx="271" cy="145" rx="20" ry="8" transform="rotate(18 271 145)"/>
+    <ellipse cx="323" cy="148" rx="17" ry="8" transform="rotate(-16 323 148)"/>
+    <ellipse cx="368" cy="169" rx="20" ry="8" transform="rotate(21 368 169)"/>
+    <ellipse cx="290" cy="183" rx="23" ry="8" transform="rotate(-8 290 183)"/>
+  </g>
+  <path d="M137 110c-7 18-7 38 0 57M461 82c9 16 11 32 6 48" fill="none" stroke="#bda6de" stroke-width="7" stroke-linecap="round" opacity=".45"/>
+</svg>

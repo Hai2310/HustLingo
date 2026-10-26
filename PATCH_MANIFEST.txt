@@ -1,0 +1,25 @@
+HustLingo Vocabulary Production PATCH
+
+This ZIP is a safe patch. Extract at HustLingo project root with overwrite enabled.
+
+Changed/new files:
+- src/data/vocabulary-en.ts
+- src/data/vocabulary-en.json
+- src/data/vocabulary-topics.ts
+- src/data/vocabulary-exam.ts
+- src/utils/vocabulary.ts
+- src/features/lessons/data/vocabulary.ts
+- src/features/practice/data/vocabulary.ts
+- src/features/tutor/data/vocabulary.ts
+- scripts/validate-vocabulary-production.mjs
+- scripts/validate-project.mjs
+- docs/VOCABULARY_DATA_PRODUCTION.md
+- docs/VOCABULARY_PRODUCTION_STATS.json
+- docs/VOCABULARY_REVIEW_QUEUE.json
+- THIRD_PARTY_VOCABULARY_ATTRIBUTIONS.md
+
+Raw records: 10000
+Production records: 4129
+Review records: 5871
+
+No Home/Profile/Auth/Backend source files are deleted.
