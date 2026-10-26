@@ -97,11 +97,12 @@ function toUser(row: ProfileRow): User {
   };
 }
 
-async function currentAuthUser() {
+async function currentAuthUser(expectedUserId?: string) {
   requireSupabaseConfig();
   const { data, error } = await supabase.auth.getUser();
   if (error) throw error;
   if (!data.user) throw new Error('Bạn chưa đăng nhập.');
+  if (expectedUserId && data.user.id !== expectedUserId) throw new Error('The active account changed. Please retry.');
   return data.user;
 }
 
@@ -233,8 +234,8 @@ export const supabaseData = {
     return toUser(data as ProfileRow);
   },
 
-  async getProgress(): Promise<LearningState> {
-    const authUser = await currentAuthUser();
+  async getProgress(expectedUserId?: string): Promise<LearningState> {
+    const authUser = await currentAuthUser(expectedUserId);
     const { data, error } = await supabase
       .from('learning_progress')
       .select('state')
@@ -244,8 +245,8 @@ export const supabaseData = {
     return (data?.state as LearningState | null) || EMPTY_PROGRESS;
   },
 
-  async putProgress(state: LearningState): Promise<void> {
-    const authUser = await currentAuthUser();
+  async putProgress(state: LearningState, expectedUserId?: string): Promise<void> {
+    const authUser = await currentAuthUser(expectedUserId);
     const { error } = await supabase.from('learning_progress').upsert({
       user_id: authUser.id,
       state,

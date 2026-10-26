@@ -1,207 +1,131 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { supabaseData } from '@/services/supabaseData';
 import type { LearningState } from '@/types';
+import { emptyProgress, importGuestProgress, mergeLearningProgress, normaliseProgress, parseProgress, recordLessonStep as applyLessonStep } from '@/utils/learningProgress';
 import { useAuth } from './AuthContext';
 
 const KEY_PREFIX = 'hustlingo_learning_state_v1';
-const EMPTY: LearningState = {
-  studiedWordIds: [],
-  reviewWordIds: [],
-  savedWordIds: [],
-  completedLessonIds: [],
-  correctAnswers: 0,
-  totalAnswers: 0,
-  minutesToday: 0,
-};
-
+const today = () => { const date = new Date(); return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; };
+type SyncStatus = 'loading' | 'local' | 'syncing' | 'synced' | 'error';
 interface LearningContextValue {
   state: LearningState;
   ready: boolean;
+  syncStatus: SyncStatus;
   markWord(wordId: string, remembered: boolean): void;
   toggleSaved(wordId: string): void;
   recordAnswer(correct: boolean): void;
   addMinutes(minutes: number): void;
   completeLesson(id: string): void;
+  markLessonStep(lessonId: string, stepId: string, requiredSteps: string[], wordId?: string): void;
   syncNow(): Promise<void>;
   accuracy: number;
 }
-
 const LearningContext = createContext<LearningContextValue | null>(null);
-
-function unique(list: string[]) {
-  return Array.from(new Set(list));
-}
-
-function today() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function storageKey(userId?: string | null) {
-  return `${KEY_PREFIX}:${userId || 'guest-local'}`;
-}
-
-function normalizeDaily(state: LearningState): LearningState {
-  if (state.lastStudyDate === today()) return state;
-  return { ...state, minutesToday: 0, lastStudyDate: today() };
-}
-
-function mergeProgress(local: LearningState, remote?: LearningState | null): LearningState {
-  if (!remote) return normalizeDaily(local);
-  const sameToday = remote.lastStudyDate === today();
-  return normalizeDaily({
-    ...local,
-    ...remote,
-    studiedWordIds: unique([
-      ...(local.studiedWordIds || []),
-      ...(remote.studiedWordIds || []),
-    ]),
-    reviewWordIds: unique([
-      ...(local.reviewWordIds || []),
-      ...(remote.reviewWordIds || []),
-    ]),
-    savedWordIds: unique([
-      ...(local.savedWordIds || []),
-      ...(remote.savedWordIds || []),
-    ]),
-    completedLessonIds: unique([
-      ...(local.completedLessonIds || []),
-      ...(remote.completedLessonIds || []),
-    ]),
-    correctAnswers: Math.max(local.correctAnswers || 0, remote.correctAnswers || 0),
-    totalAnswers: Math.max(local.totalAnswers || 0, remote.totalAnswers || 0),
-    minutesToday: sameToday
-      ? Math.max(local.minutesToday || 0, remote.minutesToday || 0)
-      : local.minutesToday || 0,
-    lastStudyDate: today(),
-  });
-}
+type Snapshot = { key: string; state: LearningState };
 
 export function LearningProvider({ children }: { children: React.ReactNode }) {
-  const { user, isGuest } = useAuth();
-  const [state, setState] = useState<LearningState>({ ...EMPTY, lastStudyDate: today() });
-  const [ready, setReady] = useState(false);
-  const activeKey = storageKey(user.id);
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { user, isGuest, loading: authLoading } = useAuth();
+  const activeKey = `${KEY_PREFIX}:${user.id || 'guest-local'}`;
+  const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>('loading');
+  const active = useRef(activeKey);
+  const current = useRef(snapshot);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const saves = useRef<Promise<void>>(Promise.resolve());
+  active.current = activeKey;
+  current.current = snapshot;
+  const ready = !authLoading && snapshot?.key === activeKey;
+  const state = ready && snapshot ? snapshot.state : emptyProgress(today());
 
   useEffect(() => {
+    if (authLoading) return;
     let cancelled = false;
-    setReady(false);
-
+    setSyncStatus('loading');
+    const stillActive = () => !cancelled && active.current === activeKey;
     (async () => {
-      let local: LearningState = { ...EMPTY, lastStudyDate: today() };
-      const raw = await AsyncStorage.getItem(activeKey).catch(() => null);
-      if (raw) {
-        try {
-          local = normalizeDaily(JSON.parse(raw) as LearningState);
-        } catch {
-          local = { ...EMPTY, lastStudyDate: today() };
-        }
-      }
-
-      let next = local;
+      let local = parseProgress(await AsyncStorage.getItem(activeKey), today());
+      let status: SyncStatus = isGuest ? 'local' : 'synced';
       if (!isGuest) {
-        try {
-          const remote = await supabaseData.getProgress();
-          next = mergeProgress(local, remote);
-        } catch {
-          next = local;
-        }
+        try { local = await importGuestProgress(AsyncStorage, KEY_PREFIX, user.id, local, today()); }
+        catch { status = 'error'; }
+        if (!stillActive()) return;
+        try { local = mergeLearningProgress(local, await supabaseData.getProgress(user.id), today()); }
+        catch { status = 'error'; }
       }
+      if (stillActive()) { setSnapshot({ key: activeKey, state: local }); setSyncStatus(status); }
+    })().catch(() => {
+      if (stillActive()) { setSnapshot({ key: activeKey, state: emptyProgress(today()) }); setSyncStatus('error'); }
+    });
+    return () => { cancelled = true; };
+  }, [activeKey, authLoading, isGuest, user.id]);
 
-      if (!cancelled) {
-        setState(next);
-        setReady(true);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-      if (saveTimer.current) clearTimeout(saveTimer.current);
+  const persist = useCallback((scope: string, value: LearningState) => {
+    const save = async () => {
+    if (active.current !== scope) return;
+    try {
+      const initial = current.current?.key === scope ? current.current.state : value;
+      await AsyncStorage.setItem(scope, JSON.stringify(initial));
+      if (active.current !== scope) return;
+      if (isGuest) { setSyncStatus('local'); return; }
+      setSyncStatus('syncing');
+      const remote = await supabaseData.getProgress(user.id);
+      if (active.current !== scope) return;
+      const latest = current.current?.key === scope ? current.current.state : value;
+      const merged = { ...mergeLearningProgress(latest, remote, today()), savedWordIds: latest.savedWordIds, reviewWordIds: latest.reviewWordIds };
+      await supabaseData.putProgress(merged, user.id);
+      if (active.current !== scope) return;
+      const afterUpload = current.current?.key === scope ? current.current.state : merged;
+      const local = { ...mergeLearningProgress(afterUpload, merged, today()), savedWordIds: afterUpload.savedWordIds, reviewWordIds: afterUpload.reviewWordIds };
+      await AsyncStorage.setItem(scope, JSON.stringify(local));
+      setSnapshot(previous => {
+        if (!previous || previous.key !== scope) return previous;
+        const preserved = { ...mergeLearningProgress(previous.state, merged, today()), savedWordIds: previous.state.savedWordIds, reviewWordIds: previous.state.reviewWordIds };
+        return JSON.stringify(normaliseProgress(preserved, today())) === JSON.stringify(normaliseProgress(previous.state, today())) ? previous : { key: scope, state: preserved };
+      });
+      setSyncStatus('synced');
+    } catch (error) {
+      if (active.current === scope) setSyncStatus('error');
+      throw error;
+    }
     };
-  }, [activeKey, isGuest]);
+    const request = saves.current.catch(() => {}).then(save);
+    saves.current = request;
+    return request;
+  }, [isGuest, user.id]);
 
   useEffect(() => {
-    if (!ready) return;
-    AsyncStorage.setItem(activeKey, JSON.stringify(state)).catch(() => null);
+    if (!ready || !snapshot || snapshot.key !== activeKey) return;
+    let cancelled = false;
+    AsyncStorage.setItem(activeKey, JSON.stringify(snapshot.state)).then(() => {
+      if (!cancelled && isGuest) setSyncStatus('local');
+    }).catch(() => { if (!cancelled) setSyncStatus('error'); });
+    if (!isGuest) {
+      setSyncStatus('syncing');
+      timer.current = setTimeout(() => { void persist(activeKey, snapshot.state).catch(() => {}); }, 1200);
+    }
+    return () => { cancelled = true; if (timer.current) clearTimeout(timer.current); };
+  }, [snapshot, ready, activeKey, isGuest, persist]);
 
-    // Guest progress stays local. Supabase is only used after a real login.
-    if (isGuest) return;
+  const update = useCallback((fn: (previous: LearningState) => LearningState) => {
+    setSnapshot(previous => previous?.key === activeKey ? { key: activeKey, state: { ...fn(normaliseProgress(previous.state, today())), lastStudyDate: today() } } : previous);
+  }, [activeKey]);
 
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => {
-      supabaseData.putProgress(state).catch(() => null);
-    }, 1200);
-
-    return () => {
-      if (saveTimer.current) clearTimeout(saveTimer.current);
-    };
-  }, [state, ready, isGuest, activeKey]);
-
-  const update = useCallback(
-    (fn: (prev: LearningState) => LearningState) =>
-      setState(prev => ({ ...fn(prev), lastStudyDate: today() })),
-    []
-  );
-
-  const value = useMemo<LearningContextValue>(
-    () => ({
-      state,
-      ready,
-      markWord(wordId, remembered) {
-        update(prev => ({
-          ...prev,
-          studiedWordIds: unique([...prev.studiedWordIds, wordId]),
-          reviewWordIds: remembered
-            ? prev.reviewWordIds.filter(x => x !== wordId)
-            : unique([...prev.reviewWordIds, wordId]),
-        }));
-      },
-      toggleSaved(wordId) {
-        update(prev => ({
-          ...prev,
-          savedWordIds: prev.savedWordIds.includes(wordId)
-            ? prev.savedWordIds.filter(x => x !== wordId)
-            : unique([...prev.savedWordIds, wordId]),
-        }));
-      },
-      recordAnswer(correct) {
-        update(prev => ({
-          ...prev,
-          totalAnswers: prev.totalAnswers + 1,
-          correctAnswers: prev.correctAnswers + (correct ? 1 : 0),
-        }));
-      },
-      addMinutes(minutes) {
-        update(prev => ({
-          ...prev,
-          minutesToday: Math.max(0, prev.minutesToday + minutes),
-        }));
-      },
-      completeLesson(id) {
-        update(prev => ({
-          ...prev,
-          completedLessonIds: unique([...prev.completedLessonIds, id]),
-        }));
-      },
-      async syncNow() {
-        await AsyncStorage.setItem(activeKey, JSON.stringify(state));
-        if (!isGuest) await supabaseData.putProgress(state);
-      },
-      accuracy: state.totalAnswers
-        ? Math.round((state.correctAnswers / state.totalAnswers) * 100)
-        : 0,
-    }),
-    [state, ready, update, isGuest, activeKey]
-  );
+  const value = useMemo<LearningContextValue>(() => ({
+    state, ready, syncStatus,
+    markWord(wordId, remembered) { update(previous => ({ ...previous, studiedWordIds: [...new Set([...previous.studiedWordIds, wordId])], reviewWordIds: remembered ? previous.reviewWordIds.filter(id => id !== wordId) : [...new Set([...previous.reviewWordIds, wordId])] })); },
+    toggleSaved(wordId) { update(previous => ({ ...previous, savedWordIds: previous.savedWordIds.includes(wordId) ? previous.savedWordIds.filter(id => id !== wordId) : [...previous.savedWordIds, wordId] })); },
+    recordAnswer(correct) { update(previous => ({ ...previous, totalAnswers: previous.totalAnswers + 1, correctAnswers: previous.correctAnswers + (correct ? 1 : 0) })); },
+    addMinutes(minutes) { if (Number.isFinite(minutes) && minutes > 0) update(previous => ({ ...previous, minutesToday: previous.minutesToday + minutes })); },
+    completeLesson(id) { update(previous => ({ ...previous, completedLessonIds: [...new Set([...previous.completedLessonIds, id])] })); },
+    markLessonStep(lessonId, stepId, requiredSteps, wordId) { update(previous => applyLessonStep(previous, lessonId, stepId, requiredSteps, wordId)); },
+    async syncNow() {
+      if (!ready || !current.current || current.current.key !== activeKey) return;
+      if (timer.current) clearTimeout(timer.current);
+      await persist(activeKey, current.current.state);
+    },
+    accuracy: state.totalAnswers ? Math.round(state.correctAnswers / state.totalAnswers * 100) : 0,
+  }), [state, ready, syncStatus, update, activeKey, persist]);
 
   return <LearningContext.Provider value={value}>{children}</LearningContext.Provider>;
 }
