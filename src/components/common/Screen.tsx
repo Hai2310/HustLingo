@@ -5,12 +5,12 @@ import { colors } from '@/theme/colors';
 import { maxContentWidth } from '@/theme/layout';
 import { AmbientBackground } from './AmbientBackground';
 
-export function Screen({ children, scroll = true, contentStyle, ambient = true }: { children: React.ReactNode; scroll?: boolean; contentStyle?: StyleProp<ViewStyle>; ambient?: boolean }) {
+export function Screen({ children, scroll = true, contentStyle, ambient = true, scrollRef }: { children: React.ReactNode; scroll?: boolean; contentStyle?: StyleProp<ViewStyle>; ambient?: boolean; scrollRef?: React.Ref<ScrollView> }) {
   const body = <View style={[styles.content, contentStyle]}>{children}</View>;
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>
       {ambient && <AmbientBackground />}
-      {scroll ? <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>{body}</ScrollView> : body}
+      {scroll ? <ScrollView ref={scrollRef} contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>{body}</ScrollView> : body}
     </SafeAreaView>
   );
 }
