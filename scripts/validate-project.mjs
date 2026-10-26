@@ -61,6 +61,9 @@ if (count < 9000) failures.push(`Vocabulary bank unexpectedly small: ${count}`);
 for (const required of [
   'app/(tabs)/home.tsx',
   'app/(tabs)/lessons.tsx',
+  'app/lessons/_layout.tsx',
+  'app/lessons/[lessonId].tsx',
+  'app/lessons/topics/[topicId].tsx',
   'app/(tabs)/practice.tsx',
   'app/(tabs)/tutor.tsx',
   'app/(tabs)/profile.tsx',
@@ -96,7 +99,6 @@ for (const [route, target] of [
 }
 
 for (const tab of [
-  'app/(tabs)/lessons.tsx',
   'app/(tabs)/practice.tsx',
   'app/(tabs)/tutor.tsx',
 ]) {
@@ -112,4 +114,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`VALIDATION PASSED: HustLingo H.1 baseline, ${count} English vocabulary records, Supabase backend preserved, Lessons/Practice/Tutor functionality intentionally blank.`);
+console.log(`VALIDATION PASSED: ${count} English vocabulary records, Lessons routes available, Supabase backend preserved; Practice/Tutor remain placeholders.`);
