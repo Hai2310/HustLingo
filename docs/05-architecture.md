@@ -4,9 +4,9 @@
 
 ![Ứng dụng, dữ liệu và triển khai](architecture/01-system-overview.png)
 
-Mũi tên chỉ thao tác ứng dụng gọi/đọc/ghi; đường nét đứt là build/phát hành. UI/Expo Router, AuthContext/LearningContext và Supabase client/supabaseData thuộc ứng dụng Expo. AsyncStorage và nội dung đóng gói nằm trên máy; Supabase Auth/PostgreSQL nằm trên cloud. Deploy: Expo export + EAS Deploy, EAS Build, Supabase Cloud.
+Mũi tên chỉ thao tác ứng dụng gọi/đọc/ghi; đường nét đứt là build/phát hành. UI/Expo Router, AuthContext/LearningContext và Supabase client/supabaseData thuộc ứng dụng Expo. AsyncStorage và nội dung đóng gói vẫn nằm trên máy để hỗ trợ offline; Supabase Auth/PostgreSQL nằm trên cloud. Danh mục topics/vocabulary/grammar/lessons đã có migration và importer; tab Grammar ưu tiên đọc Supabase và fallback về nội dung đóng gói. Deploy: Expo export + EAS Deploy, EAS Build, Supabase Cloud.
 
-Supabase client (`src/services/supabase.ts`) cấu hình kết nối và session. `supabaseData.ts` là adapter **chạy phía client** thực hiện get/update profile, get/put progress, feedback. RLS/SQL grants ở DB quyết định quyền thật. SubscriptionContext, Storage và AI runtime chưa là thành phần hoàn thiện hiện tại.
+Supabase client (`src/services/supabase.ts`) cấu hình kết nối và session. `supabaseData.ts` là adapter **chạy phía client** thực hiện get/update profile, get/put progress, feedback và đọc nội dung đã publish. RLS/SQL grants ở DB quyết định quyền thật. SubscriptionContext, Storage và AI runtime chưa là thành phần hoàn thiện hiện tại.
 
 ## Hiện trạng và mục tiêu
 
@@ -16,6 +16,7 @@ Supabase client (`src/services/supabase.ts`) cấu hình kết nối và session
 | Account | Supabase Auth, `profiles` chứa role/status | Chặn tự sửa role/status; guard account disabled ở DB/API |
 | Tiến độ | `learning_progress.state` JSON, AsyncStorage theo user ID | Guest import, ID lượt, merge chống trùng và tránh mất update |
 | Feedback | Bảng `feedback` ghi góp ý người dùng | Error/retry và validation đầu vào |
+| Content catalog | Bảng topics, vocabulary_entries, grammar_points, grammar_examples, lessons, lesson_items; importer seed dữ liệu local; tab Grammar đọc Supabase và fallback offline; public read chỉ thấy bản publish | Nối UI từ vựng vào query phân trang; cache/offline sâu hơn; admin quản lý và publish bản review |
 | Metadata mới | README dự kiến saved_words/subscriptions/user_settings | Chỉ migration khi có contract; saved words hiện nằm trong LearningState |
 | Admin/AI | Chưa có backend nghiệp vụ riêng | P1 admin functions; AI/STT/entitlement ở server giai đoạn sau |
 

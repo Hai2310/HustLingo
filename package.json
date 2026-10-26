@@ -16,6 +16,7 @@
     "build:production:android": "eas build --platform android --profile production",
     "build:production:ios": "eas build --platform ios --profile production",
     "build:production": "eas build --platform all --profile production",
+    "db:seed:content": "node scripts/import-content.mjs",
     "validate": "node scripts/validate-project.mjs",
     "check": "npm run validate && npm run typecheck"
   },
