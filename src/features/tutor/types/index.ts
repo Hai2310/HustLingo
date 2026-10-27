@@ -4,6 +4,7 @@ export interface TutorProfile {
   name: string;
   role: string;
   description: string;
+  suitableLevels: readonly string[];
   tone?: string;
   initials?: string;
   accent?: string;
@@ -19,6 +20,7 @@ export interface TutorMessage {
 
 export interface TutorScenario {
   id: string;
+  tutorId?: string;
   tutor: string;
   title: string;
   subtitle: string;
@@ -54,12 +56,14 @@ export interface TutorSession {
   messages: TutorMessage[];
   corrections: TutorCorrection[];
   newVocabulary: TutorVocabularyItem[];
+  pendingRequest?: TutorChatRequest;
 }
 
 export interface TutorSessionSummary {
   sessionId: string;
   scenarioId: string;
   tutorId: string;
+  scenarioTitle?: string;
   messageCount: number;
   durationMinutes: number;
   highlights: string[];
@@ -69,6 +73,7 @@ export interface TutorSessionSummary {
 }
 
 export interface TutorChatRequest {
+  requestId: string;
   sessionId: string;
   scenarioId: string;
   tutorId: string;
@@ -82,4 +87,12 @@ export interface TutorChatResponse {
   correction?: TutorCorrection | null;
   suggestedReplies?: string[];
   newVocabulary?: TutorVocabularyItem[];
+  tutorMessageId?: string;
+  learnerMessageId?: string;
+  summary?: TutorSessionSummary;
+}
+
+export interface TutorCatalog {
+  tutors: TutorProfile[];
+  scenarios: TutorScenario[];
 }

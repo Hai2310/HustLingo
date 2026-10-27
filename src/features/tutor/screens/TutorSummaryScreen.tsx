@@ -5,19 +5,31 @@ import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/components/common/Screen';
 import { AppButton } from '@/components/common/Buttons';
 import { loadTutorSummary } from '../services/tutorSessionStore';
-import { scenarios } from '../data/scenarios';
+import { useAuth } from '@/contexts/AuthContext';
+import { TutorDataState } from '../components/TutorDataState';
 import { colors } from '@/theme/colors';
 import type { TutorSessionSummary } from '../types';
 
 export default function TutorSummaryScreen() {
+  const { user } = useAuth();
   const [summary, setSummary] = useState<TutorSessionSummary | null>(null);
-  useEffect(() => { loadTutorSummary().then(setSummary); }, []);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    let active = true;
+    setLoading(true); setSummary(null); setError(null);
+    loadTutorSummary(user.id).then(value => { if (active) setSummary(value); })
+      .catch(() => { if (active) setError('Không tải được tổng kết phiên luyện tập.'); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [user.id]);
 
-  if (!summary) {
+  if (loading) {
     return <Screen><View style={styles.loading}><ActivityIndicator color={colors.primary} /></View></Screen>;
   }
 
-  const scenario = scenarios.find(item => item.id === summary.scenarioId) || scenarios[0];
+  if (!summary) return <TutorDataState message={error || 'Chưa có tổng kết. Hãy hoàn thành một phiên luyện tập.'} />;
+  const scenario = { title: summary.scenarioTitle || summary.scenarioId };
   return (
     <Screen>
       <View style={styles.header}><View style={styles.check}><Ionicons name="checkmark" size={31} color={colors.white} /></View><Text style={styles.kicker}>SESSION COMPLETE</Text><Text style={styles.title}>Nice work.</Text><Text style={styles.subtitle}>Bạn đã hoàn thành {scenario.title} và có thêm một bước tiến nhỏ.</Text></View>

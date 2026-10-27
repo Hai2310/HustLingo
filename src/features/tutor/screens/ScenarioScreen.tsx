@@ -6,14 +6,19 @@ import { Screen } from '@/components/common/Screen';
 import { PageHeader } from '@/components/common/PageHeader';
 import { AppButton } from '@/components/common/Buttons';
 import { AppCard } from '@/components/common/AppCard';
-import { scenarios } from '../data/scenarios';
-import { tutors } from '../data/tutors';
+import { useTutorCatalog } from '../hooks/useTutorCatalog';
+import { TutorDataState } from '../components/TutorDataState';
 import { colors } from '@/theme/colors';
 
 export default function ScenarioScreen() {
   const { id, tutorId } = useLocalSearchParams<{ id: string; tutorId?: string }>();
-  const scenario = scenarios.find(item => item.id === id) || scenarios[0];
-  const tutor = tutors.find(item => item.id === (tutorId || scenario.tutor.toLowerCase())) || tutors[0];
+  const data = useTutorCatalog();
+  const scenario = data.catalog?.scenarios.find(item => item.id === id);
+  const tutor = data.catalog?.tutors.find(item => item.id === scenario?.tutorId);
+  if (data.loading) return <TutorDataState loading />;
+  if (data.error) return <TutorDataState message={data.error} retry={data.retry} />;
+  if (!scenario || !tutor || (tutorId && tutorId !== tutor.id)) return <TutorDataState message="Tình huống không tồn tại hoặc không thuộc gia sư đã chọn." />;
+  if (!scenario.objective || !scenario.starterPrompt) return <TutorDataState message="Tình huống đang được chuẩn bị nội dung luyện tập." retry={data.retry} />;
 
   return (
     <Screen>

@@ -4,19 +4,31 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Screen } from '@/components/common/Screen';
-import { AppButton } from '@/components/common/Buttons';
-import { ChatBubble, CorrectionCard, TutorAvatar, TypingIndicator } from '../components';
-import { scenarios } from '../data/scenarios';
-import { tutors } from '../data/tutors';
+import { ChatBubble, CorrectionCard, TypingIndicator } from '../components';
+import { useTutorCatalog } from '../hooks/useTutorCatalog';
+import { TutorDataState } from '../components/TutorDataState';
+import type { TutorProfile, TutorScenario } from '../types';
 import { useTutorChat } from '../hooks/useTutorChat';
 import { colors } from '@/theme/colors';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function TutorChatScreen() {
+  const { user } = useAuth();
   const { scenarioId, tutorId } = useLocalSearchParams<{ scenarioId: string; tutorId: string }>();
-  const scenario = scenarios.find(item => item.id === scenarioId) || scenarios[0];
-  const tutor = tutors.find(item => item.id === tutorId) || tutors[0];
+  const data = useTutorCatalog();
+  const scenario = data.catalog?.scenarios.find(item => item.id === scenarioId);
+  const tutor = data.catalog?.tutors.find(item => item.id === scenario?.tutorId);
+  if (data.loading) return <TutorDataState loading />;
+  if (data.error) return <TutorDataState message={data.error} retry={data.retry} />;
+  if (!scenario || !tutor || tutor.id !== tutorId) return <TutorDataState message="Không tìm thấy tình huống luyện tập của gia sư này." />;
+  if (!scenario.starterPrompt) return <TutorDataState message="Tình huống chưa sẵn sàng để luyện tập." />;
+  return <TutorChatWorkspace key={`${user.id}:${scenario.id}:${tutor.id}`} scenario={scenario} tutor={tutor} />;
+}
+
+function TutorChatWorkspace({ scenario, tutor }: { scenario: TutorScenario; tutor: TutorProfile }) {
   const chat = useTutorChat(scenario, tutor.id);
   const [draft, setDraft] = useState('');
+  const [confirmEnd, setConfirmEnd] = useState(false);
   const listRef = useRef<FlatList>(null);
   const { width } = useWindowDimensions();
   const isDesktop = width >= 1024;
@@ -24,16 +36,29 @@ export default function TutorChatScreen() {
 
   useEffect(() => { listRef.current?.scrollToEnd({ animated: true }); }, [chat.session.messages.length, chat.status]);
 
+  const complete = async () => {
+    const summary = await chat.finish();
+    if (summary) router.replace('/tutor/summary');
+  };
+  const retry = async () => {
+    const summary = await chat.retry();
+    if (summary) router.replace('/tutor/summary');
+  };
   const endSession = () => {
+    if (!chat.canSend) return;
+    if (Platform.OS === 'web') {
+      setConfirmEnd(true);
+      return;
+    }
     Alert.alert('End practice?', 'Your session summary will be ready after you finish.', [
       { text: 'Keep practising', style: 'cancel' },
-      { text: 'End session', style: 'destructive', onPress: async () => { await chat.finish(); router.replace('/tutor/summary'); } },
+      { text: 'End session', style: 'destructive', onPress: () => { void complete(); } },
     ]);
   };
 
   const send = () => {
     const value = draft.trim();
-    if (!value) return;
+    if (!value || !chat.canSend) return;
     setDraft('');
     chat.sendMessage(value);
   };
@@ -42,6 +67,11 @@ export default function TutorChatScreen() {
     <Screen scroll={false} ambient={false} contentStyle={styles.screenContent}>
       <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}>
         <View style={[styles.header, isDesktop && styles.desktopHeader]}><PageHeader title={scenario.title} subtitle={`${tutor.name} · ${scenario.level}`} right={<Pressable onPress={endSession} style={styles.end}><Ionicons name="stop-circle-outline" size={18} color={colors.primary} /></Pressable>} /></View>
+        {confirmEnd && <View style={styles.confirmEnd}>
+          <Text style={styles.toolText}>End practice and view your summary?</Text>
+          <Pressable accessibilityRole="button" onPress={() => setConfirmEnd(false)} style={styles.tool}><Text style={styles.toolText}>Keep practising</Text></Pressable>
+          <Pressable accessibilityRole="button" disabled={!chat.canSend} onPress={() => { setConfirmEnd(false); void complete(); }} style={styles.finishTool}><Text style={styles.finishText}>End session</Text></Pressable>
+        </View>}
         <View style={[styles.workspace, isDesktop && styles.desktopWorkspace]}>
           {isDesktop && (
             <View style={styles.sessionRail}>
@@ -57,7 +87,7 @@ export default function TutorChatScreen() {
             </View>
           )}
           <View style={[styles.chatPane, isDesktop && styles.desktopChatPane]}>
-            <View style={[styles.status, isMobile && styles.mobileStatus]}><View style={styles.statusDot} /><Text style={styles.statusText}>{isMobile ? 'Live practice' : 'Practice session · live'}</Text><Text style={styles.counter}>{chat.session.messages.filter(item => item.role === 'learner').length}/30</Text></View>
+            <View style={[styles.status, isMobile && styles.mobileStatus]}><View style={styles.statusDot} /><Text style={styles.statusText}>{chat.isDemo ? 'Demo · đăng nhập để luyện với AI thật' : chat.status === 'hydrating' ? 'Đang khôi phục phiên...' : 'AI practice'}</Text><Text style={styles.counter}>{chat.session.messages.filter(item => item.role === 'learner').length}/30</Text></View>
             <FlatList
               ref={listRef}
               style={styles.list}
@@ -68,7 +98,7 @@ export default function TutorChatScreen() {
               ListFooterComponent={<>
                 {chat.status === 'loading' && <TypingIndicator />}
                 {chat.lastCorrection && <CorrectionCard correction={chat.lastCorrection} />}
-                {chat.error && <View style={styles.error}><Ionicons name="warning-outline" size={16} color={colors.error} /><Text style={styles.errorText}>{chat.error}</Text><Pressable onPress={chat.retry}><Text style={styles.retry}>Retry</Text></Pressable></View>}
+                {chat.error && <View style={styles.error}><Ionicons name="warning-outline" size={16} color={colors.error} /><Text style={styles.errorText}>{chat.error}</Text><Pressable onPress={() => { void retry(); }}><Text style={styles.retry}>Retry</Text></Pressable></View>}
               </>}
             />
             {chat.hint && (
@@ -87,11 +117,11 @@ export default function TutorChatScreen() {
               </ScrollView>
             )}
             <View style={[styles.tools, isMobile && styles.mobileTools]}>
-              <Pressable disabled={chat.status === 'loading'} onPress={chat.requestHint} style={[styles.tool, isMobile && styles.mobileTool]}><Ionicons name="bulb-outline" size={15} color={colors.orange} /><Text style={styles.toolText}>Hint</Text></Pressable>
-              <Pressable disabled={chat.status === 'loading'} onPress={chat.requestCorrection} style={[styles.tool, isMobile && styles.mobileTool]}><Ionicons name="sparkles-outline" size={15} color={colors.violet} /><Text style={styles.toolText}>{isMobile ? 'Correct' : 'Correct last'}</Text></Pressable>
+              <Pressable disabled={!chat.canSend} onPress={chat.requestHint} style={[styles.tool, isMobile && styles.mobileTool]}><Ionicons name="bulb-outline" size={15} color={colors.orange} /><Text style={styles.toolText}>Hint</Text></Pressable>
+              <Pressable disabled={!chat.canSend} onPress={chat.requestCorrection} style={[styles.tool, isMobile && styles.mobileTool]}><Ionicons name="sparkles-outline" size={15} color={colors.violet} /><Text style={styles.toolText}>{isMobile ? 'Correct' : 'Correct last'}</Text></Pressable>
               <Pressable onPress={endSession} style={[styles.tool, styles.finishTool, isMobile && styles.mobileTool, isMobile && styles.finishToolMobile]}><Ionicons name="stop-circle-outline" size={15} color={colors.primary} /><Text style={styles.finishText}>Finish</Text></Pressable>
             </View>
-            <View style={[styles.composer, isMobile && styles.mobileComposer]}><TextInput value={draft} onChangeText={setDraft} onSubmitEditing={send} placeholder="Write your reply..." placeholderTextColor={colors.textMuted} multiline maxLength={500} style={styles.input} /><Pressable onPress={send} disabled={!draft.trim() || chat.status === 'loading'} style={[styles.send, (!draft.trim() || chat.status === 'loading') && styles.sendDisabled]}><Ionicons name="arrow-up" size={20} color={colors.white} /></Pressable></View>
+            <View style={[styles.composer, isMobile && styles.mobileComposer]}><TextInput value={draft} onChangeText={setDraft} onSubmitEditing={send} placeholder="Write your reply..." placeholderTextColor={colors.textMuted} multiline maxLength={500} style={styles.input} /><Pressable onPress={send} disabled={!draft.trim() || !chat.canSend} style={[styles.send, (!draft.trim() || !chat.canSend) && styles.sendDisabled]}><Ionicons name="arrow-up" size={20} color={colors.white} /></Pressable></View>
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -105,6 +135,7 @@ const styles = StyleSheet.create({
   header: { paddingHorizontal: 18 },
   desktopHeader: { paddingHorizontal: 0 },
   end: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
+  confirmEnd: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: 12, padding: 12, marginBottom: 8, backgroundColor: colors.primarySoft, borderRadius: 12 },
   workspace: { flex: 1, minHeight: 0 },
   desktopWorkspace: { flexDirection: 'row', gap: 18, borderRadius: 18 },
   sessionRail: { width: 250, alignSelf: 'flex-start', padding: 18, borderRadius: 18, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },

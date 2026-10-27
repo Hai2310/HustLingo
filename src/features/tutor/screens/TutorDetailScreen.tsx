@@ -4,14 +4,18 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { Screen } from '@/components/common/Screen';
 import { PageHeader } from '@/components/common/PageHeader';
 import { TutorAvatar, ScenarioCard } from '../components';
-import { tutors } from '../data/tutors';
-import { scenarios } from '../data/scenarios';
+import { useTutorCatalog } from '../hooks/useTutorCatalog';
+import { TutorDataState } from '../components/TutorDataState';
 import { colors } from '@/theme/colors';
 
 export default function TutorDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const tutor = tutors.find(item => item.id === id) || tutors[0];
-  const tutorScenarios = scenarios.filter(item => item.tutor.toLowerCase() === tutor.id);
+  const data = useTutorCatalog();
+  const tutor = data.catalog?.tutors.find(item => item.id === id);
+  if (data.loading) return <TutorDataState loading />;
+  if (data.error) return <TutorDataState message={data.error} retry={data.retry} />;
+  if (!tutor) return <TutorDataState message="Gia sư không tồn tại hoặc chưa được xuất bản." />;
+  const tutorScenarios = data.catalog!.scenarios.filter(item => item.tutorId === tutor.id);
 
   return (
     <Screen>
@@ -21,6 +25,15 @@ export default function TutorDetailScreen() {
         <View style={styles.profileCopy}><Text style={styles.name}>{tutor.name}</Text><Text style={styles.role}>{tutor.role}</Text><Text style={styles.tone}>{tutor.tone}</Text></View>
       </View>
       <View style={styles.tags}>{(tutor.specialties || []).map(item => <View key={item} style={styles.tag}><Text style={styles.tagText}>{item}</Text></View>)}</View>
+      <View style={styles.levelPanel}>
+        <Text style={styles.levelTitle}>Recommended levels</Text>
+        <View style={styles.levels}>
+          {tutor.suitableLevels.map(level => (
+            <View key={level} style={styles.levelBadge}><Text style={styles.levelText}>{level}</Text></View>
+          ))}
+        </View>
+        <Text style={styles.levelHint}>Chọn tình huống bên dưới theo trình độ bạn muốn luyện tập.</Text>
+      </View>
       <Text style={styles.sectionTitle}>Practice with {tutor.name}</Text>
       <View style={styles.scenarios}>{tutorScenarios.map(scenario => <ScenarioCard key={scenario.id} compact scenario={scenario} onPress={() => router.push({ pathname: '/tutor/scenario/[id]', params: { id: scenario.id, tutorId: tutor.id } })} />)}</View>
     </Screen>
@@ -36,6 +49,12 @@ const styles = StyleSheet.create({
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginTop: 14 },
   tag: { paddingHorizontal: 9, paddingVertical: 6, borderRadius: 9, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
   tagText: { fontSize: 9.5, fontWeight: '800', color: colors.textSecondary },
+  levelPanel: { marginTop: 20, padding: 15, borderRadius: 14, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
+  levelTitle: { fontSize: 12, fontWeight: '900', color: colors.text },
+  levels: { flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginTop: 10 },
+  levelBadge: { paddingHorizontal: 10, paddingVertical: 7, borderRadius: 9, backgroundColor: colors.primarySoft },
+  levelText: { fontSize: 10, fontWeight: '800', color: colors.primaryDeep },
+  levelHint: { marginTop: 10, fontSize: 11, lineHeight: 17, color: colors.textSecondary },
   sectionTitle: { marginTop: 28, marginBottom: 11, fontSize: 15, fontWeight: '900', color: colors.text },
   scenarios: { gap: 10 },
 });

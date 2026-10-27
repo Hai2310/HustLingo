@@ -5,7 +5,6 @@ import type {
   TutorMessage,
   TutorScenario,
 } from '../types';
-import { tutors } from '../data/tutors';
 
 function lastLearnerMessage(history: TutorMessage[]) {
   return [...history].reverse().find(message => message.role === 'learner')?.text || '';
@@ -13,7 +12,6 @@ function lastLearnerMessage(history: TutorMessage[]) {
 
 function localResponse(request: TutorChatRequest): TutorChatResponse {
   const message = lastLearnerMessage(request.history).toLowerCase();
-  const tutor = tutors.find(item => item.id === request.tutorId);
 
   if (request.action === 'hint') {
     return {
@@ -35,7 +33,7 @@ function localResponse(request: TutorChatRequest): TutorChatResponse {
 
   if (request.action === 'summary') {
     return {
-      message: `Nice work with ${tutor?.name || 'your tutor'}. You completed a practice turn.`,
+      message: 'Demo session completed.',
     };
   }
 
@@ -56,16 +54,29 @@ export async function sendTutorRequest(
   request: TutorChatRequest,
   options?: { useRemote?: boolean },
 ): Promise<TutorChatResponse> {
-  if (!supabaseConfigured || options?.useRemote === false) {
+  if (options?.useRemote === false) {
     return localResponse(request);
   }
 
-  const { data, error } = await supabase.functions.invoke('tutor-chat', { body: request });
-  if (error) throw error;
-  if (!data || typeof data.message !== 'string') {
-    throw new Error('Tutor API returned an invalid response.');
+  if (!supabaseConfigured) throw new Error('Supabase chưa được cấu hình.');
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 55000);
+  try {
+    const { history: _clientHistory, ...serverRequest } = request;
+    const { data, error } = await supabase.functions.invoke('tutor-chat', { body: serverRequest, signal: controller.signal });
+    if (error) {
+      const context = 'context' in error ? error.context : null;
+      if (context instanceof Response) {
+        const detail = await context.clone().json().catch(() => null);
+        if (typeof detail?.error === 'string') throw new Error(detail.error);
+      }
+      throw new Error('Không kết nối được Gia sư AI. Bấm Retry để thử lại cùng lượt.');
+    }
+    if (!data || typeof data.message !== 'string') throw new Error('Tutor API returned an invalid response.');
+    return data as TutorChatResponse;
+  } finally {
+    clearTimeout(timer);
   }
-  return data as TutorChatResponse;
 }
 
 export function scenarioContext(scenario: TutorScenario) {
