@@ -75,6 +75,14 @@ Deno.serve(async request => {
       const messages = [{ role: 'system', content: system }, { role: 'assistant', content: details.starter_prompt },
         ...history.slice(-12).map(item => ({ role: item.role === 'learner' ? 'user' : 'assistant', content: item.content.slice(0, 1200) }))];
       if (input.action === 'message') messages.push({ role: 'user', content: input.message });
+      if (input.action === 'hint') messages.push({
+        role: 'user',
+        content: 'Pause the role-play. Give me one brief hint in Vietnamese for my NEXT reply as the learner. Suggest a useful phrase or detail I can add. Do not repeat the last tutor response, speak as the tutor character, or write my full answer. Return the required JSON with correction=null.',
+      });
+      if (input.action === 'correct') {
+        const learnerSentence = [...history].reverse().find(item => item.role === 'learner').content;
+        messages.push({ role: 'user', content: `Pause the role-play. Correct this learner sentence: ${JSON.stringify(learnerSentence)}. Return the required JSON with the original sentence, a corrected version and one brief explanation in Vietnamese. Do not answer as the scenario character.` });
+      }
       const baseUrl = (Deno.env.get('AI_BASE_URL') || 'https://api.openai.com/v1').replace(/\/$/, '');
       if (!baseUrl.startsWith('https://')) throw new TutorError('AI provider must use HTTPS.', 503);
       const controller = new AbortController();
