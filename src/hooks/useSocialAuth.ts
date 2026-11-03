@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Platform } from 'react-native';
 import { makeRedirectUri } from 'expo-auth-session';
 import * as QueryParams from 'expo-auth-session/build/QueryParams';
 import * as WebBrowser from 'expo-web-browser';
@@ -6,11 +7,14 @@ import { requireSupabaseConfig, supabase, supabaseConfigured } from '@/services/
 
 WebBrowser.maybeCompleteAuthSession();
 
-type Provider = 'google' | 'facebook';
+type Provider = 'google';
 
 export function useSocialAuth() {
   const redirectTo = useMemo(
-    () => makeRedirectUri({ scheme: 'hustlingo', path: 'oauth' }),
+    () =>
+      Platform.OS === 'web' && typeof window !== 'undefined'
+        ? `${window.location.origin}/oauth`
+        : makeRedirectUri({ scheme: 'hustlingo', path: 'oauth' }),
     []
   );
 
@@ -40,7 +44,9 @@ export function useSocialAuth() {
       provider,
       options: {
         redirectTo,
-        skipBrowserRedirect: true,
+        // Supabase redirects the current web page. Native opens the OAuth
+        // URL in an auth session and receives the custom-scheme callback.
+        ...(Platform.OS === 'web' ? {} : { skipBrowserRedirect: true }),
         ...(provider === 'google'
           ? { queryParams: { access_type: 'offline', prompt: 'select_account' } }
           : {}),
@@ -48,6 +54,11 @@ export function useSocialAuth() {
     });
     if (error) throw error;
     if (!data.url) throw new Error('Không tạo được URL đăng nhập OAuth.');
+
+    if (Platform.OS === 'web') {
+      // The callback route exchanges the PKCE code and navigates to the app.
+      return false;
+    }
 
     const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
     if (result.type !== 'success' || !result.url) return false;
@@ -57,9 +68,7 @@ export function useSocialAuth() {
 
   return {
     signInWithGoogle: () => signIn('google'),
-    signInWithFacebook: () => signIn('facebook'),
     redirectTo,
     googleReady: supabaseConfigured,
-    facebookReady: supabaseConfigured,
   };
 }

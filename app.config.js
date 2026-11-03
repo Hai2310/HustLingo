@@ -46,7 +46,10 @@ module.exports = {
     ],
     extra: {
       brand: 'HustLingo',
-      learningLanguage: 'en'
+      learningLanguage: 'en',
+      eas: {
+        projectId: '46728e0f-ac2d-44fc-af33-285e34a35a30'
+      }
     }
   }
 };
