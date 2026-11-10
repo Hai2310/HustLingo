@@ -21,4 +21,11 @@ export interface LearningState {
   totalAnswers: number;
   minutesToday: number;
   lastStudyDate?: string;
+  lessonProgress?: Record<string, LessonStudyProgress>;
+}
+
+export interface LessonStudyProgress {
+  completedSteps: string[];
+  lastStepId?: string;
+  updatedAt?: string;
 }

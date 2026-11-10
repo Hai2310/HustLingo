@@ -1,650 +1,117 @@
-import { requireSupabaseConfig, supabase } from './supabase';
+import { supabase, supabaseConfigured } from './supabase';
+import { PRODUCTION_VOCABULARY, type LocalVocabularyRecord } from '@/data/vocabulary-en';
+import { grammarPoints, type GrammarPoint } from '@/features/lessons/data/grammar';
+import { getLocalCatalog, isLessonLevel, makeTopic, normaliseLessonTopic } from '@/features/lessons/data/catalog';
+import type { CatalogLesson, LessonCatalog, LessonContent } from '@/features/lessons/types';
 
-export type LearningCefrLevel = 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
-export type LessonType = 'vocabulary' | 'grammar';
-export type PracticeSkill = 'listening' | 'reading' | 'writing' | 'speaking';
-export type TutorScenarioLevel = 'Beginner' | 'Intermediate' | 'Advanced';
-
-export interface PageQuery {
-  limit?: number;
-  offset?: number;
+interface CatalogRow {
+  id: string; topic_id: string | null; cefr_level: string; lesson_type: 'vocabulary' | 'grammar'; title: string; sort_order: number;
+  lesson_items: { position: number; vocabulary_id: string | null; grammar_point_id: string | null }[];
+}
+interface WordRow {
+  id: string; term: string; translation: string; language_code: string; part_of_speech: string | null; ipa: string | null;
+  pronunciation: string | null; example_sentence: string | null; example_translation: string | null;
+  cefr_level: LocalVocabularyRecord['cefrLevel']; topic_id: LocalVocabularyRecord['topicId']; example_quality: LocalVocabularyRecord['exampleQuality'];
+}
+interface GrammarRow {
+  id: string; cefr_level: GrammarPoint['level']; category: string; title: string; title_vi: string; pattern: string;
+  explanation: string; common_mistake: GrammarPoint['commonMistake'];
+  grammar_examples: { position: number; sentence: string; translation: string }[];
 }
 
-export interface ContentQuery extends PageQuery {
-  level?: LearningCefrLevel;
+let cachedCatalog: LessonCatalog | null = null;
+let catalogRequest: Promise<LessonCatalog> | null = null;
+const contentCache = new Map<string, LessonContent>();
+const localWords = new Map(PRODUCTION_VOCABULARY.map(word => [word.id, word]));
+const localGrammar = new Map(grammarPoints.map(point => [point.id, point]));
+export const peekLessonCatalog = () => cachedCatalog;
+
+function deadline() {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 12000);
+  return { signal: controller.signal, dispose: () => clearTimeout(timer) };
 }
 
-export type TopicQuery = ContentQuery;
-
-export interface TopicContent {
-  id: string;
-  title: string;
-  description: string | null;
-  subtitle: string | null;
-  icon: string | null;
-  level: LearningCefrLevel | null;
-  accentColor: string | null;
-  sortOrder: number;
+async function fetchCatalog(): Promise<LessonCatalog> {
+  if (!supabaseConfigured) return { ...getLocalCatalog(), notice: 'Offline library. Your progress is saved on this device.' };
+  const timeout = deadline();
+  try {
+    const [topicResult, lessonResult] = await Promise.all([
+      supabase.from('topics').select('id,title,description').eq('is_published', true).order('id').abortSignal(timeout.signal),
+      supabase.from('lessons').select('id,topic_id,cefr_level,lesson_type,title,sort_order,lesson_items(position,vocabulary_id,grammar_point_id)').eq('is_published', true).order('sort_order').range(0, 999).abortSignal(timeout.signal),
+    ]);
+    if (topicResult.error || lessonResult.error) throw new Error('Catalog could not be loaded.');
+    const lessons: CatalogLesson[] = [];
+    for (const row of (lessonResult.data || []) as unknown as CatalogRow[]) {
+      if (!isLessonLevel(row.cefr_level)) continue;
+      const items = [...(row.lesson_items || [])].sort((a, b) => a.position - b.position);
+      lessons.push({ id: row.id, title: row.title, level: row.cefr_level, topicId: row.lesson_type === 'grammar' && !row.topic_id ? 'grammar' : normaliseLessonTopic(row.topic_id || 'daily'), kind: row.lesson_type, vocabularyIds: items.flatMap(item => item.vocabulary_id ? [item.vocabulary_id] : []), grammarIds: items.flatMap(item => item.grammar_point_id ? [item.grammar_point_id] : []), order: row.sort_order });
+    }
+    if (!lessons.length) return { ...getLocalCatalog(), notice: 'The online library is empty. Showing the offline library instead.' };
+    const topics = new Map<string, ReturnType<typeof makeTopic>>();
+    for (const row of (topicResult.data || []) as { id: string; title: string; description?: string }[]) {
+      const topic = makeTopic(row.id, row.title, row.description);
+      topics.set(topic.id, topic);
+    }
+    for (const lesson of lessons) if (!topics.has(lesson.topicId)) topics.set(lesson.topicId, makeTopic(lesson.topicId));
+    return { lessons, topics: [...topics.values()], source: 'cloud' };
+  } catch {
+    return { ...getLocalCatalog(), notice: 'Could not reach the online library. You can keep learning offline, or retry.' };
+  } finally { timeout.dispose(); }
 }
 
-export interface VocabularyQuery extends ContentQuery {
-  topicId?: string;
-  search?: string;
-  examTag?: string;
-  ids?: string[];
+export async function loadLessonCatalog(force = false): Promise<LessonCatalog> {
+  if (force) { cachedCatalog = null; catalogRequest = null; contentCache.clear(); }
+  if (cachedCatalog) return cachedCatalog;
+  if (!catalogRequest) catalogRequest = fetchCatalog().then(catalog => { cachedCatalog = catalog; return catalog; }).finally(() => { catalogRequest = null; });
+  return catalogRequest;
 }
 
-export interface VocabularyContent {
-  id: string;
-  languageCode: string;
-  term: string;
-  translation: string;
-  partOfSpeech: string | null;
-  pronunciation: string | null;
-  ipa: string | null;
-  exampleSentence: string | null;
-  exampleTranslation: string | null;
-  topicId: string | null;
-  topic: string | null;
-  difficulty: LearningCefrLevel | null;
-  examTags: string[];
-  frequencyRank: number | null;
-  cefrLevel: LearningCefrLevel | null;
-  cefrSource: string | null;
-  cefrConfidence: 'high' | 'medium' | 'low' | null;
-  toeicRelevance: string | null;
-  ieltsRelevance: string | null;
-  academicRelevance: string | null;
-  businessRelevance: string | null;
-  quality: 'production' | 'review';
-  isActive: boolean;
-  sourceSegment: string | null;
-  translationSource: string | null;
-  pronunciationSource: string | null;
-  exampleQuality: string | null;
-  reviewFlags: string[];
+function localContent(lesson: CatalogLesson): LessonContent {
+  const vocabulary = lesson.vocabularyIds.flatMap(id => localWords.has(id) ? [localWords.get(id)!] : []);
+  const grammar = lesson.grammarIds.flatMap(id => localGrammar.has(id) ? [localGrammar.get(id)!] : []);
+  if (vocabulary.length !== lesson.vocabularyIds.length || grammar.length !== lesson.grammarIds.length) throw new Error('This lesson is not available offline. Connect to the internet and retry.');
+  return { vocabulary, grammar, source: 'local' };
 }
 
-export interface GrammarQuery extends ContentQuery {
-  category?: string;
-  search?: string;
-  ids?: string[];
+export async function loadLessonContent(lesson: CatalogLesson, source: LessonCatalog['source'], force = false): Promise<LessonContent> {
+  const key = `${source}:${lesson.id}`;
+  if (!force && contentCache.has(key)) return contentCache.get(key)!;
+  if (source === 'local') { const result = localContent(lesson); contentCache.set(key, result); return result; }
+  const timeout = deadline();
+  try {
+    const wordRows: WordRow[] = [];
+    for (let offset = 0; offset < lesson.vocabularyIds.length; offset += 100) {
+      const { data, error } = await supabase.from('vocabulary_entries')
+        .select('id,term,translation,language_code,part_of_speech,ipa,pronunciation,example_sentence,example_translation,cefr_level,topic_id,example_quality')
+        .eq('is_published', true).eq('quality', 'production').eq('is_active', true)
+        .in('id', lesson.vocabularyIds.slice(offset, offset + 100)).abortSignal(timeout.signal);
+      if (error) throw new Error('Vocabulary could not be loaded.');
+      wordRows.push(...(data || []) as WordRow[]);
+    }
+    const words = new Map(wordRows.map(row => [row.id, {
+      id: row.id, languageCode: row.language_code, term: row.term, translation: row.translation, partOfSpeech: row.part_of_speech || undefined,
+      ipa: row.ipa, pronunciation: row.pronunciation, exampleSentence: row.example_sentence || undefined, exampleTranslation: row.example_translation || undefined,
+      cefrLevel: row.cefr_level, topicId: row.topic_id, exampleQuality: row.example_quality,
+    } satisfies LocalVocabularyRecord]));
+    let grammar: GrammarPoint[] = [];
+    if (lesson.grammarIds.length) {
+      const { data, error } = await supabase.from('grammar_points')
+        .select('id,cefr_level,category,title,title_vi,pattern,explanation,common_mistake,grammar_examples(position,sentence,translation)')
+        .eq('is_published', true).in('id', lesson.grammarIds).abortSignal(timeout.signal);
+      if (error) throw new Error('Grammar could not be loaded.');
+      const points = new Map(((data || []) as unknown as GrammarRow[]).map(row => {
+        const examples = [...(row.grammar_examples || [])].sort((a, b) => a.position - b.position);
+        return [row.id, { id: row.id, level: row.cefr_level, category: row.category, title: row.title, titleVi: row.title_vi, pattern: row.pattern, explanation: row.explanation, commonMistake: row.common_mistake, examples: examples.map(item => item.sentence), exampleTranslations: examples.map(item => item.translation) } satisfies GrammarPoint];
+      }));
+      grammar = lesson.grammarIds.flatMap(id => points.has(id) ? [points.get(id)!] : []);
+    }
+    const vocabulary = lesson.vocabularyIds.flatMap(id => words.has(id) ? [words.get(id)!] : []);
+    if (vocabulary.length !== lesson.vocabularyIds.length || grammar.length !== lesson.grammarIds.length) throw new Error('Some lesson content is missing.');
+    const result: LessonContent = { vocabulary, grammar, source: 'cloud' };
+    contentCache.set(key, result); return result;
+  } catch {
+    const fallback = localContent(lesson);
+    return { ...fallback, notice: 'Showing the offline copy of this lesson. Your progress will still be saved.' };
+  } finally { timeout.dispose(); }
 }
-
-export interface GrammarContent {
-  id: string;
-  level: Exclude<LearningCefrLevel, 'C2'>;
-  category: string;
-  title: string;
-  titleVi: string;
-  pattern: string;
-  explanation: string;
-  examples: string[];
-  exampleTranslations: string[];
-  commonMistake: { incorrect: string; correct: string; explanation: string };
-}
-
-export interface GrammarExerciseQuery extends PageQuery {
-  topic?: string;
-}
-
-export interface GrammarExerciseContent {
-  id: string;
-  topic: string;
-  gappedText: string;
-  solution: string;
-  distractors: string[];
-  filledText: string;
-  sourceUrl: string;
-  sourceLicense: string;
-  sortOrder: number;
-}
-
-export interface LessonQuery extends ContentQuery {
-  type?: LessonType;
-}
-
-export interface LessonItemsQuery {
-  limit?: number;
-  offset?: number;
-}
-
-export interface LessonContent {
-  id: string;
-  title: string;
-  description: string | null;
-  level: LearningCefrLevel;
-  type: LessonType;
-  sortOrder: number;
-  topicId: string | null;
-  topicTitle: string | null;
-}
-
-export interface LessonContentItem {
-  position: number;
-  vocabulary: VocabularyContent | null;
-  grammar: GrammarContent | null;
-}
-
-export interface ListeningPracticePayload {
-  transcript: string;
-  question: string;
-  options: string[];
-  answer: number;
-}
-
-export interface ReadingPracticePayload {
-  text: string;
-  question: string;
-  options: string[];
-  answer: number;
-}
-
-export interface WritingPracticePayload {
-  prompt: string;
-  tip: string;
-}
-
-export interface SpeakingPracticePayload {
-  text: string;
-  vi: string;
-}
-
-export type PracticeContent =
-  | { id: string; skill: 'listening'; level: LearningCefrLevel; title: string; sortOrder: number; payload: ListeningPracticePayload }
-  | { id: string; skill: 'reading'; level: LearningCefrLevel; title: string; sortOrder: number; payload: ReadingPracticePayload }
-  | { id: string; skill: 'writing'; level: LearningCefrLevel; title: string; sortOrder: number; payload: WritingPracticePayload }
-  | { id: string; skill: 'speaking'; level: LearningCefrLevel; title: null; sortOrder: number; payload: SpeakingPracticePayload };
-
-export interface PracticeQuery extends ContentQuery {
-  skill?: PracticeSkill;
-  ids?: string[];
-}
-
-export interface TutorProfile {
-  id: string;
-  name: string;
-  role: string;
-  initials: string;
-  description: string;
-  tone: string | null;
-  accentColor: string | null;
-  sortOrder: number;
-}
-
-export interface TutorScenario {
-  id: string;
-  tutorId: string;
-  title: string;
-  subtitle: string;
-  level: TutorScenarioLevel;
-  icon: string | null;
-  sortOrder: number;
-  tutor: TutorProfile | null;
-}
-
-export interface TutorScenarioMessage {
-  position: number;
-  role: 'tutor' | 'learner';
-  text: string;
-}
-
-export interface TutorScenarioBundle {
-  scenario: TutorScenario;
-  messages: TutorScenarioMessage[];
-}
-
-export interface TutorScenarioQuery {
-  tutorId?: string;
-  level?: TutorScenarioLevel;
-  limit?: number;
-  offset?: number;
-}
-
-type TopicRow = {
-  id: string;
-  title: string;
-  description: string | null;
-  subtitle: string | null;
-  icon: string | null;
-  cefr_level: LearningCefrLevel | null;
-  accent_color: string | null;
-  sort_order: number;
-};
-
-type GrammarExampleRow = { position: number; sentence: string; translation: string };
-type GrammarPointRow = {
-  id: string;
-  cefr_level: GrammarContent['level'];
-  category: string;
-  title: string;
-  title_vi: string;
-  pattern: string;
-  explanation: string;
-  common_mistake: GrammarContent['commonMistake'];
-  sort_order: number;
-  grammar_examples: GrammarExampleRow[];
-};
-type GrammarExerciseRow = {
-  id: string;
-  grammar_topic: string;
-  gapped_text: string;
-  solution: string;
-  distractors: string[];
-  filled_text: string;
-  source_url: string;
-  source_license: string;
-  sort_order: number;
-};
-
-type VocabularyRow = {
-  id: string;
-  language_code: string;
-  term: string;
-  translation: string;
-  part_of_speech: string | null;
-  pronunciation: string | null;
-  ipa: string | null;
-  example_sentence: string | null;
-  example_translation: string | null;
-  topic_id: string | null;
-  difficulty: LearningCefrLevel | null;
-  exam_tags: string[];
-  frequency_rank: number | null;
-  cefr_level: LearningCefrLevel | null;
-  cefr_source: string | null;
-  cefr_confidence: VocabularyContent['cefrConfidence'];
-  toeic_relevance: string | null;
-  ielts_relevance: string | null;
-  academic_relevance: string | null;
-  business_relevance: string | null;
-  quality: VocabularyContent['quality'];
-  is_active: boolean;
-  source_segment: string | null;
-  translation_source: string | null;
-  pronunciation_source: string | null;
-  example_quality: string | null;
-  review_flags: string[];
-  topics: { title: string } | null;
-};
-
-type LessonRow = {
-  id: string;
-  topic_id: string | null;
-  cefr_level: LearningCefrLevel;
-  lesson_type: LessonType;
-  title: string;
-  description: string | null;
-  sort_order: number;
-  topic: { title: string } | null;
-};
-
-type LessonItemRow = {
-  position: number;
-  vocabulary: VocabularyRow | null;
-  grammar: GrammarPointRow | null;
-};
-
-type PracticeRow = {
-  id: string;
-  skill: PracticeSkill;
-  cefr_level: LearningCefrLevel;
-  title: string | null;
-  payload: Record<string, unknown>;
-  sort_order: number;
-};
-
-type TutorRow = {
-  id: string;
-  name: string;
-  role: string;
-  initials: string;
-  description: string;
-  tone: string | null;
-  accent_color: string | null;
-  sort_order: number;
-};
-
-type ScenarioRow = {
-  id: string;
-  tutor_id: string;
-  title: string;
-  subtitle: string;
-  level: TutorScenarioLevel;
-  icon: string | null;
-  sort_order: number;
-  tutor?: TutorRow | null;
-};
-
-type ScenarioBundleRow = ScenarioRow & {
-  tutor: TutorRow | null;
-  tutor_scenario_messages: TutorScenarioMessage[];
-};
-
-const MAX_PAGE_SIZE = 500;
-
-function page(limit = 100, offset = 0) {
-  const safeLimit = Math.min(Math.max(Math.trunc(limit), 1), MAX_PAGE_SIZE);
-  const safeOffset = Math.max(Math.trunc(offset), 0);
-  return { limit: safeLimit, offset: safeOffset };
-}
-
-function toTopic(row: TopicRow): TopicContent {
-  return {
-    id: row.id,
-    title: row.title,
-    description: row.description,
-    subtitle: row.subtitle,
-    icon: row.icon,
-    level: row.cefr_level,
-    accentColor: row.accent_color,
-    sortOrder: row.sort_order,
-  };
-}
-
-function toVocabulary(row: VocabularyRow): VocabularyContent {
-  return {
-    id: row.id,
-    languageCode: row.language_code,
-    term: row.term,
-    translation: row.translation,
-    partOfSpeech: row.part_of_speech,
-    pronunciation: row.pronunciation,
-    ipa: row.ipa,
-    exampleSentence: row.example_sentence,
-    exampleTranslation: row.example_translation,
-    topicId: row.topic_id,
-    topic: row.topics?.title || null,
-    difficulty: row.difficulty,
-    examTags: row.exam_tags || [],
-    frequencyRank: row.frequency_rank,
-    cefrLevel: row.cefr_level,
-    cefrSource: row.cefr_source,
-    cefrConfidence: row.cefr_confidence,
-    toeicRelevance: row.toeic_relevance,
-    ieltsRelevance: row.ielts_relevance,
-    academicRelevance: row.academic_relevance,
-    businessRelevance: row.business_relevance,
-    quality: row.quality,
-    isActive: row.is_active,
-    sourceSegment: row.source_segment,
-    translationSource: row.translation_source,
-    pronunciationSource: row.pronunciation_source,
-    exampleQuality: row.example_quality,
-    reviewFlags: row.review_flags || [],
-  };
-}
-
-function toGrammar(row: GrammarPointRow): GrammarContent {
-  const examples = [...(row.grammar_examples || [])].sort((a, b) => a.position - b.position);
-  return {
-    id: row.id,
-    level: row.cefr_level,
-    category: row.category,
-    title: row.title,
-    titleVi: row.title_vi,
-    pattern: row.pattern,
-    explanation: row.explanation,
-    examples: examples.map((example) => example.sentence),
-    exampleTranslations: examples.map((example) => example.translation),
-    commonMistake: row.common_mistake,
-  };
-}
-
-function toTutor(row: TutorRow): TutorProfile {
-  return {
-    id: row.id,
-    name: row.name,
-    role: row.role,
-    initials: row.initials,
-    description: row.description,
-    tone: row.tone,
-    accentColor: row.accent_color,
-    sortOrder: row.sort_order,
-  };
-}
-
-function toScenario(row: ScenarioRow): TutorScenario {
-  return {
-    id: row.id,
-    tutorId: row.tutor_id,
-    title: row.title,
-    subtitle: row.subtitle,
-    level: row.level,
-    icon: row.icon,
-    sortOrder: row.sort_order,
-    tutor: row.tutor ? toTutor(row.tutor) : null,
-  };
-}
-
-function toPractice(row: PracticeRow): PracticeContent {
-  const common = {
-    id: row.id,
-    level: row.cefr_level,
-    sortOrder: row.sort_order,
-  };
-  if (row.skill === 'listening') {
-    return { ...common, skill: row.skill, title: row.title || '', payload: row.payload as unknown as ListeningPracticePayload };
-  }
-  if (row.skill === 'reading') {
-    return { ...common, skill: row.skill, title: row.title || '', payload: row.payload as unknown as ReadingPracticePayload };
-  }
-  if (row.skill === 'writing') {
-    return { ...common, skill: row.skill, title: row.title || '', payload: row.payload as unknown as WritingPracticePayload };
-  }
-  return { ...common, skill: row.skill, title: null, payload: row.payload as unknown as SpeakingPracticePayload };
-}
-
-export const learningContentService = {
-  async getTopics(query: TopicQuery = {}): Promise<TopicContent[]> {
-    requireSupabaseConfig();
-    const { limit, offset } = page(query.limit, query.offset);
-    let request = supabase
-      .from('topics')
-      .select('id, title, description, subtitle, icon, cefr_level, accent_color, sort_order')
-      .eq('is_published', true)
-      .order('sort_order', { ascending: true })
-      .order('title', { ascending: true })
-      .range(offset, offset + limit - 1);
-    if (query.level) request = request.eq('cefr_level', query.level);
-    const { data, error } = await request;
-    if (error) throw error;
-    return ((data || []) as unknown as TopicRow[]).map(toTopic);
-  },
-
-  async getVocabulary(query: VocabularyQuery = {}): Promise<VocabularyContent[]> {
-    requireSupabaseConfig();
-    const { limit, offset } = page(query.limit, query.offset);
-    let request = supabase
-      .from('vocabulary_entries')
-      .select(`id, language_code, term, translation, part_of_speech, pronunciation, ipa,
-        example_sentence, example_translation, topic_id, difficulty, exam_tags, frequency_rank,
-        cefr_level, cefr_source, cefr_confidence, toeic_relevance, ielts_relevance,
-        academic_relevance, business_relevance, quality, is_active, source_segment,
-        translation_source, pronunciation_source, example_quality, review_flags, topics(title)`)
-      .eq('is_published', true)
-      .order('frequency_rank', { ascending: true, nullsFirst: false })
-      .range(offset, offset + limit - 1);
-    if (query.level) request = request.eq('cefr_level', query.level);
-    if (query.topicId) request = request.eq('topic_id', query.topicId);
-    if (query.search?.trim()) request = request.ilike('term', `%${query.search.trim()}%`);
-    if (query.examTag) request = request.contains('exam_tags', [query.examTag]);
-    if (query.ids?.length) request = request.in('id', query.ids);
-    const { data, error } = await request;
-    if (error) throw error;
-    return ((data || []) as unknown as VocabularyRow[]).map(toVocabulary);
-  },
-
-  async getGrammarPoints(query: GrammarQuery = {}): Promise<GrammarContent[]> {
-    requireSupabaseConfig();
-    if (query.level === 'C2') return [];
-    const { limit, offset } = page(query.limit, query.offset);
-    let request = supabase
-      .from('grammar_points')
-      .select(`id, cefr_level, category, title, title_vi, pattern, explanation,
-        common_mistake, sort_order, grammar_examples(position, sentence, translation)`)
-      .eq('is_published', true)
-      .order('sort_order', { ascending: true })
-      .range(offset, offset + limit - 1);
-    if (query.level) request = request.eq('cefr_level', query.level);
-    if (query.category) request = request.eq('category', query.category);
-    if (query.search?.trim()) request = request.ilike('title', `%${query.search.trim()}%`);
-    if (query.ids?.length) request = request.in('id', query.ids);
-    const { data, error } = await request;
-    if (error) throw error;
-    return ((data || []) as unknown as GrammarPointRow[]).map(toGrammar);
-  },
-
-  async getGrammarExercises(query: GrammarExerciseQuery = {}): Promise<GrammarExerciseContent[]> {
-    requireSupabaseConfig();
-    const { limit, offset } = page(query.limit, query.offset);
-    let request = supabase
-      .from('grammar_exercises')
-      .select('id, grammar_topic, gapped_text, solution, distractors, filled_text, source_url, source_license, sort_order')
-      .eq('is_published', true)
-      .order('sort_order', { ascending: true })
-      .range(offset, offset + limit - 1);
-    if (query.topic) request = request.eq('grammar_topic', query.topic);
-    const { data, error } = await request;
-    if (error) throw error;
-    return ((data || []) as unknown as GrammarExerciseRow[]).map((row) => ({
-      id: row.id,
-      topic: row.grammar_topic,
-      gappedText: row.gapped_text,
-      solution: row.solution,
-      distractors: row.distractors,
-      filledText: row.filled_text,
-      sourceUrl: row.source_url,
-      sourceLicense: row.source_license,
-      sortOrder: row.sort_order,
-    }));
-  },
-
-  async getLessons(query: LessonQuery = {}): Promise<LessonContent[]> {
-    requireSupabaseConfig();
-    const { limit, offset } = page(query.limit, query.offset);
-    let request = supabase
-      .from('lessons')
-      .select('id, topic_id, cefr_level, lesson_type, title, description, sort_order, topic:topics(title)')
-      .eq('is_published', true)
-      .order('sort_order', { ascending: true })
-      .range(offset, offset + limit - 1);
-    if (query.level) request = request.eq('cefr_level', query.level);
-    if (query.type) request = request.eq('lesson_type', query.type);
-    const { data, error } = await request;
-    if (error) throw error;
-    return ((data || []) as unknown as LessonRow[]).map((row) => ({
-      id: row.id,
-      title: row.title,
-      description: row.description,
-      level: row.cefr_level,
-      type: row.lesson_type,
-      sortOrder: row.sort_order,
-      topicId: row.topic_id,
-      topicTitle: row.topic?.title || null,
-    }));
-  },
-
-  async getLessonItems(lessonId: string, query: LessonItemsQuery = {}): Promise<LessonContentItem[]> {
-    requireSupabaseConfig();
-    if (!lessonId.trim()) return [];
-    const { limit, offset } = page(query.limit ?? 50, query.offset);
-    const { data, error } = await supabase
-      .from('lesson_items')
-      .select(`position,
-        vocabulary:vocabulary_entries(id, language_code, term, translation, part_of_speech, pronunciation, ipa,
-          example_sentence, example_translation, topic_id, difficulty, exam_tags, frequency_rank,
-          cefr_level, cefr_source, cefr_confidence, toeic_relevance, ielts_relevance, academic_relevance,
-          business_relevance, quality, is_active, source_segment, translation_source,
-          pronunciation_source, example_quality, review_flags, topics(title)),
-        grammar:grammar_points(id, cefr_level, category, title, title_vi, pattern, explanation,
-          common_mistake, sort_order, grammar_examples(position, sentence, translation))`)
-      .eq('lesson_id', lessonId)
-      .order('position', { ascending: true })
-      .range(offset, offset + limit - 1);
-    if (error) throw error;
-    return ((data || []) as unknown as LessonItemRow[]).map((item) => ({
-      position: item.position,
-      vocabulary: item.vocabulary ? toVocabulary(item.vocabulary) : null,
-      grammar: item.grammar ? toGrammar(item.grammar) : null,
-    }));
-  },
-
-  async getPracticeContent(query: PracticeQuery = {}): Promise<PracticeContent[]> {
-    requireSupabaseConfig();
-    const { limit, offset } = page(query.limit, query.offset);
-    let request = supabase
-      .from('practice_content')
-      .select('id, skill, cefr_level, title, payload, sort_order')
-      .eq('is_published', true)
-      .order('sort_order', { ascending: true })
-      .range(offset, offset + limit - 1);
-    if (query.level) request = request.eq('cefr_level', query.level);
-    if (query.skill) request = request.eq('skill', query.skill);
-    if (query.ids?.length) request = request.in('id', query.ids);
-    const { data, error } = await request;
-    if (error) throw error;
-    return ((data || []) as unknown as PracticeRow[]).map(toPractice);
-  },
-
-  async getTutors(query: PageQuery = {}): Promise<TutorProfile[]> {
-    requireSupabaseConfig();
-    const { limit, offset } = page(query.limit, query.offset);
-    const { data, error } = await supabase
-      .from('ai_tutors')
-      .select('id, name, role, initials, description, tone, accent_color, sort_order')
-      .eq('is_published', true)
-      .order('sort_order', { ascending: true })
-      .range(offset, offset + limit - 1);
-    if (error) throw error;
-    return ((data || []) as unknown as TutorRow[]).map(toTutor);
-  },
-
-  async getTutorScenarios(query: TutorScenarioQuery = {}): Promise<TutorScenario[]> {
-    requireSupabaseConfig();
-    const { limit, offset } = page(query.limit, query.offset);
-    let request = supabase
-      .from('tutor_scenarios')
-      .select('id, tutor_id, title, subtitle, level, icon, sort_order, tutor:ai_tutors(id, name, role, initials, description, tone, accent_color, sort_order)')
-      .eq('is_published', true)
-      .order('sort_order', { ascending: true })
-      .range(offset, offset + limit - 1);
-    if (query.tutorId) request = request.eq('tutor_id', query.tutorId);
-    if (query.level) request = request.eq('level', query.level);
-    const { data, error } = await request;
-    if (error) throw error;
-    return ((data || []) as unknown as ScenarioRow[]).map(toScenario);
-  },
-
-  async getTutorScenarioMessages(scenarioId: string): Promise<TutorScenarioMessage[]> {
-    requireSupabaseConfig();
-    if (!scenarioId.trim()) return [];
-    const { data, error } = await supabase
-      .from('tutor_scenario_messages')
-      .select('position, role, text')
-      .eq('scenario_id', scenarioId)
-      .order('position', { ascending: true });
-    if (error) throw error;
-    return (data || []) as TutorScenarioMessage[];
-  },
-
-  async getTutorScenarioBundle(scenarioId: string): Promise<TutorScenarioBundle | null> {
-    requireSupabaseConfig();
-    if (!scenarioId.trim()) return null;
-    const { data, error } = await supabase
-      .from('tutor_scenarios')
-      .select(`id, tutor_id, title, subtitle, level, icon, sort_order,
-        tutor:ai_tutors(id, name, role, initials, description, tone, accent_color, sort_order),
-        tutor_scenario_messages(position, role, text)`)
-      .eq('id', scenarioId)
-      .eq('is_published', true)
-      .maybeSingle();
-    if (error) throw error;
-    if (!data) return null;
-    const row = data as unknown as ScenarioBundleRow;
-    return {
-      scenario: toScenario(row),
-      messages: [...(row.tutor_scenario_messages || [])].sort((a, b) => a.position - b.position),
-    };
-  },
-};

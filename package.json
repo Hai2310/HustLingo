@@ -18,7 +18,8 @@
     "build:production": "eas build --platform all --profile production",
     "db:seed:content": "node scripts/import-content.mjs",
     "validate": "node scripts/validate-project.mjs",
-    "check": "npm run validate && npm run typecheck"
+    "test:lessons": "node --test scripts/test-lessons.mjs",
+    "check": "npm run validate && npm run typecheck && npm run test:lessons"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

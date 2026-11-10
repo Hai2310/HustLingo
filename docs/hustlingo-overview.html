@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="12 slide tóm tắt bài toán và kiến trúc HustLingo theo README chính của repository.">
+  <title>HustLingo — Bài toán & kiến trúc dự án</title>
+  <style>
+    :root { --red:#bf1636; --ink:#182535; --muted:#536174; --paper:#faf9f6; --line:#d9dee4; --blue:#3169a2; --green:#277a62; --purple:#7752a5; --orange:#ac6825; }
+    * { box-sizing:border-box; }
+    html,body { margin:0; min-height:100%; }
+    body { background:#e8ebef; color:var(--ink); font-family:"Segoe UI",Arial,sans-serif; }
+    button { font:inherit; cursor:pointer; }
+    button:focus-visible,a:focus-visible { outline:3px solid var(--red); outline-offset:5px; }
+    button:disabled { opacity:.32; cursor:default; }
+    [hidden] { display:none !important; }
+    .viewport { height:calc(100vh - 82px); height:calc(100svh - 82px); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+    .stage { width:1600px; height:900px; flex-shrink:0; transform:scale(var(--scale, .7)); transform-origin:center; }
+    .slide { width:1600px; height:900px; padding:70px 84px 78px; background:var(--paper); position:relative; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 14px 60px #18253518; border-top:8px solid var(--red); }
+    .kicker { margin:0 0 17px; color:var(--red); text-transform:uppercase; letter-spacing:.16em; font-size:18px; font-weight:700; }
+    h1,h2,h3,p { margin-top:0; }
+    h1 { font-size:118px; line-height:1.05; letter-spacing:-.045em; margin-bottom:30px; }
+    h2 { font-size:58px; line-height:1.15; letter-spacing:-.035em; margin-bottom:24px; font-weight:650; }
+    h3 { font-size:32px; line-height:1.2; font-weight:650; margin-bottom:16px; }
+    p,li { font-size:27px; line-height:1.5; }
+    .lead { font-size:29px; line-height:1.45; color:var(--muted); max-width:1180px; margin-bottom:34px; }
+    strong { font-weight:650; }
+    .small { font-size:21px; line-height:1.45; color:var(--muted); }
+    .foot { position:absolute; bottom:30px; left:84px; right:84px; display:flex; justify-content:space-between; font-size:17px; color:var(--muted); border-top:1px solid var(--line); padding-top:16px; }
+    .cover { background:var(--ink); color:white; justify-content:center; border-top-color:var(--red); }
+    .cover .kicker { color:#f897ab; margin-bottom:35px; }
+    .cover .subtitle { font-size:46px; max-width:1100px; line-height:1.3; margin-bottom:28px; }
+    .cover .lead { color:#c6ced8; font-size:29px; max-width:1000px; }
+    .cover .foot { color:#a8b4c2; border-color:#ffffff24; }
+    .cover .platforms { margin-top:32px; color:#e5e8ee; font-size:26px; letter-spacing:.08em; }
+    .cols { display:grid; grid-template-columns:1fr 1fr; gap:66px; }
+    .three { display:grid; grid-template-columns:repeat(3,1fr); gap:52px; }
+    .four { display:grid; grid-template-columns:repeat(4,1fr); gap:34px; }
+    .rule-top { border-top:2px solid var(--line); padding-top:24px; }
+    .number { font-size:55px; font-weight:650; line-height:1; color:var(--red); margin-bottom:20px; }
+    .module { border-top:4px solid currentColor; padding-top:25px; }
+    .module p { color:var(--ink); font-size:25px; line-height:1.5; }
+    .module .owner { margin-top:26px; font-size:23px; color:var(--muted); }
+    .module .path { font-size:19px; color:var(--muted); overflow-wrap:anywhere; }
+    .blue { color:var(--blue); } .green { color:var(--green); } .purple { color:var(--purple); } .orange { color:var(--orange); }
+    .shared { border-top:1px solid var(--line); padding-top:22px; margin-top:26px; font-size:25px; color:var(--muted); }
+    .big-statement { font-size:58px; line-height:1.2; font-weight:650; letter-spacing:-.035em; margin-bottom:30px; }
+    .stack-name { color:var(--red); font-size:86px; line-height:1.04; letter-spacing:-.04em; font-weight:650; margin:15px 0 30px; }
+    .stack-lines { border-top:2px solid var(--ink); }
+    .stack-line { display:grid; grid-template-columns:170px 1fr; gap:16px; border-bottom:1px solid var(--line); padding:19px 0; font-size:26px; }
+    .stack-line span { color:var(--muted); font-size:23px; }
+    ul.clean { padding-left:25px; margin:0; }
+    ul.clean li { padding-left:7px; margin-bottom:18px; }
+    .problem-table { width:100%; border-collapse:collapse; }
+    .problem-table th { text-align:left; color:var(--red); font-size:23px; padding:0 0 20px; }
+    .problem-table td { width:50%; vertical-align:top; font-size:27px; line-height:1.35; padding:22px 32px 22px 0; border-top:1px solid var(--line); }
+    .audience { margin-top:24px; font-size:24px; color:var(--muted); }
+    .diagram { width:100%; flex-shrink:0; height:auto; overflow:visible; }
+    .diagram text { font-family:"Segoe UI",Arial,sans-serif; fill:var(--ink); }
+    .diagram .node { fill:white; stroke:#b9c4cf; stroke-width:2; rx:10; }
+    .diagram .n-blue { fill:#eef4fb; stroke:#8cb0d3; }
+    .diagram .n-green { fill:#eef7f2; stroke:#8cbeac; }
+    .diagram .n-purple { fill:#f3eff9; stroke:#b7a3d2; }
+    .diagram .n-red { fill:#fbf0f2; stroke:#d7a0ac; }
+    .diagram .n-orange { fill:#fdf4e9; stroke:#d3b080; }
+    .diagram .edge { fill:none; stroke:#738399; stroke-width:2.5; }
+    .diagram .label { fill:var(--muted); font-size:22px; }
+    .diagram .title { font-size:27px; font-weight:650; }
+    .diagram .body { font-size:23px; }
+    .diagram-mobile { display:none; }
+    .example { padding:20px 0; margin-top:18px; border-top:1px solid var(--line); border-bottom:1px solid var(--line); font-size:27px; }
+    code { font-family:Consolas,"Courier New",monospace; font-size:.88em; }
+    .role-table { width:100%; border-collapse:collapse; }
+    .role-table th { font-size:21px; color:var(--red); text-align:left; padding:0 16px 15px 0; }
+    .role-table td { vertical-align:top; font-size:24px; line-height:1.4; padding:20px 22px 20px 0; border-top:1px solid var(--line); }
+    .role-table td:first-child { width:29%; font-weight:650; }
+    .data-number { font-size:120px; color:var(--red); font-weight:650; letter-spacing:-.06em; margin:8px 0 8px; line-height:1; }
+    .data-caption { color:var(--muted); font-size:24px; margin-bottom:30px; }
+    .data-source { font-size:40px; font-weight:650; margin:20px 0 8px; }
+    .data-users { display:flex; gap:0; margin-top:28px; border-top:2px solid var(--ink); }
+    .data-user { width:33.33%; padding:28px 28px 0 0; }
+    .data-user h3 { font-size:30px; }
+    .data-user p { font-size:23px; color:var(--muted); }
+    .security-code { background:var(--ink); color:white; padding:36px; font-size:39px; line-height:1.3; margin:26px 0; }
+    .security-list p { border-top:1px solid var(--line); padding-top:22px; margin-bottom:24px; font-size:27px; }
+    .phase { font-size:23px; color:var(--red); font-weight:650; letter-spacing:.05em; margin-bottom:16px; }
+    .pipeline { display:flex; align-items:center; gap:16px; margin:28px 0; font-size:28px; flex-wrap:wrap; }
+    .pipeline .arrow { color:var(--muted); }
+    .deploy { border-top:3px solid var(--red); padding-top:24px; }
+    .deploy h3 { font-size:38px; }
+    .deploy .tech { font-size:34px; color:var(--red); margin-bottom:22px; line-height:1.25; }
+    .deploy p { font-size:25px; }
+    .commands { font-family:Consolas,"Courier New",monospace; font-size:22px; line-height:1.6; margin-top:28px; overflow-wrap:anywhere; }
+    .toolbar { height:82px; position:fixed; bottom:0; left:0; right:0; background:var(--paper); border-top:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; padding:0 28px; gap:20px; z-index:10; }
+    .toolbar button { border:1px solid var(--line); border-radius:7px; padding:9px 15px; background:white; color:var(--ink); font-size:16px; }
+    .toolbar button:hover:not(:disabled) { background:#f3edef; border-color:#c7a5ad; }
+    .toolbar .primary { background:var(--ink); color:white; border-color:var(--ink); }
+    .toolbar .primary:hover:not(:disabled) { background:#314458; }
+    .nav-controls,.tools { display:flex; align-items:center; gap:10px; }
+    #counter { min-width:95px; font-variant-numeric:tabular-nums; }
+    #slide-title { font-size:16px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:570px; }
+    .progress { position:absolute; top:-3px; height:3px; background:var(--red); left:0; width:var(--progress,8.33%); transition:width .18s ease; }
+    dialog { border:0; border-radius:14px; padding:30px; width:min(850px,92vw); max-height:86vh; color:var(--ink); box-shadow:0 24px 90px #0005; background:var(--paper); }
+    dialog::backdrop { background:#182535b3; }
+    dialog h2 { font-size:28px; margin:0; }
+    .dialog-head { display:flex; align-items:center; justify-content:space-between; gap:20px; margin-bottom:24px; }
+    .close { font-size:24px; border:0; background:transparent; }
+    .overview-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .overview-grid button { text-align:left; background:white; padding:15px; border:1px solid var(--line); border-radius:6px; font-size:16px; line-height:1.35; }
+    .overview-grid button[aria-current=true] { border-color:var(--red); color:var(--red); }
+    .overview-grid .index { font-size:14px; display:block; margin-bottom:5px; color:var(--muted); }
+    .shortcuts { display:grid; grid-template-columns:140px 1fr; gap:14px; font-size:17px; }
+    kbd { border:1px solid var(--line); background:white; padding:3px 7px; border-radius:4px; font:inherit; }
+    .notes { position:fixed; right:26px; bottom:100px; width:min(490px,90vw); padding:25px; border:1px solid var(--line); border-radius:10px; background:var(--paper); box-shadow:0 15px 55px #18253540; z-index:20; }
+    .notes h3 { font-size:21px; margin-bottom:12px; }
+    .notes p { font-size:17px; line-height:1.5; margin:0; }
+    .notes .source { margin-top:14px; color:var(--muted); font-size:14px; }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    @media(max-width:760px) {
+      body { background:var(--paper); }
+      .viewport { height:auto; min-height:calc(100svh - 76px); overflow:visible; display:block; padding-bottom:76px; }
+      .stage { width:100%; height:auto; transform:none; }
+      .slide { width:100%; height:auto; min-height:calc(100svh - 76px); padding:30px 24px 32px; box-shadow:none; overflow:visible; border-top-width:5px; }
+      h1 { font-size:68px; } h2 { font-size:36px; } h3 { font-size:25px; }
+      p,li,.lead { font-size:20px; } .small { font-size:16px; }
+      .kicker { font-size:13px; } .cover .subtitle { font-size:29px; } .cover .lead { font-size:21px; }
+      .cover .platforms { font-size:18px; } .cover { min-height:calc(100svh - 76px); }
+      .foot { position:static; margin-top:32px; font-size:12px; gap:14px; }
+      .cols,.three,.four { grid-template-columns:1fr; gap:26px; }
+      .module { padding-top:17px; } .module p,.module .owner { font-size:20px; } .module .owner { margin-top:10px; }
+      .module .path { font-size:15px; } .shared { font-size:18px; }
+      .big-statement { font-size:36px; } .stack-name { font-size:60px; margin:0 0 20px; }
+      .stack-line { font-size:20px; grid-template-columns:110px 1fr; padding:15px 0; } .stack-line span { font-size:17px; }
+      .problem-table th { font-size:17px; } .problem-table td { font-size:18px; padding:15px 12px 15px 0; }
+      .audience { font-size:17px; } .number { font-size:36px; }
+      .diagram { display:none; } .diagram-mobile { display:block; font-size:19px; }
+      .diagram-mobile ol { padding-left:23px; } .diagram-mobile li { font-size:19px; margin-bottom:14px; }
+      .role-table td { font-size:17px; padding:14px 9px 14px 0; } .role-table th { font-size:15px; }
+      .example { font-size:19px; } .data-number { font-size:90px; } .data-caption { font-size:18px; }
+      .data-source { font-size:28px; } .data-users { flex-direction:column; } .data-user { width:100%; padding-top:18px; }
+      .data-user h3 { font-size:25px; } .data-user p { font-size:18px; }
+      .security-code { font-size:23px; padding:24px 18px; overflow-wrap:anywhere; }
+      .security-list p { font-size:20px; } .phase { font-size:17px; } .pipeline { font-size:21px; gap:10px; }
+      .deploy h3 { font-size:29px; } .deploy .tech { font-size:26px; } .deploy p { font-size:20px; } .commands { font-size:17px; }
+      .toolbar { height:76px; padding:0 12px; gap:8px; } .toolbar button { font-size:14px; padding:9px 10px; }
+      .tools { gap:6px; } .nav-controls { gap:6px; } #slide-title,#print { display:none; }
+      #counter { min-width:70px; } .toolbar .button-text { display:none; }
+      .overview-grid { grid-template-columns:1fr; }
+      .notes { bottom:90px; right:5vw; }
+    }
+    @media(prefers-reduced-motion:reduce) { .progress { transition:none; } }
+    @media print {
+      @page { size:1600px 900px; margin:0; }
+      body { background:white; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      .viewport { display:block; height:auto; padding:0; overflow:visible; }
+      .stage { transform:none; height:auto; width:1600px; }
+      .slide,.slide[hidden] { display:flex !important; box-shadow:none; break-after:page; page-break-after:always; }
+      .slide:last-child { break-after:auto; }
+      .toolbar,.notes,dialog,.sr-only { display:none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="viewport" aria-label="Bài trình chiếu HustLingo">
+    <div class="stage">
+      <section class="slide cover" id="slide-1" aria-labelledby="title-1" data-title="HustLingo · Bài toán & kiến trúc" data-source="README: Giới thiệu, Một codebase cho nhiều nền tảng" data-notes="Giới thiệu dự án học tiếng Anh đa nền tảng. Bài trình bày tóm tắt định hướng và kiến trúc trong README, không khẳng định tất cả tính năng đã hoàn thiện.">
+        <p class="kicker">Ứng dụng học tiếng Anh đa nền tảng</p>
+        <h1 id="title-1">HustLingo</h1>
+        <p class="subtitle">Bài toán &amp; kiến trúc dự án</p>
+        <p class="lead">Học theo lộ trình, luyện tập có hệ thống<br>và đồng bộ tiến độ giữa các thiết bị.</p>
+        <p class="platforms">Web &nbsp; · &nbsp; Android &nbsp; · &nbsp; iOS</p>
+        <footer class="foot"><span>Tổng quan theo README chính của repository</span><span>01 / 12</span></footer>
+      </section>
+
+      <section class="slide" id="slide-2" aria-labelledby="title-2" hidden data-title="Bài toán học tiếng Anh" data-source="README: HustLingo hướng tới ai? / HustLingo giải quyết điều gì?" data-notes="README nêu các khó khăn về chọn nội dung, ôn tập, theo dõi và đổi thiết bị. Đối tượng hướng tới gồm sinh viên, người học theo A1–C1 và người luyện TOEIC/IELTS; đây là định hướng sản phẩm.">
+        <p class="kicker">Bài toán</p><h2 id="title-2">Học nhiều, nhưng khó duy trì một lộ trình</h2>
+        <p class="lead">Người học cần biết nên học gì, cần ôn gì và tiếp tục ở đâu.</p>
+        <table class="problem-table"><thead><tr><th>Khó khăn</th><th>Hướng giải quyết của HustLingo</th></tr></thead><tbody>
+          <tr><td>Nội dung nhiều, thiếu thứ tự học</td><td>Bài học theo level và chủ đề</td></tr>
+          <tr><td>Bài học và luyện tập tách rời</td><td>Nối lesson, quiz, flashcard và review</td></tr>
+          <tr><td>Khó theo dõi phần đã nhớ / cần ôn</td><td>Tiến độ, độ chính xác và hàng ôn</td></tr>
+          <tr><td>Đổi thiết bị dễ mất tiến độ</td><td>Lưu local và đồng bộ tài khoản</td></tr>
+        </tbody></table>
+        <p class="audience"><strong>Hướng tới:</strong> sinh viên · người học A1–C1 · người luyện TOEIC/IELTS</p>
+        <footer class="foot"><span>HustLingo · Bài toán và người dùng mục tiêu</span><span>02 / 12</span></footer>
+      </section>
+
+      <section class="slide" id="slide-3" aria-labelledby="title-3" hidden data-title="Vòng học của sản phẩm" data-source="README: Học tập theo vòng lặp" data-notes="Learning loop trong README: Lesson, Practice, Answer/Result, Learning Progress, Review, Next Lesson. Kết quả và trạng thái học giúp người dùng lựa chọn bước tiếp theo.">
+        <p class="kicker">Giải pháp</p><h2 id="title-3">Một vòng học có phản hồi và ôn lại</h2>
+        <p class="lead">Mỗi bước tạo thông tin cho bước tiếp theo.</p>
+        <svg class="diagram" viewBox="0 0 1432 230" role="img" aria-label="Bài học đến luyện tập, kết quả, tiến độ, ôn lại và bài tiếp theo">
+          <defs><marker id="arr-loop" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L9,5 L0,10" fill="#738399"/></marker></defs>
+          <g class="edge" marker-end="url(#arr-loop)"><path d="M212 106H243"/><path d="M452 106H483"/><path d="M692 106H723"/><path d="M932 106H963"/><path d="M1172 106H1203"/></g>
+          <rect class="node n-blue" x="12" y="52" width="200" height="108"/><text class="title" x="112" y="98" text-anchor="middle">Bài học</text><text class="body" x="112" y="132" text-anchor="middle">Lesson</text>
+          <rect class="node n-green" x="252" y="52" width="200" height="108"/><text class="title" x="352" y="98" text-anchor="middle">Luyện tập</text><text class="body" x="352" y="132" text-anchor="middle">Practice</text>
+          <rect class="node" x="492" y="52" width="200" height="108"/><text class="title" x="592" y="98" text-anchor="middle">Kết quả</text><text class="body" x="592" y="132" text-anchor="middle">Result</text>
+          <rect class="node n-red" x="732" y="52" width="200" height="108"/><text class="title" x="832" y="98" text-anchor="middle">Tiến độ</text><text class="body" x="832" y="132" text-anchor="middle">Progress</text>
+          <rect class="node n-orange" x="972" y="52" width="200" height="108"/><text class="title" x="1072" y="98" text-anchor="middle">Ôn lại</text><text class="body" x="1072" y="132" text-anchor="middle">Review</text>
+          <rect class="node n-blue" x="1212" y="52" width="200" height="108"/><text class="title" x="1312" y="98" text-anchor="middle">Tiếp tục</text><text class="body" x="1312" y="132" text-anchor="middle">Next lesson</text>
+        </svg>
+        <div class="diagram-mobile"><ol><li>Bài học → luyện tập</li><li>Kết quả → cập nhật tiến độ</li><li>Ôn lại → bài học tiếp theo</li></ol></div>
+        <div class="three rule-top"><div><h3>Học có ngữ cảnh</h3><p>Từ vựng, ngữ pháp và bài kỹ năng theo chủ đề.</p></div><div><h3>Biết phần cần luyện</h3><p>Quiz, độ chính xác và từ chưa nhớ.</p></div><div><h3>Có bước tiếp theo</h3><p>Hàng ôn và tiến độ dẫn người học trở lại.</p></div></div>
+        <footer class="foot"><span>HustLingo · Luồng học mục tiêu</span><span>03 / 12</span></footer>
+      </section>
+
+      <section class="slide" id="slide-4" aria-labelledby="title-4" hidden data-title="Kiến trúc bốn module" data-source="README: Team HustLingo / Kiến trúc 4 module chính / Ownership" data-notes="Huy phụ trách Lessons, Dương phụ trách Practice, Khánh phụ trách Tutor, Hải phụ trách Backend/Core. README mô tả ba tab features đang là khung để các thành viên xây chức năng. Các phần dùng chung được quản lý tập trung.">
+        <p class="kicker">Kiến trúc theo feature</p><h2 id="title-4">Bốn module, một nền tảng dùng chung</h2>
+        <div class="four" style="margin-top:24px">
+          <div class="module blue"><h3>Lessons</h3><p>Level A1–C1<br>Topic / lesson<br>Từ vựng, ngữ pháp<br>Bốn kỹ năng</p><p class="owner">Huy</p><p class="path">src/features/lessons/</p></div>
+          <div class="module green"><h3>Practice</h3><p>Quiz / flashcard<br>Review / ôn ngắt quãng<br>Luyện kỹ năng<br>TOEIC / IELTS</p><p class="owner">Dương</p><p class="path">src/features/practice/</p></div>
+          <div class="module purple"><h3>Tutor</h3><p>Tutor / scenario<br>Chat UI / call UI<br>Hội thoại demo<br>AI runtime về sau</p><p class="owner">Khánh</p><p class="path">src/features/tutor/</p></div>
+          <div class="module orange"><h3>Backend / Core</h3><p>Auth / database<br>Guest / cloud sync<br>RLS / services<br>Shared UI / state</p><p class="owner">Hải</p><p class="path">src/services/ · supabase/</p></div>
+        </div>
+        <p class="shared"><strong>Shared layer:</strong> Theme · Common components · Context · Types · Utils · Learning data</p>
+        <p class="small">README mô tả ba tab Lessons / Practice / Tutor đang là khung để tiếp tục triển khai.</p>
+        <footer class="foot"><span>HustLingo · Phân công và ranh giới module</span><span>04 / 12</span></footer>
+      </section>
+
+      <section class="slide" id="slide-5" aria-labelledby="title-5" hidden data-title="Công nghệ đa nền tảng" data-source="README: Một codebase cho nhiều nền tảng / Kiến trúc tổng quan / Cách đọc sơ đồ" data-notes="Expo, React Native và TypeScript là nền tảng ứng dụng. Expo Router quản lý route; Context quản lý state; Supabase đảm nhiệm Auth/PostgreSQL. Web/Android/iOS là các nền tảng mục tiêu, không tự chứng minh tất cả đã được kiểm thử.">
+        <p class="kicker">Stack</p><h2 id="title-5">Một codebase cho web và mobile</h2>
+        <div class="cols" style="margin-top:14px"><div><p class="stack-name">Expo<br>React Native</p><p class="lead">TypeScript / TSX<br>Giao diện và logic ứng dụng</p><p style="font-size:28px;color:var(--red)">Web · Android · iOS</p></div><div class="stack-lines">
+          <div class="stack-line"><span>Điều hướng</span><strong>Expo Router</strong></div>
+          <div class="stack-line"><span>State</span><strong>React Context</strong></div>
+          <div class="stack-line"><span>Lưu local</span><strong>AsyncStorage</strong></div>
+          <div class="stack-line"><span>Xác thực</span><strong>Supabase Auth</strong></div>
+          <div class="stack-line"><span>Dữ liệu cloud</span><strong>PostgreSQL + RLS</strong></div>
+        </div></div>
+        <footer class="foot"><span>HustLingo · Nền tảng kỹ thuật theo README</span><span>05 / 12</span></footer>
+      </section>
+
+      <section class="slide" id="slide-6" aria-labelledby="title-6" hidden data-title="Kiến trúc hệ thống tổng quan" data-source="README: Kiến trúc tổng quan hệ thống / Cách đọc sơ đồ" data-notes="Ứng dụng đọc nội dung đóng gói, lưu local, gọi Supabase Auth và đọc/ghi PostgreSQL qua client. Mũi tên chỉ bên thực hiện thao tác đến nguồn/dịch vụ được truy cập; phản hồi được lược bỏ. Context và services nằm trong ứng dụng.">
+        <p class="kicker">Kiến trúc hệ thống</p><h2 id="title-6">Ứng dụng và các nguồn dữ liệu</h2>
+        <svg class="diagram" viewBox="0 0 1432 520" role="img" aria-label="Ứng dụng Expo đọc nội dung, lưu AsyncStorage, gọi Supabase Auth và đồng bộ PostgreSQL">
+          <defs><marker id="arr-system" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L9,5 L0,10" fill="#738399"/></marker></defs>
+          <rect x="951" y="5" width="465" height="250" fill="none" stroke="#d2d9e2" rx="14"/><text class="label" x="1183" y="35" text-anchor="middle">TRÊN THIẾT BỊ / TRÌNH DUYỆT</text>
+          <rect x="951" y="275" width="465" height="235" fill="none" stroke="#d2d9e2" rx="14"/><text class="label" x="1183" y="305" text-anchor="middle">SUPABASE CLOUD</text>
+          <rect class="node n-blue" x="18" y="65" width="455" height="420"/>
+          <text x="245" y="123" text-anchor="middle" style="font-size:32px;font-weight:650">Ứng dụng Expo</text>
+          <text class="body" x="245" y="176" text-anchor="middle">UI + Expo Router</text><text class="label" x="245" y="211" text-anchor="middle">Hiển thị và điều hướng</text>
+          <text class="body" x="245" y="275" text-anchor="middle">AuthContext + LearningContext</text><text class="label" x="245" y="310" text-anchor="middle">Trạng thái dùng chung</text>
+          <text class="body" x="245" y="374" text-anchor="middle">Supabase client + supabaseData</text><text class="label" x="245" y="409" text-anchor="middle">Giao tiếp với backend</text>
+          <g class="edge" marker-end="url(#arr-system)"><path d="M473 108H967"/><path d="M473 213H967"/><path d="M473 360H967"/><path d="M473 459H967"/></g>
+          <text class="label" x="719" y="91" text-anchor="middle">đọc nội dung</text><text class="label" x="719" y="196" text-anchor="middle">đọc / lưu trên máy</text>
+          <text class="label" x="719" y="343" text-anchor="middle">đăng nhập / đăng xuất</text><text class="label" x="719" y="442" text-anchor="middle">đọc hồ sơ / đồng bộ tiến độ</text>
+          <rect class="node n-blue" x="977" y="62" width="412" height="90"/><text class="title" x="1183" y="100" text-anchor="middle">Nội dung đóng gói</text><text class="body" x="1183" y="133" text-anchor="middle">src/data/</text>
+          <rect class="node n-orange" x="977" y="170" width="412" height="74"/><text class="title" x="1183" y="215" text-anchor="middle">AsyncStorage</text>
+          <rect class="node n-purple" x="977" y="321" width="412" height="76"/><text class="title" x="1183" y="367" text-anchor="middle">Supabase Auth</text>
+          <rect class="node n-green" x="977" y="421" width="412" height="76"/><text class="title" x="1183" y="468" text-anchor="middle">PostgreSQL + RLS</text>
+        </svg>
+        <div class="diagram-mobile"><ol><li>App → nội dung đóng gói: đọc bài học.</li><li>App → AsyncStorage: đọc/lưu trên máy.</li><li>App → Supabase Auth: đăng nhập/đăng xuất.</li><li>App → PostgreSQL: đọc hồ sơ, đồng bộ tiến độ.</li></ol></div>
+        <p class="small">Mũi tên = bên gọi → nơi được truy cập. Phản hồi được lược bỏ để dễ đọc.</p>
+        <footer class="foot"><span>HustLingo · Kiến trúc ứng dụng / local / cloud</span><span>06 / 12</span></footer>
+      </section>
+
+      <section class="slide" id="slide-7" aria-labelledby="title-7" hidden data-title="Vai trò Context và Service" data-source="README: Cách đọc sơ đồ / src/contexts/ / src/services/" data-notes="Context giữ trạng thái dùng chung khi app chạy. Supabase client là đối tượng kết nối SDK; supabaseData là adapter nghiệp vụ phía client. Các service giúp screen không phải tự viết lại thao tác backend. AsyncStorage lưu lâu dài trên thiết bị và được minh họa ở slide kiến trúc.">
+        <p class="kicker">Bên trong ứng dụng</p><h2 id="title-7">Context giữ state, Service truy cập dữ liệu</h2>
+        <table class="role-table"><thead><tr><th>Thành phần</th><th>Vai trò</th><th>Ví dụ</th></tr></thead><tbody>
+          <tr><td>AuthContext</td><td>Trạng thái người dùng và phiên</td><td>Guest / account, hồ sơ</td></tr>
+          <tr><td>LearningContext</td><td>Trạng thái học dùng chung</td><td>Từ đã học, đã lưu, cần ôn</td></tr>
+          <tr><td>Supabase client</td><td>Kết nối SDK tới Supabase</td><td>Auth, truy vấn database</td></tr>
+          <tr><td>supabaseData</td><td>Đóng gói thao tác dữ liệu ứng dụng</td><td><code>getProfile()</code>, <code>getProgress()</code></td></tr>
+        </tbody></table>
+        <p class="example"><strong>Ví dụ đọc hồ sơ:</strong> màn hình gọi <code>supabaseData</code> → adapter dùng Supabase client → truy vấn PostgreSQL.</p>
+        <p class="small">Context và cả hai service chạy phía ứng dụng. Quyền truy cập dữ liệu được kiểm tra tại Supabase.</p>
+        <footer class="foot"><span>HustLingo · Trách nhiệm của state và data access</span><span>07 / 12</span></footer>
+      </section>
+
+      <section class="slide" id="slide-8" aria-labelledby="title-8" hidden data-title="Guest-first và đồng bộ" data-source="README: Guest-first & đồng bộ dữ liệu / Luồng đăng nhập & đồng bộ dữ liệu" data-notes="Luồng mục tiêu: guest học và lưu local; đăng nhập qua Email/Google/Facebook; hợp nhất tiến độ local với account; đồng bộ nhiều thiết bị. Việc thiết kế merge và xử lý lỗi là phần cần hoàn thiện, không nên coi đây là mọi tính năng đã sẵn sàng.">
+        <p class="kicker">Kiến trúc dữ liệu người dùng</p><h2 id="title-8">Học ngay, đăng nhập khi cần đồng bộ</h2>
+        <svg class="diagram" viewBox="0 0 1432 320" role="img" aria-label="Guest lưu local, khi đăng nhập dùng Supabase Auth, hợp nhất tiến độ rồi đồng bộ tài khoản">
+          <defs><marker id="arr-sync" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L9,5 L0,10" fill="#738399"/></marker></defs>
+          <rect class="node n-orange" x="14" y="98" width="285" height="128"/><text class="title" x="156" y="145" text-anchor="middle">Guest + local</text><text class="body" x="156" y="181" text-anchor="middle">AsyncStorage</text>
+          <rect class="node n-purple" x="392" y="98" width="285" height="128"/><text class="title" x="534" y="145" text-anchor="middle">Supabase Auth</text><text class="body" x="534" y="181" text-anchor="middle">Email / Google / Facebook</text>
+          <rect class="node n-red" x="770" y="98" width="285" height="128"/><text class="title" x="912" y="145" text-anchor="middle">Hợp nhất tiến độ</text><text class="body" x="912" y="181" text-anchor="middle">Local + account</text>
+          <rect class="node n-green" x="1148" y="98" width="270" height="128"/><text class="title" x="1283" y="145" text-anchor="middle">Đồng bộ</text><text class="body" x="1283" y="181" text-anchor="middle">Supabase PostgreSQL</text>
+          <g class="edge" marker-end="url(#arr-sync)"><path d="M299 162H383"/><path d="M677 162H761"/><path d="M1055 162H1139"/></g>
+          <text class="label" x="345" y="66" text-anchor="middle">chọn đăng nhập</text><text class="label" x="723" y="66" text-anchor="middle">xác thực xong</text><text class="label" x="1101" y="66" text-anchor="middle">lưu account</text>
+        </svg>
+        <div class="diagram-mobile"><ol><li>Guest học và lưu AsyncStorage.</li><li>Chọn đăng nhập qua Email/Google/Facebook.</li><li>Hợp nhất local với tiến độ account.</li><li>Đồng bộ Supabase để tiếp tục trên máy khác.</li></ol></div>
+        <div class="three rule-top"><div><h3>Trên một thiết bị</h3><p>Guest giữ progress, saved words, settings và draft.</p></div><div><h3>Khi có tài khoản</h3><p>Đọc / lưu tiến độ bằng danh tính đã xác thực.</p></div><div><h3>Giữa các thiết bị</h3><p>Web, Android và iOS dùng cùng account.</p></div></div>
+        <footer class="foot"><span>HustLingo · Luồng đồng bộ mục tiêu trong README</span><span>08 / 12</span></footer>
+      </section>
+
+      <section class="slide" id="slide-9" aria-labelledby="title-9" hidden data-title="Data layer dùng chung" data-source="README: Nền tảng nội dung học / Dataset 10.000 từ / Quy tắc chất lượng" data-notes="README đặt mục tiêu 10.000 từ và một nguồn learning data dùng chung. Features có adapter/re-export riêng nhưng không copy toàn bộ kho. Các nhãn CEFR/TOEIC/IELTS không được gọi là official khi chưa có nguồn hoặc xác minh phù hợp. Con số trong slide là mục tiêu kho từ của README.">
+        <p class="kicker">Kiến trúc nội dung</p><h2 id="title-9">Một nguồn dữ liệu cho nhiều feature</h2>
+        <div class="cols"><div><p class="data-number">10.000</p><p class="data-caption">Mục tiêu kho từ vựng trong README</p><p>Từ · IPA · Nghĩa · Ví dụ<br>Level · Topic · Exam tags<br>Nguồn và mức độ xác minh</p></div><div><p class="data-source">Shared learning data</p><p class="small" style="margin-bottom:20px">Vocabulary · Grammar · Bốn kỹ năng · TOEIC / IELTS · Topics / Review</p><div class="data-users"><div class="data-user"><h3 class="blue">Lessons</h3><p>Dạy nội dung</p></div><div class="data-user"><h3 class="green">Practice</h3><p>Luyện và ôn</p></div><div class="data-user"><h3 class="purple">Tutor</h3><p>Ngữ cảnh tương lai</p></div></div><p class="example" style="font-size:24px">Feature giữ adapter / config riêng; dữ liệu gốc được dùng lại.</p></div></div>
+        <p class="small">Chỉ gắn nhãn CEFR / TOEIC / IELTS “chuẩn” khi có nguồn và quy trình xác minh phù hợp.</p>
+        <footer class="foot"><span>HustLingo · Data layer và chất lượng nội dung</span><span>09 / 12</span></footer>
+      </section>
+
+      <section class="slide" id="slide-10" aria-labelledby="title-10" hidden data-title="Ranh giới bảo mật" data-source="README: RLS / Security / Checklist trước khi đưa code vào bản chung" data-notes="RLS là cơ chế tại database. Ví dụ trong README so sánh auth.uid() với user_id để kiểm chủ sở hữu. Publishable client config không phải service role secret. Service role key, provider secrets và private tokens không được đưa vào frontend hoặc commit repository.">
+        <p class="kicker">Bảo mật</p><h2 id="title-10">Dữ liệu cá nhân được bảo vệ tại database</h2>
+        <div class="cols"><div><h3>Kiểm tra chủ sở hữu bằng RLS</h3><div class="security-code"><code>auth.uid() = user_id</code></div><p>User A truy cập dữ liệu của A.<br>Truy cập dữ liệu của B phải bị từ chối.</p><p class="small">Đây là ví dụ nguyên tắc trong README; chính sách thực tế còn phụ thuộc loại bảng và thao tác.</p></div><div class="security-list"><p><strong>Frontend:</strong> dùng cấu hình public và phiên người dùng để gọi Supabase.</p><p><strong>Máy chủ:</strong> giữ service-role key và secret của nhà cung cấp AI.</p><p><strong>Repository:</strong> không commit <code>.env</code>, private token hoặc API secret.</p></div></div>
+        <footer class="foot"><span>HustLingo · RLS, danh tính và secrets</span><span>10 / 12</span></footer>
+      </section>
+
+      <section class="slide" id="slide-11" aria-labelledby="title-11" hidden data-title="Kiến trúc gia sư AI" data-source="README: Gia sư AI / Khánh — Giai đoạn hiện tại / Giai đoạn AI thật" data-notes="README ưu tiên Tutor UI và interaction flow trước khi kết nối AI runtime. Giai đoạn tương lai dùng microphone, STT, LLM, TTS, audio output. Slide không khẳng định AI thật hoặc UI đã hoàn thiện; pipeline là thiết kế tương lai.">
+        <p class="kicker">Tutor</p><h2 id="title-11">Giao diện trước, AI runtime ở giai đoạn sau</h2>
+        <p class="phase">ƯU TIÊN HIỆN TẠI</p><div class="pipeline"><strong>Tutor list</strong><span class="arrow">→</span><strong>Scenario</strong><span class="arrow">→</span><strong>Chat / Call UI</strong><span class="arrow">→</span><strong>Demo conversation</strong></div>
+        <p class="small" style="margin-bottom:36px">Xây luồng tương tác, trạng thái chat/call và điều khiển mic/speaker.</p>
+        <p class="phase rule-top">KIẾN TRÚC AI TƯƠNG LAI</p>
+        <svg class="diagram" viewBox="0 0 1432 170" role="img" aria-label="Microphone chuyển qua STT, LLM, TTS rồi phát audio">
+          <defs><marker id="arr-ai" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L9,5 L0,10" fill="#738399"/></marker></defs>
+          <g class="edge" marker-end="url(#arr-ai)"><path d="M246 76H294"/><path d="M536 76H584"/><path d="M826 76H874"/><path d="M1116 76H1164"/></g>
+          <rect class="node" x="16" y="25" width="230" height="100"/><text class="title" x="131" y="68" text-anchor="middle">Microphone</text><text class="body" x="131" y="101" text-anchor="middle">Thu tiếng nói</text>
+          <rect class="node n-purple" x="306" y="25" width="230" height="100"/><text class="title" x="421" y="68" text-anchor="middle">STT</text><text class="body" x="421" y="101" text-anchor="middle">Giọng nói → chữ</text>
+          <rect class="node n-red" x="596" y="25" width="230" height="100"/><text class="title" x="711" y="68" text-anchor="middle">LLM</text><text class="body" x="711" y="101" text-anchor="middle">Tạo phản hồi</text>
+          <rect class="node n-purple" x="886" y="25" width="230" height="100"/><text class="title" x="1001" y="68" text-anchor="middle">TTS</text><text class="body" x="1001" y="101" text-anchor="middle">Chữ → giọng nói</text>
+          <rect class="node" x="1176" y="25" width="240" height="100"/><text class="title" x="1296" y="68" text-anchor="middle">Audio output</text><text class="body" x="1296" y="101" text-anchor="middle">Phát phản hồi</text>
+        </svg>
+        <div class="diagram-mobile"><ol><li>Microphone → STT: giọng nói thành chữ.</li><li>LLM tạo phản hồi.</li><li>TTS → audio: chữ thành giọng nói.</li></ol></div>
+        <p class="small">Secret AI được giữ phía máy chủ; frontend gửi yêu cầu qua lớp dịch vụ phù hợp.</p>
+        <footer class="foot"><span>HustLingo · Tutor UI và pipeline mục tiêu</span><span>11 / 12</span></footer>
+      </section>
+
+      <section class="slide" id="slide-12" aria-labelledby="title-12" hidden data-title="Kiến trúc triển khai" data-source="README: Cách đọc sơ đồ — Công nghệ triển khai / Core files / Ownership" data-notes="Hướng deploy trong README: web Expo export + EAS Deploy, mobile EAS Build cho Android/iOS, backend Supabase Cloud. Việc build/phát hành là hoạt động triển khai, khác với các thao tác đọc/ghi trong lúc ứng dụng chạy. Shared/core thay đổi theo interface nhóm thống nhất.">
+        <p class="kicker">Build &amp; deploy</p><h2 id="title-12">Triển khai ứng dụng và backend</h2>
+        <p class="lead">Ba đích triển khai theo hướng trong README.</p>
+        <div class="three" style="margin-top:14px">
+          <div class="deploy"><h3>Web</h3><p class="tech">Expo export<br>+ EAS Deploy</p><p>Xuất bản web và đưa lên môi trường truy cập bằng trình duyệt.</p></div>
+          <div class="deploy"><h3>Mobile</h3><p class="tech">EAS Build<br>Android / iOS</p><p>Tạo bản ứng dụng cho từng nền tảng từ codebase chung.</p></div>
+          <div class="deploy"><h3>Backend</h3><p class="tech">Supabase<br>Cloud</p><p>Auth, PostgreSQL, migration và các chính sách RLS.</p></div>
+        </div>
+        <p class="shared"><strong>Nguyên tắc phát triển:</strong> mỗi thành viên làm trong module của mình; shared/core thay đổi theo interface cả nhóm thống nhất.</p>
+        <footer class="foot"><span>HustLingo · Công nghệ triển khai dự kiến</span><span>12 / 12</span></footer>
+      </section>
+    </div>
+  </main>
+
+  <nav class="toolbar" aria-label="Điều khiển trình chiếu">
+    <div class="progress" aria-hidden="true"></div>
+    <div class="nav-controls"><button id="prev" type="button" aria-label="Slide trước" title="Slide trước (←)">←</button><button id="counter" type="button" aria-label="Mở mục lục slide" title="Mục lục (O)">01 / 12</button><button id="next" type="button" class="primary" aria-label="Slide tiếp theo" title="Slide tiếp (→)">→</button></div>
+    <span id="slide-title">HustLingo · Bài toán &amp; kiến trúc</span>
+    <div class="tools"><button id="notes-button" type="button" aria-controls="notes" aria-expanded="false" title="Ghi chú (N)">Ghi chú</button><button id="fullscreen" type="button" title="Toàn màn hình (F)" aria-label="Bật hoặc tắt toàn màn hình">⛶ <span class="button-text">Toàn màn hình</span></button><button id="print" type="button" title="In hoặc lưu PDF (P)">In / PDF</button><button id="help-button" type="button" aria-label="Phím tắt" title="Phím tắt (?)">?</button></div>
+  </nav>
+  <aside class="notes" id="notes" aria-label="Ghi chú thuyết trình" hidden><h3>Ghi chú thuyết trình</h3><p id="note-text"></p><p class="source" id="note-source"></p></aside>
+  <dialog id="overview" aria-labelledby="overview-title"><div class="dialog-head"><h2 id="overview-title">Mục lục 12 slide</h2><button class="close" type="button" aria-label="Đóng mục lục" data-close="overview">×</button></div><div class="overview-grid" id="overview-grid"></div></dialog>
+  <dialog id="help" aria-labelledby="help-title"><div class="dialog-head"><h2 id="help-title">Điều khiển trình chiếu</h2><button class="close" type="button" aria-label="Đóng hướng dẫn" data-close="help">×</button></div><div class="shortcuts"><span><kbd>←</kbd> / <kbd>→</kbd></span><span>Slide trước / tiếp theo</span><span><kbd>Home</kbd> / <kbd>End</kbd></span><span>Slide đầu / cuối</span><span><kbd>O</kbd></span><span>Mở mục lục</span><span><kbd>N</kbd></span><span>Hiện / ẩn ghi chú</span><span><kbd>F</kbd></span><span>Toàn màn hình</span><span><kbd>P</kbd></span><span>In hoặc lưu PDF</span><span><kbd>Esc</kbd></span><span>Đóng ghi chú / hộp thoại</span></div></dialog>
+  <p id="announcer" class="sr-only" aria-live="polite"></p>
+  <noscript><p style="padding:20px">Bật JavaScript để chuyển slide; chức năng in của trình duyệt vẫn hiển thị toàn bộ bài trình bày.</p></noscript>
+
+  <script>
+    (() => {
+      'use strict';
+      const slides = [...document.querySelectorAll('.slide')];
+      const overview = document.getElementById('overview');
+      const help = document.getElementById('help');
+      const notes = document.getElementById('notes');
+      let index = 0;
+      const title = document.getElementById('slide-title');
+      const parseHash = () => {
+        const match = location.hash.match(/^#slide-(\d+)$/);
+        return match ? Math.max(0, Math.min(slides.length - 1, Number(match[1]) - 1)) : 0;
+      };
+      function resize() {
+        const scale = Math.min((innerWidth - 48) / 1600, (innerHeight - 112) / 900);
+        document.documentElement.style.setProperty('--scale', Math.max(.05, scale));
+      }
+      function show(next, updateHash = true) {
+        index = Math.max(0, Math.min(slides.length - 1, next));
+        slides.forEach((slide, i) => { slide.hidden = i !== index; });
+        document.getElementById('counter').textContent = `${String(index + 1).padStart(2, '0')} / ${slides.length}`;
+        document.getElementById('prev').disabled = index === 0;
+        document.getElementById('next').disabled = index === slides.length - 1;
+        title.textContent = slides[index].dataset.title;
+        document.getElementById('note-text').textContent = slides[index].dataset.notes;
+        document.getElementById('note-source').textContent = slides[index].dataset.source;
+        document.getElementById('announcer').textContent = `Slide ${index + 1} / ${slides.length}: ${slides[index].dataset.title}`;
+        document.documentElement.style.setProperty('--progress', `${(index + 1) / slides.length * 100}%`);
+        document.querySelectorAll('[data-slide-index]').forEach(button => button.setAttribute('aria-current', String(Number(button.dataset.slideIndex) === index)));
+        if (updateHash) history.replaceState(null, '', `#slide-${index + 1}`);
+        window.scrollTo(0, 0);
+      }
+      function toggleNotes() {
+        notes.hidden = !notes.hidden;
+        document.getElementById('notes-button').setAttribute('aria-expanded', String(!notes.hidden));
+      }
+      async function toggleFullscreen() {
+        try {
+          if (document.fullscreenElement) await document.exitFullscreen();
+          else if (document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
+        } catch (_) { document.getElementById('announcer').textContent = 'Trình duyệt không cho phép bật toàn màn hình.'; }
+      }
+      function openDialog(dialog) { if (!dialog.open) dialog.showModal(); }
+      slides.forEach((slide, i) => {
+        const button = document.createElement('button');
+        button.type = 'button'; button.dataset.slideIndex = i;
+        const number = document.createElement('span'); number.className = 'index'; number.textContent = String(i + 1).padStart(2, '0');
+        const label = document.createElement('span'); label.textContent = slide.dataset.title;
+        button.append(number, label);
+        button.addEventListener('click', () => { overview.close(); show(i); });
+        document.getElementById('overview-grid').append(button);
+      });
+      document.getElementById('prev').addEventListener('click', () => show(index - 1));
+      document.getElementById('next').addEventListener('click', () => show(index + 1));
+      document.getElementById('counter').addEventListener('click', () => openDialog(overview));
+      document.getElementById('notes-button').addEventListener('click', toggleNotes);
+      document.getElementById('fullscreen').addEventListener('click', toggleFullscreen);
+      document.getElementById('print').addEventListener('click', () => window.print());
+      document.getElementById('help-button').addEventListener('click', () => openDialog(help));
+      document.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', () => document.getElementById(button.dataset.close).close()));
+      document.addEventListener('keydown', event => {
+        if (event.altKey || event.ctrlKey || event.metaKey || /INPUT|TEXTAREA|SELECT/.test(event.target.tagName)) return;
+        if (overview.open || help.open) return;
+        const key = event.key.toLowerCase();
+        if (key === ' ' && event.target.closest('button,a')) return;
+        if (key === 'arrowright' || key === 'pagedown' || key === ' ') { event.preventDefault(); show(index + 1); }
+        else if (key === 'arrowleft' || key === 'pageup') { event.preventDefault(); show(index - 1); }
+        else if (key === 'home') { event.preventDefault(); show(0); }
+        else if (key === 'end') { event.preventDefault(); show(slides.length - 1); }
+        else if (key === 'o') openDialog(overview);
+        else if (key === 'n') toggleNotes();
+        else if (key === 'f') toggleFullscreen();
+        else if (key === 'p') window.print();
+        else if (key === '?' || key === 'h') openDialog(help);
+        else if (key === 'escape' && !notes.hidden) toggleNotes();
+      });
+      let touchStart = null;
+      document.querySelector('.viewport').addEventListener('pointerdown', event => {
+        if (event.pointerType === 'touch') touchStart = { x:event.clientX, y:event.clientY };
+      });
+      document.querySelector('.viewport').addEventListener('pointerup', event => {
+        if (!touchStart || event.pointerType !== 'touch') return;
+        const dx = event.clientX - touchStart.x, dy = event.clientY - touchStart.y;
+        if (Math.abs(dx) > 70 && Math.abs(dy) < 60) show(index + (dx < 0 ? 1 : -1));
+        touchStart = null;
+      });
+      window.addEventListener('resize', resize);
+      window.addEventListener('hashchange', () => show(parseHash(), false));
+      resize(); show(parseHash(), false);
+    })();
+  </script>
+</body>
+</html>
