@@ -5,7 +5,7 @@
 ## Được code
 - `screens/`: Practice Hub và các màn luyện tập.
 - `components/`: question, answer option, flashcard, exam timer, result...
-- `data/`: toàn bộ 10.000 vocabulary, grammar/listening/reading/writing source data, practice modes, exam catalog, review config.
+- `data/`: cấu hình hiển thị như practice modes, exam catalog và review config. Nội dung vocabulary, grammar và bài luyện đã publish được lấy qua `learningContentService` trong `src/services/learningContent.ts`.
 - `hooks/`: quiz state, timer, review queue, spaced repetition...
 - `types/`: type câu hỏi/kết quả.
 
@@ -14,3 +14,5 @@ Backend/Auth/Supabase/layout chung. Khi cần lưu kết quả, gọi API do Bac
 
 ## Start
 Code UI trong `screens/PracticeScreen.tsx`; tab `app/(tabs)/practice.tsx` đã trỏ tới file này.
+
+Xem danh sách phương thức và bộ lọc dữ liệu trong `src/services/README.md`.

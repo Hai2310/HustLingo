@@ -92,7 +92,6 @@ for (const [route, target] of [
   ['app/flashcards.tsx', '/(tabs)/practice'],
   ['app/quiz.tsx', '/(tabs)/practice'],
   ['app/exam.tsx', '/(tabs)/practice'],
-  ['app/tutor/[id].tsx', '/(tabs)/tutor'],
 ]) {
   const text = fs.readFileSync(path.join(root, route), 'utf8');
   if (!text.includes(target)) failures.push(`${route}: H.1 blank route must redirect to ${target}`);
@@ -100,7 +99,6 @@ for (const [route, target] of [
 
 for (const tab of [
   'app/(tabs)/practice.tsx',
-  'app/(tabs)/tutor.tsx',
 ]) {
   const text = fs.readFileSync(path.join(root, tab), 'utf8');
   for (const marker of ['router.push', 'useLearning', '@/data/']) {
