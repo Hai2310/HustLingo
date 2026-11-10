@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createClient } from '@supabase/supabase-js';
@@ -13,6 +14,13 @@ const tutorMessagesPath = resolve(projectRoot, 'src/features/tutor/data/demoMess
 const backendEnvPath = resolve(projectRoot, '.env.backend.local');
 const appEnvPath = resolve(projectRoot, '.env');
 const batchSize = 500;
+const grammarExerciseBatchSize = 100;
+const maxUpsertAttempts = 4;
+const retryBaseDelayMs = 1000;
+const grammarDatasetRevision = '374f402068cf15bf0e71c44410ba72f3a8c9c301';
+const grammarDatasetSha256 = '4b20c6e8c12c8be8d0e0bd03213d0e79aeb8b1d14f0180ba70dc073b9461462c';
+const grammarDatasetUrl = `https://raw.githubusercontent.com/ZanichelliEditore/english-grammar-multiple-choice-generation/${grammarDatasetRevision}/dataset/train_exercise_dataset.json`;
+const grammarDatasetSourceUrl = `https://github.com/ZanichelliEditore/english-grammar-multiple-choice-generation/blob/${grammarDatasetRevision}/dataset/train_exercise_dataset.json`;
 const levelOrder = new Map(['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map((level, index) => [level, index]));
 
 const topicTitles = {
@@ -82,6 +90,54 @@ function loadGrammarPoints() {
     throw new Error('Không đọc được grammarPoints từ src/features/lessons/data/grammar.ts.');
   }
   return points;
+}
+
+async function loadExternalGrammarExercises() {
+  const response = await fetch(grammarDatasetUrl);
+  if (!response.ok) {
+    throw new Error(`Không tải được bộ grammar từ GitHub (HTTP ${response.status}).`);
+  }
+
+  const bytes = Buffer.from(await response.arrayBuffer());
+  const checksum = createHash('sha256').update(bytes).digest('hex');
+  if (checksum !== grammarDatasetSha256) {
+    throw new Error(`Checksum bộ grammar không khớp ở revision ${grammarDatasetRevision}; đã dừng để tránh nhập dữ liệu khác nguồn.`);
+  }
+
+  const dataset = JSON.parse(bytes.toString('utf8'));
+  const fields = ['gapped_text', 'solution', 'distractors', 'filled_text', 'grammar_topic'];
+  const sourceIds = Object.keys(dataset.gapped_text || {}).sort((left, right) => Number(left) - Number(right));
+  if (sourceIds.length < 1000 || fields.some((field) => !dataset[field] || Object.keys(dataset[field]).length !== sourceIds.length)) {
+    throw new Error('Bộ grammar từ GitHub thiếu cột hoặc có số dòng không đồng nhất.');
+  }
+
+  const rows = sourceIds.map((sourceId, index) => {
+    const distractors = dataset.distractors[sourceId];
+    if (!Array.isArray(distractors) || distractors.length < 1 || distractors.length > 3) {
+      throw new Error(`Danh sách lựa chọn không hợp lệ tại bản ghi nguồn ${sourceId}.`);
+    }
+    for (const field of ['gapped_text', 'solution', 'filled_text', 'grammar_topic']) {
+      if (typeof dataset[field][sourceId] !== 'string' || !dataset[field][sourceId].trim()) {
+        throw new Error(`Thiếu nội dung '${field}' tại bản ghi nguồn ${sourceId}.`);
+      }
+    }
+
+    return {
+      id: `zanichelli-mcc-${String(sourceId).padStart(5, '0')}`,
+      source_dataset: 'zanichelli-english-grammar-mcc',
+      source_record_id: Number(sourceId),
+      grammar_topic: dataset.grammar_topic[sourceId],
+      gapped_text: dataset.gapped_text[sourceId],
+      solution: dataset.solution[sourceId],
+      distractors,
+      filled_text: dataset.filled_text[sourceId],
+      source_url: grammarDatasetSourceUrl,
+      source_license: 'CC BY-NC-ND 4.0 (non-commercial demo; unchanged source content)',
+      sort_order: index + 1,
+      is_published: true,
+    };
+  });
+  return rows;
 }
 
 function loadLearningCatalogs() {
@@ -342,12 +398,61 @@ function buildVocabularyLessons(vocabulary) {
   return { lessons, items };
 }
 
-async function upsertInBatches(client, table, rows, onConflict) {
-  for (let offset = 0; offset < rows.length; offset += batchSize) {
-    const batch = rows.slice(offset, offset + batchSize);
-    const { error } = await client.from(table).upsert(batch, { onConflict });
-    if (error) {
-      throw new Error(`Không thể nhập ${table} (bản ghi ${offset + 1}-${offset + batch.length}): ${error.message}`);
+function isRetryableUpsertError(error) {
+  const status = Number(error?.status);
+  if (status === 408 || status === 425 || status === 429 || status >= 500) return true;
+  const message = `${error?.name || ''} ${error?.message || error || ''}`;
+  return /fetch failed|network|timeout|timed out|socket|ECONNRESET|ECONNREFUSED|EAI_AGAIN|UND_ERR/i.test(message);
+}
+
+function describeUpsertError(error) {
+  const parts = [];
+  if (error?.status) parts.push(`HTTP ${error.status}`);
+  if (error?.message) parts.push(error.message);
+  const cause = error?.cause;
+  if (cause?.code) parts.push(`cause=${cause.code}`);
+  else if (cause?.message) parts.push(`cause=${cause.message}`);
+  const nestedCause = typeof error?.details === 'string'
+    ? error.details.match(/Caused by:\s*([^\n]+)/i)?.[1]?.trim()
+    : null;
+  if (nestedCause) parts.push(`chi tiết kết nối: ${nestedCause}`);
+  if (error?.hint) parts.push(`gợi ý: ${error.hint}`);
+  return parts.join('; ') || String(error);
+}
+
+const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+
+async function upsertInBatches(client, table, rows, onConflict, rowsPerBatch = batchSize) {
+  for (let offset = 0; offset < rows.length; offset += rowsPerBatch) {
+    const batch = rows.slice(offset, offset + rowsPerBatch);
+    const batchLabel = `bản ghi ${offset + 1}-${offset + batch.length}`;
+
+    for (let attempt = 1; attempt <= maxUpsertAttempts; attempt += 1) {
+      try {
+        const { error } = await client.from(table).upsert(batch, { onConflict });
+        if (!error) break;
+        if (!isRetryableUpsertError(error) || attempt === maxUpsertAttempts) {
+          throw error;
+        }
+        const delay = retryBaseDelayMs * (2 ** (attempt - 1));
+        console.warn(
+          `Lỗi tạm thời khi nhập ${table} (${batchLabel}); thử lại lần ${attempt + 1}/${maxUpsertAttempts} sau ${delay / 1000}s.`
+        );
+        await wait(delay);
+      } catch (error) {
+        if (attempt === maxUpsertAttempts || !isRetryableUpsertError(error)) {
+          throw new Error(`Không thể nhập ${table} (${batchLabel}): ${describeUpsertError(error)}`);
+        }
+        const delay = retryBaseDelayMs * (2 ** (attempt - 1));
+        console.warn(
+          `Lỗi kết nối khi nhập ${table} (${batchLabel}); thử lại lần ${attempt + 1}/${maxUpsertAttempts} sau ${delay / 1000}s.`
+        );
+        await wait(delay);
+      }
+    }
+
+    if (offset % (rowsPerBatch * 10) === 0 || offset + batch.length === rows.length) {
+      console.log(`Đã nhập ${table}: ${offset + 1}-${offset + batch.length}/${rows.length}`);
     }
   }
 }
@@ -365,6 +470,7 @@ async function main() {
     throw new Error('Không đọc được dữ liệu từ src/data/vocabulary-en.json.');
   }
   const grammar = toGrammarRows(loadGrammarPoints());
+  const externalGrammarExercises = await loadExternalGrammarExercises();
   const content = loadLearningCatalogs();
   const topics = buildTopics(vocabulary, content.learningTopics);
   const vocabularyRows = vocabulary.map(toVocabularyRow);
@@ -382,6 +488,7 @@ async function main() {
   await upsertInBatches(client, 'vocabulary_entries', vocabularyRows, 'id');
   await upsertInBatches(client, 'grammar_points', grammar.grammarPoints, 'id');
   await upsertInBatches(client, 'grammar_examples', grammar.grammarExamples, 'grammar_point_id,position');
+  await upsertInBatches(client, 'grammar_exercises', externalGrammarExercises, 'id', grammarExerciseBatchSize);
   await upsertInBatches(client, 'lessons', lessons, 'id');
   await upsertInBatches(client, 'lesson_items', lessonItems, 'lesson_id,position');
   await upsertInBatches(client, 'practice_content', practiceRows, 'id');
@@ -394,6 +501,7 @@ async function main() {
     `Đã nhập ${topics.length} chủ đề, ${vocabularyRows.length} từ vựng ` +
       `(${publishedVocabularyCount} công khai), ${grammar.grammarPoints.length} điểm grammar, ` +
       `${grammar.grammarExamples.length} ví dụ và ${lessons.length} lesson; ` +
+      `${externalGrammarExercises.length} câu grammar trích nguyên bản từ GitHub; ` +
       `${practiceRows.length} nội dung luyện tập, ${tutorCatalog.tutors.length} gia sư, ` +
       `${tutorCatalog.scenarios.length} tình huống và ${tutorCatalog.messages.length} tin nhắn mẫu.`
   );

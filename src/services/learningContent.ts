@@ -84,6 +84,22 @@ export interface GrammarContent {
   commonMistake: { incorrect: string; correct: string; explanation: string };
 }
 
+export interface GrammarExerciseQuery extends PageQuery {
+  topic?: string;
+}
+
+export interface GrammarExerciseContent {
+  id: string;
+  topic: string;
+  gappedText: string;
+  solution: string;
+  distractors: string[];
+  filledText: string;
+  sourceUrl: string;
+  sourceLicense: string;
+  sortOrder: number;
+}
+
 export interface LessonQuery extends ContentQuery {
   type?: LessonType;
 }
@@ -208,6 +224,17 @@ type GrammarPointRow = {
   common_mistake: GrammarContent['commonMistake'];
   sort_order: number;
   grammar_examples: GrammarExampleRow[];
+};
+type GrammarExerciseRow = {
+  id: string;
+  grammar_topic: string;
+  gapped_text: string;
+  solution: string;
+  distractors: string[];
+  filled_text: string;
+  source_url: string;
+  source_license: string;
+  sort_order: number;
 };
 
 type VocabularyRow = {
@@ -466,6 +493,31 @@ export const learningContentService = {
     const { data, error } = await request;
     if (error) throw error;
     return ((data || []) as unknown as GrammarPointRow[]).map(toGrammar);
+  },
+
+  async getGrammarExercises(query: GrammarExerciseQuery = {}): Promise<GrammarExerciseContent[]> {
+    requireSupabaseConfig();
+    const { limit, offset } = page(query.limit, query.offset);
+    let request = supabase
+      .from('grammar_exercises')
+      .select('id, grammar_topic, gapped_text, solution, distractors, filled_text, source_url, source_license, sort_order')
+      .eq('is_published', true)
+      .order('sort_order', { ascending: true })
+      .range(offset, offset + limit - 1);
+    if (query.topic) request = request.eq('grammar_topic', query.topic);
+    const { data, error } = await request;
+    if (error) throw error;
+    return ((data || []) as unknown as GrammarExerciseRow[]).map((row) => ({
+      id: row.id,
+      topic: row.grammar_topic,
+      gappedText: row.gapped_text,
+      solution: row.solution,
+      distractors: row.distractors,
+      filledText: row.filled_text,
+      sourceUrl: row.source_url,
+      sourceLicense: row.source_license,
+      sortOrder: row.sort_order,
+    }));
   },
 
   async getLessons(query: LessonQuery = {}): Promise<LessonContent[]> {

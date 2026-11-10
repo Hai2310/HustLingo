@@ -1,0 +1,31 @@
+{
+  "audience": "Giảng viên và sinh viên nghe báo cáo thiết kế backend của project môn học.",
+  "purpose": "Trình bày kiến trúc tổng quan, mô hình dữ liệu, bảo mật, đồng bộ và trạng thái hiện thực hóa HustLingo.",
+  "thesis": "HustLingo dùng Supabase managed backend với phân tách catalog công khai đã xuất bản và dữ liệu cá nhân theo user; tiến độ ưu tiên local-first nhưng đồng bộ cloud hiện mới best-effort.",
+  "visual_dna": "Academic technical briefing adapted to the HUST 4:3 red-and-gold PowerPoint template.",
+  "design_rules": [
+    "Giữ nguyên trang bìa, header/footer, logo và palette của template HUST.",
+    "Dùng các trang một cột và hai cột có sẵn; thêm sơ đồ native PowerPoint có thể chỉnh sửa.",
+    "Mỗi trang có một kết luận chính; dùng nhãn ngắn, đoạn ngắn và phân biệt phần đã làm với phần đề xuất.",
+    "Ghi chú người thuyết trình chứa giải thích kỹ thuật dài hơn slide."
+  ],
+  "slide_mapping": [
+    {"slide": 1, "role": "cover"},
+    {"slide": 2, "role": "team"},
+    {"slide": 3, "role": "agenda"},
+    {"slide": 4, "role": "architecture"},
+    {"slide": 5, "role": "architecture_flow"},
+    {"slide": 6, "role": "api"},
+    {"slide": 7, "role": "security"},
+    {"slide": 8, "role": "data_domains"},
+    {"slide": 9, "role": "erd"},
+    {"slide": 10, "role": "schema_core"},
+    {"slide": 11, "role": "schema_catalog"},
+    {"slide": 12, "role": "sync_overview"},
+    {"slide": 13, "role": "sync_flow"},
+    {"slide": 14, "role": "content_pipeline"},
+    {"slide": 15, "role": "deployment"},
+    {"slide": 16, "role": "status_roadmap"},
+    {"slide": 17, "role": "closing"}
+  ]
+}

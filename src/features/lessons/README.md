@@ -11,6 +11,12 @@
 
 Backend cung cấp danh sách chủ đề, lesson đã publish và nội dung của từng lesson. Xem danh sách API và kiểu trả về trong `src/services/README.md`.
 
+Điểm ngữ pháp trong giáo trình dùng `learningContentService.getGrammarPoints()`;
+ngân hàng bài điền khuyết 27.514 câu được phân trang qua
+`learningContentService.getGrammarExercises({ topic, limit, offset })`. Bộ bài tập
+được giữ nguyên ngôn ngữ và nội dung nguồn, chỉ dùng cho demo phi thương mại; xem
+`supabase/seed/GRAMMAR_DATASET_ATTRIBUTION.md` trước khi hiển thị hoặc phân phối.
+
 ## Không tự sửa
 `AuthContext`, `LearningContext`, `src/services/supabase.ts`, `supabase/migrations`, `app/(tabs)/_layout.tsx`, `package.json`. Khi cần API lưu progress, thống nhất với Backend/Core.
 
