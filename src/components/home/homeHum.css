@@ -5,7 +5,6 @@
 
 :root {
   --home-focus: #24548c;
-  --home-focus-on-ink: #f3d642;
   --home-soft-edge: #fffcf3;
   --home-fiber-shadow: #d9d0b9;
   --home-stock-hover: rgb(22 24 32 / 0.08);
@@ -19,6 +18,7 @@ body:has(#hustlingo-home) {
 }
 
 #hustlingo-home,
+#hustlingo-home #home-hero,
 #hustlingo-home #home-lesson,
 #hustlingo-home #home-vocabulary-face,
 #hustlingo-home #home-grammar-face,
@@ -52,13 +52,18 @@ body:has(#hustlingo-home) {
   min-width: 0;
 }
 
-#hustlingo-home a:focus-visible {
+#hustlingo-home a:focus-visible,
+#hustlingo-home #home-hero [role="button"]:focus-visible {
   outline: 2px solid var(--home-focus);
   outline-offset: 3px;
 }
 
-#hustlingo-home #home-plans a:focus-visible {
-  outline-color: var(--home-focus-on-ink);
+#hustlingo-home #home-hero-slide {
+  touch-action: pan-y;
+}
+
+#hustlingo-home #home-hero-title {
+  text-wrap: balance;
 }
 
 #hustlingo-home #home-lesson-action-face {

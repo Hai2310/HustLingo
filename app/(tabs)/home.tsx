@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { HustLogo } from '@/components/HustLogo';
+import { HeroSlideshow } from '@/components/home/HeroSlideshow';
 import { HomeLesson } from '@/components/home/HomeLesson';
 import { HomePaperPressable, useHomeMotionPreference } from '@/components/home/HomePaperPressable';
 import { PricingTeaser } from '@/components/home/PricingTeaser';
@@ -65,6 +66,7 @@ export default function Home() {
             <Text accessibilityRole="header" aria-level={1} style={[styles.greeting, wide && styles.greetingWide]}>
               {greeting}
             </Text>
+            <HeroSlideshow wide={wide} reducedMotion={reducedMotion !== false} />
             <View style={[styles.study, desktop && styles.studyDesktop]}>
               <HomeLesson wide={wide} learnerId={user.id} reducedMotion={reducedMotion} />
               <View style={[styles.quick, desktop && styles.quickDesktop]}>

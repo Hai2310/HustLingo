@@ -1,141 +1,171 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Easing, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, Easing, Image, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import type { GestureResponderEvent } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
-import { colors } from '@/theme/colors';
-import { Float, Shimmer } from '../motion/Motion';
+import { Link } from 'expo-router';
+import { getVocabularyArtwork } from '@/features/lessons/data/vocabulary-artwork';
+import { hum, humType, paperButton } from './homeHum';
 
-type Slide = {
-  kicker: string;
-  title: string;
-  subtitle: string;
-  action: string;
-  path: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  stat: string;
-  statLabel: string;
-  colors: readonly [string, string, ...string[]];
-  accent: string;
-};
+const slides = [
+  {
+    name: 'HustLingo',
+    title: 'Học tiếng Anh cùng HustLingo',
+    detail: 'Khám phá bài học tiếng Anh theo trình độ của bạn.',
+    action: 'Xem bài học',
+    href: '/(tabs)/lessons',
+    paper: hum.pear,
+    edge: hum.pearEdge,
+    image: getVocabularyArtwork('education').image,
+  },
+  {
+    name: 'Từ vựng',
+    title: 'Từ vựng theo chủ đề',
+    detail: 'Nghe cách phát âm và xem từ mới trong câu ví dụ.',
+    action: 'Học từ vựng',
+    href: '/vocabulary',
+    paper: hum.sky,
+    edge: hum.skyEdge,
+    image: getVocabularyArtwork('travel').image,
+  },
+  {
+    name: 'Ngữ pháp',
+    title: 'Ngữ pháp qua ví dụ',
+    detail: 'Xem công thức, ví dụ và các lỗi thường gặp.',
+    action: 'Học ngữ pháp',
+    href: '/grammar',
+    paper: hum.mint,
+    edge: hum.mintRule,
+    image: null,
+  },
+] as const;
 
-const baseSlides: Slide[] = [
-  {
-    kicker: 'LỘ TRÌNH HÔM NAY',
-    title: '15 phút để\nkhông mất nhịp.',
-    subtitle: 'Tiếp tục University Life và giữ nhịp học đều mỗi ngày.',
-    action: 'Tiếp tục học',
-    path: '/flashcards',
-    icon: 'flash-outline',
-    stat: '15',
-    statLabel: 'phút',
-    colors: ['#D10A34', '#8A0625'],
-    accent: '#FFD6DF',
-  },
-  {
-    kicker: '10.000 TỪ TIẾNG ANH',
-    title: 'Học theo ngữ cảnh,\nnhớ lâu hơn.',
-    subtitle: 'Từ vựng được chia theo cấp độ, chủ đề và tình huống thực tế.',
-    action: 'Khám phá từ vựng',
-    path: '/vocabulary',
-    icon: 'text-outline',
-    stat: '10K',
-    statLabel: 'từ',
-    colors: ['#FF6A4D', '#E93B54'],
-    accent: '#FFE8D5',
-  },
-  {
-    kicker: 'TOEIC · IELTS',
-    title: 'Biết mình yếu đâu,\nluyện đúng chỗ đó.',
-    subtitle: 'Mini test, kỹ năng riêng lẻ và lộ trình luyện thi rõ ràng.',
-    action: 'Vào luyện thi',
-    path: '/exam',
-    icon: 'school-outline',
-    stat: '4',
-    statLabel: 'kỹ năng',
-    colors: ['#3478F6', '#6558F5'],
-    accent: '#DBE8FF',
-  },
-  {
-    kicker: 'LUYỆN 4 KỸ NĂNG',
-    title: 'Nghe · Nói · Đọc · Viết\ntrong một nhịp học.',
-    subtitle: 'Chuyển kỹ năng nhanh, giao diện sáng và tập trung vào tiến bộ.',
-    action: 'Bắt đầu luyện',
-    path: '/(tabs)/practice',
-    icon: 'sparkles-outline',
-    stat: '4',
-    statLabel: 'kỹ năng',
-    colors: ['#12B8C4', '#3478F6'],
-    accent: '#D8FBFF',
-  },
-];
-
-export function HeroSlideshow({ goal = 15, minutesToday = 0 }: { goal?: number; minutesToday?: number }) {
+export function HeroSlideshow({ wide, reducedMotion }: { wide: boolean; reducedMotion: boolean }) {
   const [index, setIndex] = useState(0);
-  const entrance = useRef(new Animated.Value(0)).current;
-  const { width } = useWindowDimensions();
-  const compact = width < 620;
-
-  const slides = useMemo(() => baseSlides.map((s, i) => i === 0 ? { ...s, stat: String(goal), statLabel: 'phút' } : s), [goal]);
+  const [artOpacity] = useState(() => new Animated.Value(1));
+  const lastIndex = useRef(index);
+  const touchOrigin = useRef<{ x: number; y: number } | null>(null);
   const slide = slides[index];
-  const pct = Math.min(100, Math.round((minutesToday / Math.max(1, goal)) * 100));
+
+  const step = (offset: number) => {
+    setIndex(current => (current + offset + slides.length) % slides.length);
+  };
+
+  const startTouch = ({ nativeEvent }: GestureResponderEvent) => {
+    const touch = nativeEvent.touches[0];
+    touchOrigin.current = nativeEvent.touches.length === 1 ? { x: touch.pageX, y: touch.pageY } : null;
+  };
+
+  const endTouch = ({ nativeEvent }: GestureResponderEvent) => {
+    const origin = touchOrigin.current;
+    const touch = nativeEvent.changedTouches[0];
+    touchOrigin.current = null;
+    if (!origin || !touch) return;
+    const dx = touch.pageX - origin.x;
+    const dy = touch.pageY - origin.y;
+    if (Math.abs(dx) >= 42 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1);
+  };
 
   useEffect(() => {
-    entrance.setValue(0);
-    Animated.timing(entrance, { toValue: 1, duration: 520, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
-  }, [entrance, index]);
-
-  useEffect(() => {
-    const timer = setInterval(() => setIndex((v) => (v + 1) % slides.length), 4700);
-    return () => clearInterval(timer);
-  }, [slides.length]);
-
-  const go = (next: number) => setIndex((next + slides.length) % slides.length);
+    const changed = lastIndex.current !== index;
+    lastIndex.current = index;
+    if (reducedMotion || !changed) {
+      artOpacity.setValue(1);
+      return;
+    }
+    artOpacity.setValue(0.72);
+    const animation = Animated.timing(artOpacity, {
+      toValue: 1,
+      duration: 200,
+      easing: Easing.out(Easing.quad),
+      useNativeDriver: Platform.OS !== 'web',
+      isInteraction: false,
+    });
+    animation.start();
+    return () => animation.stop();
+  }, [index, artOpacity, reducedMotion]);
 
   return (
-    <View style={styles.wrap}>
-      <LinearGradient colors={slide.colors as any} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.hero, compact && styles.heroCompact]}>
-        <Shimmer style={styles.shimmer} />
-        <View style={styles.blurOne} />
-        <View style={styles.blurTwo} />
-
-        <Animated.View style={[styles.copy, { opacity: entrance, transform: [{ translateX: entrance.interpolate({ inputRange: [0, 1], outputRange: [-18, 0] }) }] }]}>
-          <View style={styles.kickerRow}>
-            <View style={[styles.spark, { backgroundColor: slide.accent }]}><Ionicons name={slide.icon} size={14} color={slide.colors[0]} /></View>
-            <Text style={styles.kicker}>{slide.kicker}</Text>
-          </View>
-          <Text style={[styles.title, compact && styles.titleCompact]}>{slide.title}</Text>
-          <Text style={styles.subtitle}>{slide.subtitle}</Text>
-          <Pressable onPress={() => router.push(slide.path as any)} style={({ pressed }) => [styles.action, pressed && styles.actionPressed]}>
-            <Text style={[styles.actionText, { color: slide.colors[0] }]}>{slide.action}</Text>
-            <Ionicons name="arrow-forward" size={16} color={slide.colors[0]} />
-          </Pressable>
-        </Animated.View>
-
-        <Animated.View style={[styles.visual, compact && styles.visualCompact, { opacity: entrance, transform: [{ translateX: entrance.interpolate({ inputRange: [0, 1], outputRange: [22, 0] }) }, { scale: entrance.interpolate({ inputRange: [0, 1], outputRange: [0.92, 1] }) }] }]}>
-          <Float distance={7} duration={2300}>
-            <View style={styles.metricOuter}>
-              <View style={styles.metricInner}>
-                {index === 0 ? <>
-                  <Text style={styles.metricBig}>{pct}%</Text>
-                  <Text style={styles.metricSmall}>{minutesToday}/{goal}</Text>
-                </> : <>
-                  <Text style={styles.metricBig}>{slide.stat}</Text>
-                  <Text style={styles.metricSmall}>{slide.statLabel}</Text>
-                </>}
+    <View nativeID="home-hero" style={[styles.sheet, wide && styles.sheetWide, { backgroundColor: slide.paper, borderColor: slide.edge }]}>
+      <View
+        nativeID="home-hero-slide"
+        style={[styles.slide, wide && styles.slideWide]}
+        onTouchStart={startTouch}
+        onTouchEnd={endTouch}
+        onTouchCancel={() => { touchOrigin.current = null; }}
+      >
+        <View style={styles.copy}>
+          <Text
+            nativeID="home-hero-title"
+            accessibilityRole="header"
+            aria-level={2}
+            aria-live="polite"
+            textBreakStrategy="balanced"
+            style={[styles.title, wide && styles.titleWide]}
+          >
+            {slide.title}
+          </Text>
+          <Text style={[styles.detail, wide && styles.detailWide]}>{slide.detail}</Text>
+          <Link href={slide.href} style={styles.action} asChild>
+            <Pressable nativeID="home-hero-action" accessibilityLabel={slide.action}>
+              <Text style={styles.actionLabel}>{slide.action}</Text>
+              <Ionicons aria-hidden name="arrow-forward" size={15} color={hum.ink} />
+            </Pressable>
+          </Link>
+        </View>
+        <Animated.View style={[styles.art, wide && styles.artWide, { opacity: artOpacity }]} aria-hidden>
+          {slide.image ? (
+            <View style={[styles.photo, wide && styles.photoWide]}>
+              <Image source={slide.image} resizeMode="cover" style={styles.image} />
+              <View style={[styles.tape, wide && styles.tapeWide]} />
+            </View>
+          ) : (
+            <View style={[styles.example, wide && styles.exampleWide]}>
+              <View style={[styles.wordTile, styles.wordFirst, wide && styles.wordTileWide]}>
+                <Text style={[styles.word, wide && styles.wordWide]}>I am</Text>
+              </View>
+              <View style={[styles.wordTile, styles.wordSecond, wide && styles.wordTileWide]}>
+                <Text style={[styles.word, wide && styles.wordWide]}>You are</Text>
               </View>
             </View>
-          </Float>
+          )}
         </Animated.View>
-      </LinearGradient>
+      </View>
 
-      <View style={styles.controls}>
-        <View style={styles.dots}>
-          {slides.map((_, i) => <Pressable key={i} accessibilityLabel={`Slide ${i + 1}`} onPress={() => setIndex(i)} style={[styles.dot, i === index && styles.dotOn]} />)}
+      <View style={[styles.controls, { borderTopColor: slide.edge }]}>
+        <View style={styles.selectors}>
+          {slides.map((item, position) => (
+            <Pressable
+              key={item.name}
+              nativeID={'home-hero-select-' + position}
+              accessibilityRole="button"
+              accessibilityState={{ selected: index === position }}
+              accessibilityLabel={(index === position ? 'Đang xem ' : 'Xem giới thiệu ') + item.name}
+              onPress={() => setIndex(position)}
+              style={({ pressed }) => [styles.selector, pressed && styles.pressed]}
+            >
+              <View style={[styles.dot, { borderColor: slide.edge }, index === position && styles.dotSelected]} />
+            </Pressable>
+          ))}
         </View>
         <View style={styles.arrows}>
-          <Pressable onPress={() => go(index - 1)} style={styles.arrow}><Ionicons name="arrow-back" size={15} color={colors.text}/></Pressable>
-          <Pressable onPress={() => go(index + 1)} style={styles.arrow}><Ionicons name="arrow-forward" size={15} color={colors.text}/></Pressable>
+          <Pressable
+            nativeID="home-hero-prev"
+            accessibilityRole="button"
+            accessibilityLabel="Giới thiệu trước"
+            onPress={() => step(-1)}
+            style={({ pressed }) => [styles.arrow, pressed && styles.pressed]}
+          >
+            <Ionicons aria-hidden name="chevron-back" size={20} color={hum.ink} />
+          </Pressable>
+          <Pressable
+            nativeID="home-hero-next"
+            accessibilityRole="button"
+            accessibilityLabel="Giới thiệu tiếp theo"
+            onPress={() => step(1)}
+            style={({ pressed }) => [styles.arrow, pressed && styles.pressed]}
+          >
+            <Ionicons aria-hidden name="chevron-forward" size={20} color={hum.ink} />
+          </Pressable>
         </View>
       </View>
     </View>
@@ -143,32 +173,38 @@ export function HeroSlideshow({ goal = 15, minutesToday = 0 }: { goal?: number; 
 }
 
 const styles = StyleSheet.create({
-  wrap: { marginBottom: 12 },
-  hero: { minHeight: 230, borderRadius: 26, paddingHorizontal: 24, paddingVertical: 24, flexDirection: 'row', alignItems: 'center', overflow: 'hidden', shadowColor: '#8E1530', shadowOpacity: 0.22, shadowRadius: 30, shadowOffset: { width: 0, height: 16 }, elevation: 7 },
-  heroCompact: { minHeight: 285, padding: 20 },
-  shimmer: { position: 'absolute', width: 120, height: 390, backgroundColor: colors.white, top: -70, left: -190 },
-  blurOne: { position: 'absolute', width: 220, height: 220, borderRadius: 110, backgroundColor: 'rgba(255,255,255,.12)', right: -65, top: -95 },
-  blurTwo: { position: 'absolute', width: 150, height: 150, borderRadius: 75, backgroundColor: 'rgba(255,255,255,.08)', left: '44%', bottom: -100 },
-  copy: { flex: 1, zIndex: 2, paddingRight: 14 },
-  kickerRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  spark: { width: 28, height: 28, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
-  kicker: { fontSize: 9.5, fontWeight: '900', letterSpacing: 1.15, color: '#FFF5F6' },
-  title: { fontSize: 29, lineHeight: 34, fontWeight: '900', color: colors.white, letterSpacing: -1, marginTop: 12, maxWidth: 560 },
-  titleCompact: { fontSize: 24, lineHeight: 29 },
-  subtitle: { fontSize: 12, lineHeight: 18, color: 'rgba(255,255,255,.86)', marginTop: 8, maxWidth: 540 },
-  action: { alignSelf: 'flex-start', marginTop: 16, minHeight: 40, paddingHorizontal: 14, borderRadius: 12, backgroundColor: colors.white, flexDirection: 'row', alignItems: 'center', gap: 8 },
-  actionPressed: { transform: [{ scale: 0.98 }], opacity: 0.92 },
-  actionText: { fontSize: 11.5, fontWeight: '900' },
-  visual: { width: 148, minHeight: 170, alignItems: 'center', justifyContent: 'center', zIndex: 2 },
-  visualCompact: { width: 96 },
-  metricOuter: { width: 112, height: 112, borderRadius: 56, borderWidth: 2, borderColor: 'rgba(255,255,255,.58)', backgroundColor: 'rgba(255,255,255,.12)', padding: 9, alignItems: 'center', justifyContent: 'center' },
-  metricInner: { width: '100%', height: '100%', borderRadius: 999, backgroundColor: 'rgba(255,255,255,.13)', alignItems: 'center', justifyContent: 'center' },
-  metricBig: { fontSize: 26, fontWeight: '900', color: colors.white, letterSpacing: -0.7 },
-  metricSmall: { fontSize: 9.5, color: 'rgba(255,255,255,.82)', marginTop: 1, fontWeight: '700' },
-  controls: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10, paddingHorizontal: 3 },
-  dots: { flexDirection: 'row', gap: 6, alignItems: 'center' },
-  dot: { width: 7, height: 7, borderRadius: 99, backgroundColor: colors.borderStrong },
-  dotOn: { width: 26, backgroundColor: colors.primary },
-  arrows: { flexDirection: 'row', gap: 7 },
-  arrow: { width: 34, height: 34, borderRadius: 11, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
+  sheet: { borderRadius: 22, borderWidth: 1, borderBottomWidth: 4, marginBottom: 20, paddingTop: 14, paddingHorizontal: 13, paddingBottom: 4 },
+  sheetWide: { paddingTop: 19, paddingHorizontal: 23, paddingBottom: 6, marginBottom: 23 },
+  slide: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 140, paddingBottom: 10 },
+  slideWide: { gap: 28, minHeight: 187, paddingBottom: 14 },
+  copy: { flex: 1, minWidth: 0, gap: 6 },
+  title: { color: hum.ink, fontSize: 25, lineHeight: 28, letterSpacing: -0.8, fontWeight: humType.bold, minWidth: 0 },
+  titleWide: { fontSize: 42, lineHeight: 46, letterSpacing: -1.65, maxWidth: 630 },
+  detail: { color: hum.ink, fontSize: 14, lineHeight: 19, maxWidth: 380 },
+  detailWide: { fontSize: 16, lineHeight: 22 },
+  action: { ...paperButton, flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 8, minHeight: 44, paddingHorizontal: 11, marginTop: 3, backgroundColor: hum.card, borderColor: hum.paperDeep },
+  actionLabel: { color: hum.ink, fontSize: 14, fontWeight: humType.bold },
+  art: { width: '31%', maxWidth: 118, marginRight: 4, flexShrink: 0, aspectRatio: 1.05, justifyContent: 'center' },
+  artWide: { width: '36%', maxWidth: 365, aspectRatio: undefined, height: 162, marginRight: 7 },
+  photo: { flex: 1, padding: 4, borderRadius: 11, backgroundColor: hum.card, borderWidth: 1, borderColor: hum.paperDeep, borderBottomWidth: 3, transform: [{ rotate: '-4deg' }] },
+  photoWide: { padding: 6, borderRadius: 15 },
+  image: { width: '100%', height: '100%', borderRadius: 7, backgroundColor: hum.paper },
+  tape: { position: 'absolute', width: '37%', minWidth: 26, height: 11, top: -4, left: '31%', borderRadius: 3, backgroundColor: hum.paperDeep, transform: [{ rotate: '8deg' }] },
+  tapeWide: { width: '25%', left: '38%', height: 16, top: -8 },
+  example: { gap: 4, justifyContent: 'center' },
+  exampleWide: { gap: 6, paddingHorizontal: 22 },
+  wordTile: { ...paperButton, paddingHorizontal: 8, paddingVertical: 4, borderColor: hum.mintRule, borderRadius: 9 },
+  wordTileWide: { paddingHorizontal: 22, paddingVertical: 6, borderRadius: 12 },
+  wordFirst: { backgroundColor: hum.card, alignSelf: 'flex-start', transform: [{ rotate: '-6deg' }] },
+  wordSecond: { backgroundColor: hum.sky, alignSelf: 'flex-end', transform: [{ rotate: '4deg' }] },
+  word: { color: hum.ink, fontSize: 15, lineHeight: 21, fontWeight: humType.bold },
+  wordWide: { fontSize: 25, lineHeight: 30 },
+  controls: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTopWidth: 1, paddingTop: 3 },
+  selectors: { flexDirection: 'row' },
+  selector: { width: 44, minHeight: 44, justifyContent: 'center', alignItems: 'center', borderRadius: 12 },
+  dot: { width: 10, height: 10, borderRadius: 6, borderWidth: 1, backgroundColor: hum.card },
+  dotSelected: { width: 22, backgroundColor: hum.ink },
+  arrows: { flexDirection: 'row', gap: 4 },
+  arrow: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 13, backgroundColor: hum.card, borderWidth: 1, borderBottomWidth: 3, borderColor: hum.paperDeep },
+  pressed: { opacity: 0.72 },
 });

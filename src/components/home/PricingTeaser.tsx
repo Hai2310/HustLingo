@@ -1,45 +1,101 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
 import { formatVnd, subscriptionPlans } from '@/data/plans';
 import { hum, humType, paperButton } from './homeHum';
 
 const paidPlans = subscriptionPlans.filter(plan => plan.id === 'plus' || plan.id === 'pro');
+const pricingPaper = {
+  sheet: ['#FFF0C9', '#FFF9E9'] as const,
+  sheetEdge: '#DEC27F',
+  plus: ['#F8FCFF', '#E5F1FB'] as const,
+  pro: ['#FFF7D9', '#FFE08B'] as const,
+  proEdge: '#D3A74C',
+  proInk: '#78500E',
+};
 
 export function PricingTeaser({ wide = false }: { wide?: boolean }) {
+  const action = (
+    <Link href="/pricing" style={styles.action} asChild>
+      <Pressable nativeID="home-plans-action">
+        <Text style={styles.actionLabel}>Xem gói học</Text>
+        <Ionicons aria-hidden name="arrow-forward" size={17} color={hum.ink} />
+      </Pressable>
+    </Link>
+  );
+
   return (
-    <View nativeID="home-plans" style={[styles.panel, wide && styles.panelWide]}>
+    <LinearGradient
+      nativeID="home-plans"
+      colors={pricingPaper.sheet}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 0.9, y: 1 }}
+      style={[styles.panel, wide && styles.panelWide]}
+    >
       <View style={[styles.intro, wide && styles.introWide]}>
-        <Text accessibilityRole="header" aria-level={2} style={styles.title}>Gói học Plus và Pro</Text>
-        <Text style={styles.description}>Lộ trình mở rộng, luyện thi nâng cao và đồng bộ tiến độ nhiều thiết bị.</Text>
-      </View>
-      <View style={styles.prices}>
-        {paidPlans.map(plan => (
-          <View key={plan.id} style={styles.plan}>
-            <Text style={styles.planName}>{plan.name}</Text>
-            <Text style={styles.description}>{formatVnd(plan.monthlyPrice)} / tháng</Text>
+        <View style={styles.titleRow}>
+          <View aria-hidden style={styles.seal}>
+            <Ionicons aria-hidden name="sparkles" size={21} color={pricingPaper.proInk} />
           </View>
-        ))}
+          <Text accessibilityRole="header" aria-level={2} style={[styles.title, wide && styles.titleWide]}>Gói học Plus và Pro</Text>
+        </View>
+        <Text style={styles.description}>Mở rộng lộ trình học, luyện thi nâng cao và đồng bộ tiến độ trên nhiều thiết bị.</Text>
+        {wide && action}
       </View>
-      <Link href="/pricing" style={styles.action} asChild>
-        <Pressable>
-          <Text style={styles.actionLabel}>Xem gói học</Text>
-        </Pressable>
-      </Link>
-    </View>
+      <View style={[styles.plans, wide && styles.plansWide]}>
+        {paidPlans.map(plan => {
+          const pro = plan.id === 'pro';
+          const accent = pro ? pricingPaper.proInk : hum.blue;
+          return (
+            <LinearGradient
+              key={plan.id}
+              nativeID={'home-plan-' + plan.id}
+              colors={pro ? pricingPaper.pro : pricingPaper.plus}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0.85, y: 1 }}
+              style={[styles.plan, wide && styles.planWide, { borderColor: pro ? pricingPaper.proEdge : hum.skyEdge }]}
+            >
+              <View style={styles.planHeading}>
+                <Text style={[styles.planName, { color: accent }]}>{plan.name}</Text>
+                <Ionicons aria-hidden name={pro ? 'diamond-outline' : 'flash-outline'} size={19} color={accent} />
+              </View>
+              <View style={styles.rate}>
+                <Text style={[styles.price, wide && styles.priceWide]}>{formatVnd(plan.monthlyPrice)}</Text>
+                <Text style={styles.unit}>/ tháng</Text>
+              </View>
+              <Text style={styles.benefit}>{pro ? 'Thống kê học tập chuyên sâu' : 'Ôn tập nâng cao theo tiến độ'}</Text>
+            </LinearGradient>
+          );
+        })}
+      </View>
+      {!wide && action}
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  panel: { paddingHorizontal: 17, paddingVertical: 18, gap: 14, borderRadius: 20, backgroundColor: hum.ink },
-  panelWide: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', paddingHorizontal: 20, gap: 20 },
-  intro: { minWidth: 0, gap: 5 },
-  introWide: { flexGrow: 1, flexShrink: 1, flexBasis: 252 },
-  title: { color: hum.card, fontSize: 21, lineHeight: 27, fontWeight: humType.bold },
-  description: { color: hum.paperDeep, fontSize: 14, lineHeight: 20 },
-  prices: { flexDirection: 'row', flexWrap: 'wrap', columnGap: 19, rowGap: 6 },
-  plan: { gap: 2 },
-  planName: { color: hum.card, fontSize: 15, lineHeight: 20, fontWeight: humType.bold },
-  action: { ...paperButton, alignSelf: 'flex-start', justifyContent: 'center', minHeight: 44, paddingHorizontal: 13, backgroundColor: hum.paper, borderColor: hum.paperDeep },
+  panel: { padding: 15, gap: 15, borderRadius: 22, borderWidth: 1, borderBottomWidth: 4, borderColor: pricingPaper.sheetEdge },
+  panelWide: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', padding: 22, gap: 24 },
+  intro: { minWidth: 0, gap: 8 },
+  introWide: { flexGrow: 1, flexBasis: 260 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  seal: { width: 40, height: 40, borderRadius: 11, borderWidth: 1, borderBottomWidth: 3, borderColor: pricingPaper.proEdge, alignItems: 'center', justifyContent: 'center', backgroundColor: hum.pear, transform: [{ rotate: '-7deg' }] },
+  title: { flexShrink: 1, color: hum.ink, fontSize: 22, lineHeight: 27, letterSpacing: -0.45, fontWeight: humType.bold },
+  titleWide: { fontSize: 28, lineHeight: 33, letterSpacing: -0.8 },
+  description: { color: hum.ink, fontSize: 14, lineHeight: 21, maxWidth: 390 },
+  plans: { flexDirection: 'row', flexWrap: 'wrap', gap: 9 },
+  plansWide: { flexGrow: 1, flexBasis: 360, gap: 13 },
+  plan: { flexGrow: 1, flexBasis: 112, minWidth: 0, padding: 10, borderWidth: 1, borderBottomWidth: 4, borderRadius: 16, gap: 7 },
+  planWide: { padding: 15, gap: 9, borderRadius: 17 },
+  planHeading: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 5 },
+  planName: { fontSize: 18, lineHeight: 23, fontWeight: humType.bold },
+  rate: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', columnGap: 5, rowGap: 1 },
+  price: { color: hum.ink, fontSize: 22, lineHeight: 26, letterSpacing: -0.5, fontWeight: humType.bold, fontVariant: ['tabular-nums'] },
+  priceWide: { fontSize: 29, lineHeight: 33, letterSpacing: -0.8 },
+  unit: { color: hum.muted, fontSize: 13, lineHeight: 18 },
+  benefit: { color: hum.ink, fontSize: 13, lineHeight: 18 },
+  action: { ...paperButton, alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 9, minHeight: 45, paddingHorizontal: 14, backgroundColor: hum.pear, borderColor: hum.pearEdge },
   actionLabel: { color: hum.ink, fontSize: 15, fontWeight: humType.bold },
 });
