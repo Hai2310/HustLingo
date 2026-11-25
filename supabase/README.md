@@ -7,10 +7,11 @@ Supabase cung cấp:
 - PostgreSQL hosted.
 - Row Level Security (RLS).
 - Profile, learning progress, feedback.
-- Danh mục nội dung: chủ đề, từ vựng, grammar và lesson liên kết.
+- Danh mục nội dung cho Bài học, Luyện tập và Gia sư AI.
 
-Schema nằm trong các file `migrations/`. Migration nội dung là
-`migrations/202610160001_content_catalog.sql`.
+Schema nằm trong các file `migrations/`. Nội dung feature được khai báo trong
+`202610160001_content_catalog.sql`, `202610210001_practice_tutor_catalogs.sql` và
+`202610210002_grammar_exercise_catalog.sql`.
 
 ## Cách nhanh nhất
 
@@ -63,7 +64,22 @@ erDiagram
   LESSONS ||--o{ LESSON_ITEMS : contains
   VOCABULARY_ENTRIES ||--o{ LESSON_ITEMS : included_in
   GRAMMAR_POINTS ||--o{ LESSON_ITEMS : included_in
+  AI_TUTORS ||--o{ TUTOR_SCENARIOS : leads
+  TUTOR_SCENARIOS ||--o{ TUTOR_SCENARIO_MESSAGES : includes
+  GRAMMAR_EXERCISES {
+    string id PK
+    string grammar_topic
+    string source_url
+  }
 ```
+
+`GRAMMAR_POINTS` lưu các điểm dạy ngữ pháp theo CEFR; `GRAMMAR_EXAMPLES` lưu ví dụ.
+`GRAMMAR_EXERCISES` lưu bài trắc nghiệm điền khuyết nguyên bản từ dataset GitHub,
+được phân trang theo chủ đề. Bảng bài tập không gán CEFR vì bộ nguồn không cung cấp
+trình độ CEFR cho từng câu.
+
+`PRACTICE_CONTENT` lưu listening, reading, writing và speaking theo skill. Nội dung
+được truy vấn qua `learningContentService` tại `src/services/learningContent.ts`.
 
 ## Nhập dữ liệu học tập
 
@@ -85,8 +101,56 @@ chmod 600 .env
 npm run db:seed:content
 ```
 
-Importer đọc `SUPABASE_URL` và `SUPABASE_SECRET_KEY` từ file backend này (hoặc environment của terminal), không đọc hay in key ra log. Nếu project chỉ còn legacy key, script cũng chấp nhận `SUPABASE_SERVICE_ROLE_KEY`. Nó đọc `src/data/vocabulary-en.json` và `src/features/lessons/data/grammar.ts`, rồi upsert theo lô. Nó đưa vào đủ 10.000 từ vựng, 98 điểm grammar cùng ví dụ; các bản production được công khai, còn bản review được lưu ở trạng thái riêng tư nhờ RLS. Nó tạo lesson từ từng điểm grammar và nhóm từ vựng theo chủ đề/trình độ. Có thể chạy lại sau khi cập nhật dữ liệu nguồn.
+Importer đọc `SUPABASE_URL` và `SUPABASE_SECRET_KEY` từ file backend này (hoặc environment của terminal), không đọc hay in key ra log. Nếu project chỉ còn legacy key, script cũng chấp nhận `SUPABASE_SERVICE_ROLE_KEY`. Sau khi chạy tất cả migration, chạy `npm run db:seed:content`. Script upsert theo lô từ vocabulary, grammar, chủ đề, lesson, practice/tutor và 27.514 bài tập grammar từ GitHub. Chạy lại an toàn: script dùng upsert, không truncate bảng, không xóa profiles, tiến độ học hay feedback.
+
+Nguồn hiện tại có 10.000 mục từ vựng, 98 điểm grammar cùng 196 ví dụ, 27.514 câu hỏi
+grammar từ GitHub trên 19 chủ đề, 11 mục luyện tập (3 listening, 2 reading, 3 writing,
+3 speaking), 2 gia sư, 6 tình huống và 4 tin nhắn hội thoại mẫu. Bộ câu hỏi grammar
+không có CEFR theo từng câu; giữ nguyên nội dung gốc và chỉ sử dụng trong demo môn học
+phi thương mại. Xem `seed/GRAMMAR_DATASET_ATTRIBUTION.md` để biết attribution và điều
+khoản nguồn.
+
+### Seed qua GitHub Actions
+
+Có thể nhập bằng GitHub mà không đưa secret vào source code:
+
+1. Trong GitHub repository, mở **Settings → Secrets and variables → Actions**.
+2. Thêm repository secrets `SUPABASE_URL` và `SUPABASE_SECRET_KEY`.
+3. Mở **Actions → Seed Supabase learning content → Run workflow**.
+
+Workflow chỉ chạy thủ công, dùng secret ở phía GitHub Actions và gọi cùng importer
+`npm run db:seed:content`. Không đặt service/secret key vào `EXPO_PUBLIC_*`, app Expo,
+issue, commit hoặc chat.
+
+### Chạy migrations nếu Supabase thiếu bảng
+
+Trong Supabase Dashboard → **SQL Editor**, chạy theo thứ tự:
+
+1. `migrations/202610050001_init_hustlingo.sql`
+2. `migrations/202610160001_content_catalog.sql`
+3. `migrations/202610210001_practice_tutor_catalogs.sql`
+4. `migrations/202610210002_grammar_exercise_catalog.sql`
+
+Sau đó chạy `npm run db:seed:content` ở máy đã có Node.js, hoặc chạy workflow GitHub
+Actions ở trên. Migrations tạo bảng; importer mới thêm các hàng dữ liệu.
+
+Kiểm tra bảng mới và số lượng grammar sau khi seed trong SQL Editor:
+
+```sql
+select table_name
+from information_schema.tables
+where table_schema = 'public'
+order by table_name;
+
+select grammar_topic, count(*) as exercise_count
+from public.grammar_exercises
+where is_published
+group by grammar_topic
+order by grammar_topic;
+```
 
 Lấy Project URL ở nút Connect của project; lấy secret key trong Settings → API Keys. Dùng key `sb_secret_...` cho importer. Secret key có quyền cao, bỏ qua RLS; chỉ giữ trong file local bị ignore hoặc môi trường backend, không gửi qua chat, không thêm tiền tố `EXPO_PUBLIC_`, không commit và không đưa vào app Expo. Publishable key của app vẫn là biến `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Migration cấp quyền đọc nội dung đã publish cho anon/authenticated, còn client không có quyền sửa nội dung.
 
-Màn hình Lessons ưu tiên tải grammar đã publish từ Supabase khi app có cấu hình; nếu chưa cấu hình, chưa nhập dữ liệu hoặc đang offline thì dùng bộ grammar đóng gói làm dự phòng. `supabaseData.getVocabulary()` cung cấp truy vấn từ vựng phân trang/lọc để nối vào màn hình từ vựng.
+Các feature dùng `learningContentService` để truy vấn nội dung đã publish. `supabaseData`
+chỉ giữ các thao tác hồ sơ, tiến độ học và feedback của tài khoản. UI tab Bài học,
+Luyện tập và Gia sư hiện vẫn để trống theo trạng thái giao diện đã thống nhất.

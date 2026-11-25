@@ -1,0 +1,26 @@
+{
+  "title": "HustLingo | Thiết kế Backend",
+  "language": "vi",
+  "aspect_ratio": "4:3",
+  "source_deck": "C:\\Users\\Lenovo\\Downloads\\HustLingo_Backend.pptx",
+  "output_deck": "C:\\Users\\Lenovo\\Downloads\\HustLingo_Backend_Comprehensive.pptx",
+  "slides": [
+    { "role": "cover", "title": "HustLingo: Thiết kế Backend", "subtitle": "Kiến trúc dữ liệu • Bảo mật • Đồng bộ tiến độ" },
+    { "role": "team", "title": "Thành viên nhóm", "members": ["Hoàng Minh Hải — 20235072", "Nguyễn Quang Huy — 20230039", "Hoàng Đức Khánh — 20235117", "Nguyễn Tùng Dương — 20230024"] },
+    { "role": "agenda", "title": "Nội dung trình bày", "sections": ["Kiến trúc và API · slide 4–6", "Xác thực và bảo mật · slide 7", "Cơ sở dữ liệu · slide 8–11", "Đồng bộ và offline · slide 12–13", "Pipeline và phát hành · slide 14–15", "Hiện trạng và hướng phát triển · slide 16"] },
+    { "role": "architecture", "title": "1. Kiến trúc tổng quan", "content": "Expo Web/iOS/Android → service trong ứng dụng → Supabase Auth/PostgREST → PostgreSQL + RLS. AsyncStorage lưu tiến độ local. Importer nạp catalog bằng secret key ở môi trường riêng." },
+    { "role": "architecture_flow", "title": "Luồng Auth, REST và import", "content": "Phân biệt JWT/session cho truy vấn app với importer server-side dùng service role để upsert catalog." },
+    { "role": "api", "title": "1.3 Frontend lấy dữ liệu qua API như thế nào?", "content": "Màn hình yêu cầu service lấy nội dung hoặc cập nhật dữ liệu người học. Service dùng Supabase SDK gọi REST PostgREST; ví dụ lọc bài nghe theo B1, hoặc lưu tiến độ vào đúng tài khoản qua JWT và RLS. Không có endpoint Express riêng." },
+    { "role": "security", "title": "2. Xác thực và bảo mật dữ liệu", "content": "Supabase Auth hỗ trợ Google/email; web dùng PKCE. RLS giới hạn hồ sơ và tiến độ theo auth.uid(); catalog chỉ đọc hàng published; feedback chỉ insert của chủ tài khoản." },
+    { "role": "data_domains", "title": "3.1 Thiết kế dữ liệu và quan hệ", "content": "Miền người dùng và catalog nội dung; khóa ngoại, cascade/set-null và constraint bảo toàn liên kết." },
+    { "role": "erd", "title": "3.2 Lược đồ quan hệ database", "content": "ERD gồm 14 bảng public và auth.users do Supabase quản lý." },
+    { "role": "schema_core", "title": "3.3 Lược đồ: tài khoản và cấu trúc bài học", "tables": ["auth.users", "profiles", "learning_progress", "feedback", "topics", "vocabulary_entries", "lessons", "lesson_items"], "content": "Bảng tra cứu PK/FK và vai trò từng bảng; state tiến độ JSONB, 30 trường từ vựng, quan hệ topic/lesson và CHECK một loại nội dung mỗi lesson item." },
+    { "role": "schema_catalog", "title": "3.4 Lược đồ: grammar, luyện tập và gia sư", "tables": ["grammar_points", "grammar_examples", "grammar_exercises", "practice_content", "ai_tutors", "tutor_scenarios", "tutor_scenario_messages"], "content": "Bảng tra cứu PK/FK, khóa ghép, JSONB, nguồn bài cloze và quan hệ tutor → scenarios → hội thoại mẫu." },
+    { "role": "sync_overview", "title": "4.1 Đồng bộ tiến độ | local-first best-effort", "content": "Ghi local, đọc cloud, hợp nhất IDs, debounce 1,2 giây và upsert learning_progress." },
+    { "role": "sync_flow", "title": "4.2 Luồng local-first và giới hạn offline", "content": "Guest lưu local; user đồng bộ cloud. Chưa có outbox bền, retry, cache catalog hoặc xử lý xung đột đa thiết bị." },
+    { "role": "content_pipeline", "title": "5. Nạp và xuất bản nội dung", "content": "Nguồn JSON/TypeScript/GitHub → validate/transform → import-content.mjs upsert theo lô → PostgreSQL → learningContent. Dashboard metrics cũ là số ước tính; xác nhận seed remote trước khi báo số hiện tại." },
+    { "role": "deployment", "title": "5.2 Môi trường và triển khai", "content": "Public Supabase URL/publishable key trong app; secret key chỉ importer. Migrations SQL, seed data, Expo Web và EAS Build." },
+    { "role": "status_roadmap", "title": "6. Hiện trạng và hướng phát triển", "content": "Phân biệt code, schema trong repo và dữ liệu remote. UI tabs đang để trống theo yêu cầu; chưa có backend LLM; seed grammar gặp lỗi fetch cần xác nhận lại." },
+    { "role": "closing", "title": "CẢM ƠN!" }
+  ]
+}
