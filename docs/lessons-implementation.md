@@ -16,6 +16,16 @@ Phạm vi đợt này: BH-01 đến BH-06 và BH-11 đến BH-13 trong bảng c�
 | BH-12 | Có Loading, Empty, Error, Completed; có thử lại, báo khi dùng bản dữ liệu có sẵn và xử lý bài/chủ đề không tồn tại. |
 | BH-13 | Lưới chủ đề thay đổi theo chiều rộng, nội dung có giới hạn chiều rộng trên web; hiệu ứng hiện nội dung và chuyển phần nhẹ, tôn trọng lựa chọn giảm chuyển động của thiết bị. |
 
+## Giao diện từ vựng có minh họa — 2026-11-04
+
+Thư viện Vocabulary có ảnh mở đầu và bìa chủ đề. Trong bài học, phần đầu kết hợp hình minh họa, cấp độ, số từ và tiến độ. Thẻ từ hiển thị hai cột từ chiều rộng 900px, một cột trên điện thoại và tablet nhỏ; giữ IPA, nghĩa, ví dụ, bản dịch, nghe phát âm, lưu từ và đánh dấu đã học.
+
+Có bảy ảnh riêng cho Library, University, Family, Travel, Technology, Career và Food. Ảnh JPEG 960 × 640 nằm trong `assets/illustrations/vocabulary`, tổng khoảng 1 MB và được đóng gói cùng app. Prompt tạo ảnh được lưu trong [README của bộ ảnh](../assets/illustrations/vocabulary/README.md). Bảng ánh xạ nằm trong `src/features/lessons/data/vocabulary-artwork.ts`; có thể bổ sung ảnh và từ tương ứng ở đây mà không sửa kho từ hoặc database.
+
+Ảnh trên thẻ có nhãn **TOPIC SCENE**, minh họa ngữ cảnh theo chủ đề. Đây chưa phải bộ ảnh định nghĩa riêng cho từng từ trong 4.129 từ vựng. Chỉ các từ được ánh xạ rõ ràng mới có ảnh ngữ cảnh; từ khác dùng ô chữ cái. Nếu ảnh trên thẻ không tải được, thẻ tự dùng ô chữ cái và vẫn học bình thường.
+
+Đã kiểm tra tải ảnh, bố cục tại 1440/768/390/320px, nghe/dừng phát âm với âm thanh giả lập, lưu từ, bản dịch, phân trang và giữ tiến độ sau tải lại. Kiểm tra hồi quy các màn Grammar, Home/Profile và luồng offline cũng đạt; không ghi Supabase trong quá trình kiểm tra.
+
 ## Đường dẫn và mã nguồn
 
 - `/lessons`: tab thư viện, `screens/LessonsScreen.tsx`.
