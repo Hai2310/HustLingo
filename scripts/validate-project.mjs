@@ -65,6 +65,7 @@ for (const required of [
   'app/lessons/[lessonId].tsx',
   'app/lessons/topics/[topicId].tsx',
   'app/(tabs)/practice.tsx',
+  'app/practice/[exerciseId].tsx',
   'app/(tabs)/tutor.tsx',
   'app/(tabs)/profile.tsx',
   'src/services/supabase.ts',
@@ -85,25 +86,16 @@ if (!appConfig.includes("output: 'single'")) failures.push("app.config.js: web.o
 for (const [route, target] of [
   ['app/vocabulary.tsx', '/(tabs)/lessons'],
   ['app/grammar.tsx', '/(tabs)/lessons'],
-  ['app/listening.tsx', '/(tabs)/lessons'],
-  ['app/reading.tsx', '/(tabs)/lessons'],
-  ['app/speaking.tsx', '/(tabs)/lessons'],
-  ['app/writing.tsx', '/(tabs)/lessons'],
+  ['app/listening.tsx', '/(tabs)/practice'],
+  ['app/reading.tsx', '/(tabs)/practice'],
+  ['app/speaking.tsx', '/(tabs)/practice'],
+  ['app/writing.tsx', '/(tabs)/practice'],
   ['app/flashcards.tsx', '/(tabs)/practice'],
   ['app/quiz.tsx', '/(tabs)/practice'],
   ['app/exam.tsx', '/(tabs)/practice'],
 ]) {
   const text = fs.readFileSync(path.join(root, route), 'utf8');
-  if (!text.includes(target)) failures.push(`${route}: H.1 blank route must redirect to ${target}`);
-}
-
-for (const tab of [
-  'app/(tabs)/practice.tsx',
-]) {
-  const text = fs.readFileSync(path.join(root, tab), 'utf8');
-  for (const marker of ['router.push', 'useLearning', '@/data/']) {
-    if (text.includes(marker)) failures.push(`${tab}: H.1 blank tab still contains functional marker ${marker}`);
-  }
+  if (!text.includes(target)) failures.push(`${route}: must redirect to ${target}`);
 }
 
 if (failures.length) {
@@ -112,4 +104,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`VALIDATION PASSED: ${count} English vocabulary records, Lessons routes available, Supabase backend preserved; Practice/Tutor remain placeholders.`);
+console.log(`VALIDATION PASSED: ${count} English vocabulary records, Lessons and Practice routes available, Supabase backend preserved.`);

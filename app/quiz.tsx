@@ -1,6 +1,6 @@
 import React from 'react';
 import { Redirect } from 'expo-router';
 
-export default function EmptyFeatureRoute() {
-  return <Redirect href="/(tabs)/practice" />;
+export default function QuizRoute() {
+  return <Redirect href={{ pathname: '/(tabs)/practice', params: { skill: 'grammar' } }} />;
 }

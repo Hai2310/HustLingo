@@ -96,7 +96,7 @@ export default function Home() {
                 <View style={styles.libraryRail}>
                   {libraryShortcuts.map(item => (
                     <Link key={item.path} href={item.path} style={styles.libraryLink} asChild>
-                      <Pressable accessibilityLabel={item.label + ', mở thư viện bài học'}>
+                      <Pressable accessibilityLabel={'Luyện ' + item.label.toLowerCase()}>
                         <Ionicons aria-hidden name={item.icon} size={19} color={hum.blue} />
                         <Text style={styles.linkText}>{item.label}</Text>
                         <Ionicons aria-hidden name="chevron-forward" size={14} color={hum.blue} style={styles.chevron} />
