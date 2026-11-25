@@ -1,12 +1,11 @@
-import React, { useCallback, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
+import React from 'react';
+import { Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Link, router, useLocalSearchParams } from 'expo-router';
-import { AppButton } from '@/components/common/Buttons';
 import { Screen } from '@/components/common/Screen';
 import { hum, paperButton, paperCard } from '@/theme/hum';
 import { PracticeNotice, practiceStyles, skillLabels } from '../components/PracticeUI';
-import { grammarTopicLabel, isPracticeSkill, loadGrammarPage, loadPracticeCatalog, skills } from '../data/catalog';
+import { grammarTopicLabel, grammarTopicTitle, isPracticeSkill, loadGrammarTopics, loadPracticeCatalog, skills } from '../data/catalog';
 import type { PracticeSkill } from '../data/catalog';
 import { usePracticeRequest } from '../hooks/usePracticeRequest';
 
@@ -41,9 +40,9 @@ export function PracticeScreen() {
         ))}
       </View>
       <Text accessibilityRole="header" aria-level={2} style={practiceStyles.heading}>
-        {skill === 'grammar' ? 'Điền chỗ trống' : 'Bài luyện ' + skillLabels[skill].label.toLowerCase()}
+        {skill === 'grammar' ? 'Nhóm ngữ pháp' : 'Bài luyện ' + skillLabels[skill].label.toLowerCase()}
       </Text>
-      {skill === 'grammar' ? <GrammarList wide={wide} /> : <SkillList skill={skill} wide={wide} />}
+      {skill === 'grammar' ? <GrammarTopics wide={wide} /> : <SkillList skill={skill} wide={wide} />}
     </Screen>
   );
 }
@@ -66,48 +65,31 @@ function SkillList({ skill, wide }: { skill: Exclude<PracticeSkill, 'grammar'>; 
   </>;
 }
 
-function GrammarList({ wide }: { wide: boolean }) {
-  const [draft, setDraft] = useState('');
-  const [filter, setFilter] = useState('');
-  const [page, setPage] = useState(0);
-  const load = useCallback((signal: AbortSignal) => loadGrammarPage(page, filter, signal), [page, filter]);
-  const request = usePracticeRequest(load);
-  const applyFilter = () => { setPage(0); setFilter(draft.trim()); };
-
-  return <>
-    <Text style={practiceStyles.detail}>Kho câu hỏi demo phi thương mại. Tìm theo nhóm ngữ pháp bằng tên tiếng Anh.</Text>
-    <View style={styles.search}>
-      <TextInput
-        value={draft}
-        onChangeText={setDraft}
-        onSubmitEditing={applyFilter}
-        placeholder="Ví dụ: past simple"
-        placeholderTextColor={hum.muted}
-        accessibilityLabel="Tìm chủ đề ngữ pháp"
-        maxLength={60}
-        style={[practiceStyles.input, styles.searchInput]}
-      />
-      <AppButton title="Tìm" variant="secondary" icon="search-outline" onPress={applyFilter} />
+function GrammarTopics({ wide }: { wide: boolean }) {
+  const request = usePracticeRequest(loadGrammarTopics);
+  if (request.loading) return <PracticeNotice loading message="Đang tải các nhóm Ngữ pháp…" />;
+  if (request.error) return <PracticeNotice message={request.error} retry={request.retry} />;
+  if (!request.data?.length) return <PracticeNotice message="Chưa có nhóm Ngữ pháp đã xuất bản." />;
+  return (
+    <View style={styles.grid}>
+      {request.data.map(topic => {
+        const englishTitle = grammarTopicLabel(topic);
+        const title = grammarTopicTitle(topic);
+        return (
+          <Link key={topic} href={{ pathname: '/practice/grammar/[topic]', params: { topic } }} style={[styles.card, wide && styles.cardWide]} asChild>
+            <Pressable accessibilityRole="link">
+              <View aria-hidden style={styles.topicIcon}><Ionicons name="book-outline" size={19} color={hum.blue} /></View>
+              <View style={styles.copy}>
+                <Text style={styles.cardTitle}>{title}</Text>
+                {englishTitle !== title && <Text style={practiceStyles.detail}>{englishTitle}</Text>}
+              </View>
+              <Ionicons aria-hidden name="chevron-forward" size={18} color={hum.blue} />
+            </Pressable>
+          </Link>
+        );
+      })}
     </View>
-    {request.loading ? <PracticeNotice loading message="Đang tải câu hỏi…" /> : request.error ? (
-      <PracticeNotice message={request.error} retry={request.retry} />
-    ) : request.data && <>
-      {request.data.rows.length ? (
-        <View style={styles.grid}>
-          {request.data.rows.map(item => (
-            <ExerciseCard key={item.id} id={item.id} skill="grammar" label={grammarTopicLabel(item.grammar_topic)} title={item.gapped_text} wide={wide} />
-          ))}
-        </View>
-      ) : <PracticeNotice message="Chưa tìm thấy câu hỏi cho chủ đề này." />}
-      {(page > 0 || request.data.hasNext) && (
-        <View style={styles.pagination}>
-          <AppButton title="Trang trước" variant="secondary" disabled={page === 0} onPress={() => setPage(value => value - 1)} />
-          <Text accessibilityLiveRegion="polite" style={practiceStyles.label}>Trang {page + 1}</Text>
-          <AppButton title="Trang sau" variant="secondary" disabled={!request.data.hasNext} onPress={() => setPage(value => value + 1)} />
-        </View>
-      )}
-    </>}
-  </>;
+  );
 }
 
 function ExerciseCard({ id, skill, label, title, wide }: {
@@ -143,7 +125,5 @@ const styles = StyleSheet.create({
   card: { ...paperCard, width: '100%', minHeight: 75, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 },
   cardWide: { width: '49%' },
   cardTitle: { color: hum.ink, fontSize: 16, lineHeight: 22, fontWeight: '700' },
-  search: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  searchInput: { flex: 1, minWidth: 0 },
-  pagination: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8, justifyContent: 'space-between' },
+  topicIcon: { borderWidth: 1, borderColor: hum.skyEdge, borderRadius: 12, backgroundColor: hum.sky, width: 39, height: 39, alignItems: 'center', justifyContent: 'center' },
 });

@@ -10,23 +10,27 @@ import { useLessonSpeech } from '@/features/lessons/hooks/useLessonSpeech';
 import { hum, paperButton } from '@/theme/hum';
 import { SpeakingResponse, WritingResponse } from '../components/PracticeResponses';
 import { PracticeNotice, practiceStyles, skillLabels } from '../components/PracticeUI';
-import { grammarTopicLabel, isPracticeSkill, loadGrammarExercise, loadPracticeCatalog } from '../data/catalog';
+import { grammarTopicTitle, isPracticeSkill, loadGrammarExercise, loadPracticeCatalog } from '../data/catalog';
 import type { GrammarExercise, PracticeSkill, SkillExercise } from '../data/catalog';
 import { usePracticeRequest } from '../hooks/usePracticeRequest';
 
 export default function PracticeExerciseScreen() {
-  const { exerciseId, skill: parameter } = useLocalSearchParams<{ exerciseId?: string; skill?: string }>();
+  const { exerciseId, skill: parameter, fromTopic, page, number } = useLocalSearchParams<{
+    exerciseId?: string; skill?: string; fromTopic?: string; page?: string; number?: string;
+  }>();
   const skill = isPracticeSkill(parameter) ? parameter : 'listening';
+  const returnToTopic = skill === 'grammar' && !!fromTopic;
   return (
     <Screen contentStyle={[practiceStyles.page, styles.page]}>
       <View style={styles.back}>
-        <AppButton title="Về Luyện tập" icon="arrow-back" variant="secondary" onPress={() => {
-          if (router.canGoBack()) router.back();
+        <AppButton title={returnToTopic ? 'Về danh sách câu hỏi' : 'Về Luyện tập'} icon="arrow-back" variant="secondary" onPress={() => {
+          if (returnToTopic) router.dismissTo({ pathname: '/practice/grammar/[topic]', params: { topic: fromTopic, page: page ?? '1' } });
+          else if (router.canGoBack()) router.back();
           else router.replace({ pathname: '/(tabs)/practice', params: { skill } });
         }} />
       </View>
       {!exerciseId ? <PracticeNotice message="Chưa tìm thấy bài luyện tập." /> : skill === 'grammar'
-        ? <GrammarDetail key={exerciseId} id={exerciseId} />
+        ? <GrammarDetail key={exerciseId} id={exerciseId} number={returnToTopic && number && /^[1-9]\d*$/.test(number) ? number : undefined} />
         : <SkillDetail key={skill + ':' + exerciseId} id={exerciseId} skill={skill} />}
     </Screen>
   );
@@ -49,16 +53,16 @@ function SkillDetail({ id, skill }: { id: string; skill: Exclude<PracticeSkill, 
   </>;
 }
 
-function GrammarDetail({ id }: { id: string }) {
+function GrammarDetail({ id, number }: { id: string; number?: string }) {
   const load = useCallback((signal: AbortSignal) => loadGrammarExercise(id, signal), [id]);
   const request = usePracticeRequest(load);
   if (request.loading) return <PracticeNotice loading message="Đang tải câu hỏi…" />;
   if (request.error) return <PracticeNotice message={request.error} retry={request.retry} />;
   if (!request.data) return <PracticeNotice message="Chưa tìm thấy câu hỏi Ngữ pháp." />;
-  return <GrammarQuestion exercise={request.data} />;
+  return <GrammarQuestion exercise={request.data} number={number} />;
 }
 
-function GrammarQuestion({ exercise }: { exercise: GrammarExercise }) {
+function GrammarQuestion({ exercise, number }: { exercise: GrammarExercise; number?: string }) {
   const [options] = useState(() => {
     const values = [...new Set([exercise.solution, ...exercise.distractors])];
     for (let end = values.length - 1; end > 0; end--) {
@@ -69,7 +73,7 @@ function GrammarQuestion({ exercise }: { exercise: GrammarExercise }) {
   });
   const [sourceError, setSourceError] = useState(false);
   return <>
-    <ExerciseHeading skill="grammar" label={grammarTopicLabel(exercise.grammar_topic)} title="Điền chỗ trống" />
+    <ExerciseHeading skill="grammar" label={grammarTopicTitle(exercise.grammar_topic)} title={number ? `Câu ${number}` : 'Điền chỗ trống'} />
     <ChoiceExercise question={exercise.gapped_text} options={options} answer={options.indexOf(exercise.solution)} review={exercise.filled_text} />
     <View style={styles.source}>
       <Text style={practiceStyles.detail}>{exercise.source_license}</Text>

@@ -66,6 +66,7 @@ for (const required of [
   'app/lessons/topics/[topicId].tsx',
   'app/(tabs)/practice.tsx',
   'app/practice/[exerciseId].tsx',
+  'app/practice/grammar/[topic].tsx',
   'app/(tabs)/tutor.tsx',
   'app/(tabs)/profile.tsx',
   'src/services/supabase.ts',

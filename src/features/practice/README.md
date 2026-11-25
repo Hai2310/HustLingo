@@ -5,7 +5,7 @@
 ## Được code
 - `screens/`: Practice Hub và các màn luyện tập.
 - `components/`: question, answer option, flashcard, exam timer, result...
-- `data/catalog.ts`: đọc bài đã xuất bản từ `practice_content` và `grammar_exercises` qua Supabase. Nghe, Đọc, Viết và Nói có bộ bài dự phòng đi kèm ứng dụng. Ngữ pháp tải theo trang và hiển thị nguồn, giấy phép của từng câu.
+- `data/catalog.ts`: đọc bài đã xuất bản từ `practice_content` và `grammar_exercises` qua Supabase. Nghe, Đọc, Viết và Nói có bộ bài dự phòng đi kèm ứng dụng. Ngữ pháp lấy danh sách nhóm qua view `practice_grammar_topics`. Với database chưa có view, ứng dụng dùng danh sách nhóm của bộ seed. Mỗi nhóm tải ID câu hỏi theo trang, còn nội dung và giấy phép được tải khi mở từng câu.
 - `hooks/`: quiz state, timer, review queue, spaced repetition...
 - `types/`: type câu hỏi/kết quả.
 

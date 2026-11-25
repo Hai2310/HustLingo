@@ -14,8 +14,10 @@ export type SkillExercise = Entry & (
   | { skill: 'speaking'; text: string; translation: string }
 );
 
-export type GrammarPreview = { id: string; grammar_topic: string; gapped_text: string };
-export type GrammarExercise = GrammarPreview & {
+export type GrammarExercise = {
+  id: string;
+  grammar_topic: string;
+  gapped_text: string;
   solution: string;
   distractors: string[];
   filled_text: string;
@@ -31,9 +33,33 @@ type SkillRow = {
   payload: Record<string, unknown>;
 };
 
-export const grammarPageSize = 12;
+// Includes all groups in the pinned grammar seed, for databases without the topics view.
+const grammarTopicNames: Record<string, string> = {
+  articles: 'Mạo từ',
+  comparisons: 'Câu so sánh',
+  conditionals: 'Câu điều kiện',
+  future_simple: 'Thì tương lai đơn',
+  modals: 'Động từ khuyết thiếu',
+  non_finites: 'Dạng động từ không chia',
+  passive: 'Câu bị động',
+  past_continuous: 'Thì quá khứ tiếp diễn',
+  past_perfect: 'Thì quá khứ hoàn thành',
+  past_simple: 'Thì quá khứ đơn',
+  personal_pronouns: 'Đại từ nhân xưng',
+  possessives: 'Chỉ sự sở hữu',
+  prepositions: 'Giới từ',
+  present_continuous: 'Thì hiện tại tiếp diễn',
+  present_perfect: 'Thì hiện tại hoàn thành',
+  present_simple: 'Thì hiện tại đơn',
+  quantifiers: 'Từ chỉ số lượng',
+  relatives: 'Mệnh đề quan hệ',
+  wh_questions: 'Câu hỏi Wh-',
+};
+
+export const grammarPageSize = 24;
 export const isPracticeSkill = (value?: string): value is PracticeSkill => skills.some(skill => skill === value);
-export const grammarTopicLabel = (topic: string) => topic.replace(/_/g, ' ');
+export const grammarTopicLabel = (topic: string) => topic.replace(/_/g, ' ').replace(/^\w/, letter => letter.toUpperCase());
+export const grammarTopicTitle = (topic: string) => Object.hasOwn(grammarTopicNames, topic) ? grammarTopicNames[topic] : grammarTopicLabel(topic);
 
 const localExercises: SkillExercise[] = [
   ...listeningLessons.map(item => ({ ...item, skill: 'listening' as const })),
@@ -82,17 +108,24 @@ export async function loadPracticeCatalog(signal: AbortSignal) {
   return { exercises: localExercises, source: 'local' as const };
 }
 
+export async function loadGrammarTopics(signal: AbortSignal): Promise<string[]> {
+  if (!supabaseConfigured) throw new Error('Kho Ngữ pháp cần kết nối với Supabase.');
+  const { data, error } = await supabase.from('practice_grammar_topics').select('grammar_topic')
+    .order('grammar_topic').abortSignal(signal);
+  if (error?.code === 'PGRST205') return Object.keys(grammarTopicNames);
+  if (error) throw new Error('Chưa tải được các nhóm Ngữ pháp.');
+  return data.map(row => row.grammar_topic);
+}
+
 export async function loadGrammarPage(page: number, topic: string, signal: AbortSignal) {
   if (!supabaseConfigured) throw new Error('Kho Ngữ pháp cần kết nối với Supabase.');
-  const offset = page * grammarPageSize;
-  const query = supabase.from('grammar_exercises').select('id,grammar_topic,gapped_text')
-    .eq('is_published', true).order('sort_order').order('id').range(offset, offset + grammarPageSize);
-  const term = topic.replace(/[\\%_]/g, '\\$&').replace(/\s+/g, '\\_');
-  if (term) query.ilike('grammar_topic', '%' + term + '%');
-  const { data, error } = await query.abortSignal(signal);
-  if (error) throw new Error('Chưa tải được kho bài tập Ngữ pháp.');
-  const rows: GrammarPreview[] = data;
-  return { rows: rows.slice(0, grammarPageSize), hasNext: rows.length > grammarPageSize };
+  const offset = (page - 1) * grammarPageSize;
+  const { data, error, count, status } = await supabase.from('grammar_exercises').select('id', { count: 'exact' })
+    .eq('is_published', true).eq('grammar_topic', topic)
+    .order('sort_order').order('id').range(offset, offset + grammarPageSize - 1).abortSignal(signal);
+  if (status === 416) return { rows: [], total: count ?? 0 };
+  if (error) throw new Error('Chưa tải được danh sách câu hỏi.');
+  return { rows: data as { id: string }[], total: count ?? data.length };
 }
 
 export async function loadGrammarExercise(id: string, signal: AbortSignal): Promise<GrammarExercise | null> {

@@ -130,6 +130,7 @@ Trong Supabase Dashboard → **SQL Editor**, chạy theo thứ tự:
 2. `migrations/202610160001_content_catalog.sql`
 3. `migrations/202610210001_practice_tutor_catalogs.sql`
 4. `migrations/202610210002_grammar_exercise_catalog.sql`
+5. `migrations/202610210003_practice_grammar_topics.sql`
 
 Sau đó chạy `npm run db:seed:content` ở máy đã có Node.js, hoặc chạy workflow GitHub
 Actions ở trên. Migrations tạo bảng; importer mới thêm các hàng dữ liệu.
