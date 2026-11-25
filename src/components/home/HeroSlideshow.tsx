@@ -4,7 +4,7 @@ import type { GestureResponderEvent } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import { getVocabularyArtwork } from '@/features/lessons/data/vocabulary-artwork';
-import { hum, humType, paperButton } from './homeHum';
+import { hum, humType, paperButton } from '@/theme/hum';
 
 const slides = [
   {

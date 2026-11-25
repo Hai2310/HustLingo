@@ -78,7 +78,7 @@ export default function OAuthComplete() {
   }, []);
 
   return (
-    <View style={styles.page}>
+    <View nativeID="hum-screen-oauth" style={styles.page}>
       {!errorMessage ? <ActivityIndicator size="large" color={colors.primary} /> : null}
       <Text style={styles.title}>
         {errorMessage ? 'Đăng nhập chưa hoàn tất' : 'Đang hoàn tất đăng nhập…'}

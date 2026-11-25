@@ -1,8 +1,9 @@
 import React, { useEffect, useRef } from 'react';
-import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Animated, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { colors } from '@/theme/colors';
+import { hum, paperButton, paperCard } from '@/theme/hum';
 import { useLearning } from '@/contexts/LearningContext';
 import { lessonStats } from '../data/catalog';
 import { useReducedLessonMotion } from '../hooks/useReducedLessonMotion';
@@ -13,8 +14,8 @@ export function Reveal({ children }: { children: React.ReactNode }) {
   const reduced = useReducedLessonMotion(), opacity = useRef(new Animated.Value(1)).current;
   useEffect(() => {
     if (reduced) { opacity.setValue(1); return; }
-    opacity.setValue(0.4);
-    const animation = Animated.timing(opacity, { toValue: 1, duration: 180, useNativeDriver: true });
+    opacity.setValue(0.78);
+    const animation = Animated.timing(opacity, { toValue: 1, duration: 180, useNativeDriver: Platform.OS !== 'web', isInteraction: false });
     animation.start(); return () => animation.stop();
   }, [opacity, reduced]);
   return <Animated.View style={{ opacity }}>{children}</Animated.View>;
@@ -25,7 +26,7 @@ export function ProgressBar({ percent, label }: { percent: number; label: string
 }
 
 export function LessonButton({ label, onPress, secondary = false, disabled = false, icon }: { label: string; onPress(): void; secondary?: boolean; disabled?: boolean; icon?: keyof typeof Ionicons.glyphMap }) {
-  return <Pressable accessibilityRole="button" accessibilityLabel={label} disabled={disabled} onPress={onPress} style={({ pressed }) => [ui.button, secondary && ui.buttonSecondary, disabled && { opacity: .45 }, pressed && !disabled && { opacity: .8 }]}>{icon && <Ionicons name={icon} size={18} color={secondary ? colors.text : colors.white} />}<Text style={[ui.buttonText, secondary && { color: colors.text }]}>{label}</Text></Pressable>;
+  return <Pressable accessibilityRole="button" accessibilityLabel={label} disabled={disabled} onPress={onPress} style={({ pressed }) => [ui.button, secondary && ui.buttonSecondary, disabled && { opacity: .45 }, pressed && !disabled && { opacity: .8 }]}>{icon && <Ionicons aria-hidden name={icon} size={18} color={colors.text} />}<Text style={ui.buttonText}>{label}</Text></Pressable>;
 }
 
 export function LessonState({ kind, title, description, action, onAction }: { kind: 'loading' | 'empty' | 'error'; title: string; description: string; action?: string; onAction?: () => void }) {
@@ -60,7 +61,7 @@ export function LessonSearch({ value, onChange }: { value: string; onChange(valu
 
 export function LessonCard({ lesson, topic }: { lesson: CatalogLesson; topic?: LessonTopic }) {
   const { state, ready } = useLearning(), stats = lessonStats(lesson, state);
-  return <Pressable accessibilityRole="button" accessibilityLabel={`${lesson.title}, ${lesson.level}, ${stats.percent}% complete`} onPress={() => router.push({ pathname: '/lessons/[lessonId]', params: { lessonId: lesson.id } })} style={({ pressed }) => [ui.lessonCard, pressed && { opacity: .85 }]}><View style={ui.lessonTop}><View style={[ui.lessonIcon, { backgroundColor: lesson.kind === 'grammar' ? colors.violetSoft : colors.blueSoft }]}><Ionicons name={lesson.kind === 'grammar' ? 'library-outline' : 'text-outline'} size={22} color={lesson.kind === 'grammar' ? colors.violet : colors.blue} /></View><View style={{ flex: 1 }}><Text style={ui.lessonKicker}>{lesson.kind === 'grammar' ? 'GRAMMAR' : topic?.title.toUpperCase() || 'VOCABULARY'} · {lesson.level}</Text><Text style={ui.lessonTitle}>{lesson.title}</Text></View><Ionicons name={stats.complete ? 'checkmark-circle' : 'arrow-forward'} size={23} color={stats.complete ? colors.success : colors.textMuted} /></View><Text style={ui.lessonMeta}>{lesson.kind === 'grammar' ? `${lesson.grammarIds.length} grammar point${lesson.grammarIds.length === 1 ? '' : 's'} · rule, examples & common mistakes` : `${lesson.vocabularyIds.length} words · pronunciation & examples`}</Text><View style={ui.progressLabel}><Text style={[ui.progressText, stats.complete && { color: colors.success }]}>{!ready ? 'Loading progress…' : stats.complete ? 'Completed' : stats.done ? 'In progress' : 'Not started'}</Text><Text style={ui.progressText}>{stats.percent}%</Text></View><ProgressBar percent={stats.percent} label={`${lesson.title} progress`} /></Pressable>;
+  return <Pressable accessibilityRole="button" accessibilityLabel={`${lesson.title}, ${lesson.level}, ${stats.percent}% complete`} onPress={() => router.push({ pathname: '/lessons/[lessonId]', params: { lessonId: lesson.id } })} style={({ pressed }) => [ui.lessonCard, pressed && { opacity: .85 }]}><View style={ui.lessonTop}><View style={[ui.lessonIcon, { backgroundColor: lesson.kind === 'grammar' ? colors.blueSoft : hum.coralSoft }]}><Ionicons name={lesson.kind === 'grammar' ? 'library-outline' : 'text-outline'} size={22} color={lesson.kind === 'grammar' ? colors.blue : hum.coralEdge} /></View><View style={{ flex: 1 }}><Text style={ui.lessonKicker}>{lesson.kind === 'grammar' ? 'GRAMMAR' : topic?.title.toUpperCase() || 'VOCABULARY'} · {lesson.level}</Text><Text style={ui.lessonTitle}>{lesson.title}</Text></View><Ionicons name={stats.complete ? 'checkmark-circle' : 'arrow-forward'} size={23} color={stats.complete ? colors.success : colors.textMuted} /></View><Text style={ui.lessonMeta}>{lesson.kind === 'grammar' ? `${lesson.grammarIds.length} grammar point${lesson.grammarIds.length === 1 ? '' : 's'} · rule, examples & common mistakes` : `${lesson.vocabularyIds.length} words · pronunciation & examples`}</Text><View style={ui.progressLabel}><Text style={[ui.progressText, stats.complete && { color: colors.success }]}>{!ready ? 'Loading progress…' : stats.complete ? 'Completed' : stats.done ? 'In progress' : 'Not started'}</Text><Text style={ui.progressText}>{stats.percent}%</Text></View><ProgressBar percent={stats.percent} label={`${lesson.title} progress`} /></Pressable>;
 }
 
 export const ui = StyleSheet.create({
@@ -70,29 +71,29 @@ export const ui = StyleSheet.create({
   description: { color: colors.textSecondary, fontSize: 14, lineHeight: 22, marginTop: 7 },
   sectionHeading: { fontSize: 21, fontWeight: '800', color: colors.text, letterSpacing: -.45 },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 28, marginBottom: 16 },
-  track: { height: 5, backgroundColor: '#EEE8E4', borderRadius: 99, overflow: 'hidden' },
-  fill: { height: '100%', borderRadius: 99, backgroundColor: colors.primary },
-  button: { minHeight: 46, backgroundColor: colors.primary, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
-  buttonSecondary: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.borderStrong },
-  buttonText: { fontSize: 14, fontWeight: '700', color: colors.white, textAlign: 'center' },
-  state: { minHeight: 230, alignItems: 'center', justifyContent: 'center', padding: 28, gap: 14, backgroundColor: colors.white, borderRadius: 20, borderWidth: 1, borderColor: colors.border, marginTop: 20 },
+  track: { height: 5, backgroundColor: hum.mintTrack, borderRadius: 99, overflow: 'hidden' },
+  fill: { height: '100%', borderRadius: 99, backgroundColor: hum.greenInk },
+  button: { ...paperButton, minHeight: 46, backgroundColor: colors.action, borderColor: colors.actionEdge, paddingVertical: 12, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  buttonSecondary: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.borderStrong },
+  buttonText: { fontSize: 14, fontWeight: '700', color: colors.text, textAlign: 'center', flexShrink: 1 },
+  state: { ...paperCard, minHeight: 230, alignItems: 'center', justifyContent: 'center', padding: 28, gap: 14, marginTop: 20 },
   stateIcon: { width: 62, height: 62, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
   stateTitle: { fontSize: 20, fontWeight: '700', color: colors.text, textAlign: 'center' },
   stateDescription: { fontSize: 14, lineHeight: 22, color: colors.textSecondary, maxWidth: 430, textAlign: 'center' },
-  notice: { backgroundColor: '#FFF3DF', padding: 13, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 9, marginTop: 16 },
+  notice: { backgroundColor: colors.warningSoft, padding: 13, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 9, marginTop: 16 },
   noticeText: { flex: 1, color: colors.textSecondary, fontSize: 12, lineHeight: 18 },
   retry: { padding: 8 }, retryText: { color: colors.primary, fontSize: 12, fontWeight: '800' },
   sync: { flexDirection: 'row', alignItems: 'center', gap: 5, minHeight: 36 }, syncText: { fontSize: 11, color: colors.textSecondary },
   back: { flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start', minHeight: 44, marginBottom: 18 },
   backText: { color: colors.textSecondary, fontSize: 13, fontWeight: '600' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { minWidth: 45, minHeight: 40, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 14, paddingVertical: 9, backgroundColor: colors.white, borderRadius: 11, borderWidth: 1, borderColor: colors.border },
-  selectedChip: { backgroundColor: colors.primary, borderColor: colors.primary }, chipText: { color: colors.textSecondary, fontSize: 13, fontWeight: '700' }, selectedChipText: { color: colors.white },
+  chip: { minWidth: 45, minHeight: 44, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 14, paddingVertical: 9, backgroundColor: colors.surface, borderRadius: 11, borderWidth: 1, borderColor: colors.border },
+  selectedChip: { backgroundColor: colors.action, borderColor: colors.actionEdge }, chipText: { color: colors.textSecondary, fontSize: 13, fontWeight: '700' }, selectedChipText: { color: colors.text },
   kindRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 22, borderBottomWidth: 1, borderBottomColor: colors.border, marginTop: 20 },
   kind: { paddingVertical: 12, borderBottomWidth: 2, borderBottomColor: 'transparent' }, kindSelected: { borderBottomColor: colors.primary }, kindText: { fontSize: 14, fontWeight: '700', color: colors.textMuted },
-  search: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: colors.white, borderRadius: 12, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 14, minHeight: 46, marginBottom: 17 },
+  search: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: colors.surface, borderRadius: 12, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 14, minHeight: 46, marginBottom: 17 },
   searchInput: { flex: 1, color: colors.text, fontSize: 14, minHeight: 46, paddingVertical: 10 },
-  lessonCard: { backgroundColor: colors.white, borderRadius: 17, borderWidth: 1, borderColor: colors.border, padding: 20 },
+  lessonCard: { ...paperCard, padding: 20 },
   lessonTop: { flexDirection: 'row', alignItems: 'center', gap: 13 },
   lessonIcon: { width: 46, height: 46, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   lessonKicker: { color: colors.textMuted, fontSize: 9, fontWeight: '800', letterSpacing: .7, marginBottom: 5 },

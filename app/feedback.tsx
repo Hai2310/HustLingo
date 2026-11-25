@@ -32,5 +32,5 @@ export default function Feedback() {
 const styles = StyleSheet.create({
   page: { maxWidth: 700, alignSelf: 'center' },
   label: { fontSize: 13, fontWeight: '800', color: colors.text, marginBottom: 8 },
-  input: { minHeight: 220, borderRadius: 18, borderWidth: 1, borderColor: colors.borderStrong, backgroundColor: colors.white, padding: 15, fontSize: 14, lineHeight: 22, color: colors.text, marginBottom: 14 },
+  input: { minHeight: 220, borderRadius: 18, borderWidth: 1, borderColor: colors.borderStrong, backgroundColor: colors.surface, padding: 15, fontSize: 14, lineHeight: 22, color: colors.text, marginBottom: 14 },
 });

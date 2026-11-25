@@ -18,6 +18,7 @@ body:has(#hustlingo-home) {
 }
 
 #hustlingo-home,
+[id^="hum-screen-"],
 #hustlingo-home #home-hero,
 #hustlingo-home #home-lesson,
 #hustlingo-home #home-vocabulary-face,
@@ -52,8 +53,8 @@ body:has(#hustlingo-home) {
   min-width: 0;
 }
 
-#hustlingo-home a:focus-visible,
-#hustlingo-home #home-hero [role="button"]:focus-visible {
+:where(#hustlingo-home, [id^="hum-screen-"]) :is(a, button, [role="button"], [role="tab"], [role="switch"], input, textarea):focus-visible,
+[role="tablist"] [role="tab"]:focus-visible {
   outline: 2px solid var(--home-focus);
   outline-offset: 3px;
 }

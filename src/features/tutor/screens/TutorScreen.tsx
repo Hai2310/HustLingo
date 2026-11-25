@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/components/common/Screen';
 import { FadeIn } from '@/components/motion/Motion';
 import { colors } from '@/theme/colors';
+import { hum, paperButton, paperCard } from '@/theme/hum';
 import { useTutorCatalog } from '../hooks/useTutorCatalog';
 import { TutorDataState } from '../components/TutorDataState';
 import { ScenarioCard } from '../components';
@@ -23,10 +24,12 @@ export function TutorScreen() {
   if (data.error || !scenarios.length) return <TutorDataState message={data.error || undefined} retry={data.retry} />;
   return (
     <Screen>
-      <FadeIn>
-        <Text style={styles.kicker}>PRACTICE</Text>
-        <Text style={styles.title}>Choose a situation.</Text>
-        <Text style={styles.subtitle}>Luyện tiếng Anh qua những cuộc hội thoại gần với đời thật.</Text>
+      <FadeIn style={styles.intro}>
+        <View style={styles.introCopy}>
+          <Text accessibilityRole="header" style={styles.title}>Luyện hội thoại với gia sư</Text>
+          <Text style={styles.subtitle}>Chọn một tình huống để thực hành tiếng Anh.</Text>
+        </View>
+        <View aria-hidden style={styles.introIcon}><Ionicons name="chatbubbles-outline" size={25} color={hum.greenInk} /></View>
       </FadeIn>
 
       <FadeIn delay={90}>
@@ -80,23 +83,25 @@ export default TutorScreen;
 
 function FilterButton({ active, label, onPress }: { active: boolean; label: string; onPress: () => void }) {
   return (
-    <Pressable onPress={onPress} style={[styles.filter, active && styles.filterActive]}>
+    <Pressable accessibilityRole="button" accessibilityState={{ selected: active }} onPress={onPress} style={[styles.filter, active && styles.filterActive]}>
       <Text style={[styles.filterText, active && styles.filterTextActive]}>{label}</Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  kicker: { marginTop: 4, fontSize: 9, fontWeight: '900', letterSpacing: 1.25, color: colors.violet },
+  intro: { ...paperCard, flexDirection: 'row', alignItems: 'center', gap: 13, backgroundColor: hum.mint, borderColor: hum.mintRule, padding: 21, marginTop: 7 },
+  introCopy: { flex: 1, minWidth: 0 },
+  introIcon: { width: 46, height: 46, backgroundColor: hum.card, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
   title: { marginTop: 5, fontSize: 30, lineHeight: 35, fontWeight: '900', letterSpacing: -1, color: colors.text },
-  subtitle: { maxWidth: 560, marginTop: 6, fontSize: 12.5, lineHeight: 19, color: colors.textSecondary },
+  subtitle: { maxWidth: 560, marginTop: 6, fontSize: 14, lineHeight: 21, color: colors.textSecondary },
   filterRow: { flexDirection: 'row', alignItems: 'center', marginTop: 23, marginBottom: 14, gap: 10 },
   filterLabel: { fontSize: 10.5, fontWeight: '900', color: colors.text },
   filters: { gap: 7 },
-  filter: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
-  filterActive: { backgroundColor: colors.charcoal, borderColor: colors.charcoal },
-  filterText: { fontSize: 10, fontWeight: '800', color: colors.textSecondary },
-  filterTextActive: { color: colors.white },
+  filter: { ...paperButton, minHeight: 44, paddingHorizontal: 12, justifyContent: 'center', borderRadius: 11, backgroundColor: colors.surface, borderColor: colors.border },
+  filterActive: { backgroundColor: colors.action, borderColor: colors.actionEdge },
+  filterText: { fontSize: 13, fontWeight: '700', color: colors.textSecondary },
+  filterTextActive: { color: colors.text },
   profileLinks: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: 12, rowGap: 4, marginBottom: 14 },
   profileLabel: { fontSize: 10.5, color: colors.textSecondary },
   profileLink: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 4 },

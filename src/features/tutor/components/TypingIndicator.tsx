@@ -1,17 +1,21 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, View } from 'react-native';
+import { Animated, Platform, StyleSheet, View } from 'react-native';
 import { colors } from '@/theme/colors';
+import { useMotionPreference } from '@/theme/MotionPreference';
 
 export function TypingIndicator() {
   const progress = useRef(new Animated.Value(0)).current;
+  const reduced = useMotionPreference() !== false;
   useEffect(() => {
+    if (reduced) { progress.setValue(1); return; }
+    const timing = { duration: 700, useNativeDriver: Platform.OS !== 'web', isInteraction: false };
     const loop = Animated.loop(Animated.sequence([
-      Animated.timing(progress, { toValue: 1, duration: 700, useNativeDriver: true }),
-      Animated.timing(progress, { toValue: 0, duration: 700, useNativeDriver: true }),
+      Animated.timing(progress, { ...timing, toValue: 1 }),
+      Animated.timing(progress, { ...timing, toValue: 0 }),
     ]));
     loop.start();
     return () => loop.stop();
-  }, [progress]);
+  }, [progress, reduced]);
   return (
     <View style={styles.bubble}>
       {[0, 1, 2].map(index => (

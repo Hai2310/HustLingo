@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Screen } from '@/components/Screen';
 import { colors } from '@/theme/colors';
+import { hum, paperCard } from '@/theme/hum';
 import { useLearning } from '@/contexts/LearningContext';
 import { loadLessonContent } from '@/services/learningContent';
 import { useLessonCatalog } from '../hooks/useLessonCatalog';
@@ -50,6 +51,6 @@ export default function LessonDetailScreen() {
 
 const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' },
-  progressCard: { padding: 20, marginTop: 24, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.border, borderRadius: 16 }, progressTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 15, marginBottom: 12 }, progressDescription: { flex: 1, color: colors.textSecondary, fontSize: 12, lineHeight: 19 }, percent: { color: colors.primary, fontSize: 23, fontWeight: '800' },
-  completed: { flexDirection: 'row', alignItems: 'center', gap: 15, padding: 20, borderRadius: 16, borderWidth: 1, borderColor: '#BBDFCF', backgroundColor: colors.successSoft, marginTop: 22 }, check: { width: 44, alignItems: 'center' }, completedTitle: { fontSize: 17, fontWeight: '700', color: '#1E6F50' }, completedDescription: { fontSize: 12, lineHeight: 19, marginTop: 5, color: '#42725E' }, nextActions: { gap: 12, marginTop: 24 },
+  progressCard: { ...paperCard, padding: 20, marginTop: 24, backgroundColor: hum.mint, borderColor: hum.mintRule }, progressTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 15, marginBottom: 12 }, progressDescription: { flex: 1, color: colors.textSecondary, fontSize: 13, lineHeight: 19 }, percent: { color: hum.greenInk, fontSize: 23, fontWeight: '700' },
+  completed: { flexDirection: 'row', alignItems: 'center', gap: 15, padding: 20, borderRadius: 16, borderWidth: 1, borderColor: hum.mintRule, backgroundColor: colors.successSoft, marginTop: 22 }, check: { width: 44, alignItems: 'center' }, completedTitle: { fontSize: 17, fontWeight: '700', color: hum.greenInk }, completedDescription: { fontSize: 12, lineHeight: 19, marginTop: 5, color: hum.greenInk }, nextActions: { gap: 12, marginTop: 24 },
 });

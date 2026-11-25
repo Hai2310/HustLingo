@@ -6,7 +6,7 @@ import { useLearning } from '@/contexts/LearningContext';
 import { getLocalCatalog, lessonStats } from '@/features/lessons/data/catalog';
 import { getVocabularyArtwork } from '@/features/lessons/data/vocabulary-artwork';
 import { useLessonCatalog } from '@/features/lessons/hooks/useLessonCatalog';
-import { hum, humType, paperButton } from './homeHum';
+import { hum, humType, paperButton } from '@/theme/hum';
 import { HomePaperPressable } from './HomePaperPressable';
 
 export function HomeLesson({ wide, learnerId, reducedMotion }: {

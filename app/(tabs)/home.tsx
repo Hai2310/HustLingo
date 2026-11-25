@@ -6,15 +6,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { HustLogo } from '@/components/HustLogo';
 import { HeroSlideshow } from '@/components/home/HeroSlideshow';
 import { HomeLesson } from '@/components/home/HomeLesson';
-import { HomePaperPressable, useHomeMotionPreference } from '@/components/home/HomePaperPressable';
+import { HomePaperPressable } from '@/components/home/HomePaperPressable';
 import { PricingTeaser } from '@/components/home/PricingTeaser';
-import { hum, humType, paperButton } from '@/components/home/homeHum';
+import { hum, humType, paperButton } from '@/theme/hum';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLearning } from '@/contexts/LearningContext';
 import { learningTopics } from '@/data/content';
 import { getVocabularyArtwork } from '@/features/lessons/data/vocabulary-artwork';
 import { maxContentWidth } from '@/theme/layout';
-import '@/components/home/homeHum.css';
+import { useMotionPreference } from '@/theme/MotionPreference';
 
 const libraryShortcuts = [
   { label: 'Nghe', icon: 'headset-outline', path: '/listening' },
@@ -24,7 +24,7 @@ const libraryShortcuts = [
 export default function Home() {
   const { user, isGuest } = useAuth();
   const { state, accuracy, ready } = useLearning();
-  const reducedMotion = useHomeMotionPreference();
+  const reducedMotion = useMotionPreference();
   const { width } = useWindowDimensions();
   const desktop = width >= 1000;
   const wide = width >= 680;

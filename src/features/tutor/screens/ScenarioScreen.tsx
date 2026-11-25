@@ -9,6 +9,7 @@ import { AppCard } from '@/components/common/AppCard';
 import { useTutorCatalog } from '../hooks/useTutorCatalog';
 import { TutorDataState } from '../components/TutorDataState';
 import { colors } from '@/theme/colors';
+import { hum, paperCard } from '@/theme/hum';
 
 export default function ScenarioScreen() {
   const { id, tutorId } = useLocalSearchParams<{ id: string; tutorId?: string }>();
@@ -37,8 +38,8 @@ export default function ScenarioScreen() {
 }
 
 const styles = StyleSheet.create({
-  hero: { alignItems: 'center', paddingVertical: 5 },
-  icon: { width: 70, height: 70, borderRadius: 23, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
+  hero: { ...paperCard, alignItems: 'center', padding: 19, backgroundColor: hum.sky, borderColor: hum.skyEdge },
+  icon: { width: 60, height: 60, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: hum.card },
   title: { marginTop: 16, fontSize: 28, fontWeight: '900', color: colors.text, textAlign: 'center' },
   subtitle: { maxWidth: 400, marginTop: 6, fontSize: 12, lineHeight: 18, color: colors.textSecondary, textAlign: 'center' },
   goal: { marginTop: 22, backgroundColor: colors.surface, borderColor: colors.border },

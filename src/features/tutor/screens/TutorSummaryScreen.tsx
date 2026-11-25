@@ -8,6 +8,7 @@ import { loadTutorSummary } from '../services/tutorSessionStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { TutorDataState } from '../components/TutorDataState';
 import { colors } from '@/theme/colors';
+import { hum, paperCard } from '@/theme/hum';
 import type { TutorSessionSummary } from '../types';
 
 export default function TutorSummaryScreen() {
@@ -47,12 +48,12 @@ export default function TutorSummaryScreen() {
 
 const styles = StyleSheet.create({
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  header: { alignItems: 'center', paddingTop: 18 },
+  header: { ...paperCard, alignItems: 'center', padding: 20, backgroundColor: hum.mint, borderColor: hum.mintRule },
   check: { width: 66, height: 66, borderRadius: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.success },
   kicker: { marginTop: 17, fontSize: 8.5, fontWeight: '900', letterSpacing: 1.2, color: colors.success },
   title: { marginTop: 6, fontSize: 32, fontWeight: '900', color: colors.text },
   subtitle: { maxWidth: 440, marginTop: 7, fontSize: 12, lineHeight: 19, color: colors.textSecondary, textAlign: 'center' },
-  stats: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 25, padding: 17, borderRadius: 17, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
+  stats: { ...paperCard, flexDirection: 'row', justifyContent: 'space-around', marginTop: 20, padding: 17 },
   statValue: { fontSize: 23, fontWeight: '900', color: colors.text, textAlign: 'center' },
   statLabel: { marginTop: 2, fontSize: 9, fontWeight: '800', color: colors.textMuted, textAlign: 'center' },
   sectionTitle: { marginTop: 25, marginBottom: 10, fontSize: 14, fontWeight: '900', color: colors.text },

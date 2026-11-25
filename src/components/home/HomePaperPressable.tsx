@@ -1,7 +1,7 @@
 import React, { forwardRef, useEffect, useState } from 'react';
-import { AccessibilityInfo, Animated, Easing, Platform, Pressable, StyleSheet } from 'react-native';
+import { Animated, Easing, Platform, Pressable, StyleSheet } from 'react-native';
 import type { PressableProps, StyleProp, ViewStyle } from 'react-native';
-import { paperButton } from './homeHum';
+import { paperButton } from '@/theme/hum';
 
 type Props = Omit<PressableProps, 'children' | 'style' | 'onPressIn' | 'onPressOut'> & {
   children: React.ReactNode;
@@ -10,24 +10,6 @@ type Props = Omit<PressableProps, 'children' | 'style' | 'onPressIn' | 'onPressO
   reducedMotion: boolean;
   primary?: boolean;
 };
-
-export function useHomeMotionPreference() {
-  const [reduced, setReduced] = useState<boolean | null>(null);
-  useEffect(() => {
-    let pending = true;
-    const subscription = AccessibilityInfo.addEventListener('reduceMotionChanged', value => {
-      pending = false;
-      setReduced(value);
-    });
-    const resolve = (value: boolean) => { if (pending) setReduced(value); };
-    void AccessibilityInfo.isReduceMotionEnabled().then(resolve, () => resolve(true));
-    return () => {
-      pending = false;
-      subscription?.remove();
-    };
-  }, []);
-  return reduced;
-}
 
 // Expo Router supplies the link props to this outer Pressable. Only the face moves.
 export const HomePaperPressable = forwardRef<React.ComponentRef<typeof Pressable>, Props>(

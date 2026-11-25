@@ -1,11 +1,17 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, Easing, Pressable, PressableProps, StyleProp, ViewStyle } from 'react-native';
+import { Animated, Easing, Platform, Pressable, PressableProps, StyleProp, ViewStyle } from 'react-native';
+import { useMotionPreference } from '@/theme/MotionPreference';
 
 export function FadeIn({ children, delay = 0, distance = 12, style }: { children: React.ReactNode; delay?: number; distance?: number; style?: StyleProp<ViewStyle> }) {
-  const p = useRef(new Animated.Value(0)).current;
+  const reduced = useMotionPreference() !== false;
+  const p = useRef(new Animated.Value(1)).current;
   useEffect(() => {
-    Animated.timing(p, { toValue: 1, duration: 440, delay, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
-  }, [delay, p]);
+    if (reduced) { p.setValue(1); return; }
+    p.setValue(0.75);
+    const animation = Animated.timing(p, { toValue: 1, duration: 230, delay: Math.min(delay, 120), easing: Easing.out(Easing.cubic), useNativeDriver: Platform.OS !== 'web', isInteraction: false });
+    animation.start();
+    return () => animation.stop();
+  }, [delay, p, reduced]);
   return (
     <Animated.View style={[style, { opacity: p, transform: [{ translateY: p.interpolate({ inputRange: [0, 1], outputRange: [distance, 0] }) }] }]}>
       {children}
@@ -14,22 +20,23 @@ export function FadeIn({ children, delay = 0, distance = 12, style }: { children
 }
 
 export function ScaleIn({ children, delay = 0, style }: { children: React.ReactNode; delay?: number; style?: StyleProp<ViewStyle> }) {
-  const p = useRef(new Animated.Value(0)).current;
-  useEffect(() => {
-    Animated.spring(p, { toValue: 1, delay, tension: 70, friction: 10, useNativeDriver: true }).start();
-  }, [delay, p]);
-  return <Animated.View style={[style, { opacity: p, transform: [{ scale: p }] }]}>{children}</Animated.View>;
+  return <FadeIn delay={delay} distance={8} style={style}>{children}</FadeIn>;
 }
 
 export function MotionPressable({ children, style, onPressIn, onPressOut, ...props }: PressableProps & { style?: StyleProp<ViewStyle> }) {
-  const scale = useRef(new Animated.Value(1)).current;
-  const animate = (toValue: number) => Animated.spring(scale, { toValue, speed: 28, bounciness: 2, useNativeDriver: true }).start();
+  const reduced = useMotionPreference() !== false;
+  const lift = useRef(new Animated.Value(0)).current;
+  useEffect(() => { if (reduced) lift.setValue(0); }, [lift, reduced]);
+  const animate = (toValue: number) => {
+    if (reduced) return;
+    Animated.timing(lift, { toValue, duration: 90, useNativeDriver: Platform.OS !== 'web', isInteraction: false }).start();
+  };
   return (
-    <Animated.View style={{ transform: [{ scale }] }}>
+    <Animated.View style={{ transform: [{ translateY: lift }] }}>
       <Pressable
         {...props}
-        onPressIn={(e) => { animate(0.972); onPressIn?.(e); }}
-        onPressOut={(e) => { animate(1); onPressOut?.(e); }}
+        onPressIn={(e) => { animate(2); onPressIn?.(e); }}
+        onPressOut={(e) => { animate(0); onPressOut?.(e); }}
         style={style as any}
       >{children}</Pressable>
     </Animated.View>

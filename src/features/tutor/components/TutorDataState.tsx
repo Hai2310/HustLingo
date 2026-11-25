@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { Screen } from '@/components/common/Screen';
 import { AppButton } from '@/components/common/Buttons';
 import { colors } from '@/theme/colors';
+import { paperCard } from '@/theme/hum';
 
 export function TutorDataState({ loading, message, retry }: { loading?: boolean; message?: string; retry?: () => void }) {
   return (
@@ -21,7 +22,7 @@ export function TutorDataState({ loading, message, retry }: { loading?: boolean;
 }
 
 const styles = StyleSheet.create({
-  content: { paddingVertical: 40, gap: 16, alignItems: 'center' },
+  content: { ...paperCard, padding: 24, marginTop: 14, gap: 16, alignItems: 'center' },
   title: { fontSize: 24, fontWeight: '900', color: colors.text },
   message: { fontSize: 13, lineHeight: 20, color: colors.textSecondary, textAlign: 'center', maxWidth: 440 },
 });

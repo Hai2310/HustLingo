@@ -4,17 +4,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
 import { formatVnd, subscriptionPlans } from '@/data/plans';
-import { hum, humType, paperButton } from './homeHum';
+import { hum, humType, paperButton, pricingPaper } from '@/theme/hum';
 
 const paidPlans = subscriptionPlans.filter(plan => plan.id === 'plus' || plan.id === 'pro');
-const pricingPaper = {
-  sheet: ['#FFF0C9', '#FFF9E9'] as const,
-  sheetEdge: '#DEC27F',
-  plus: ['#F8FCFF', '#E5F1FB'] as const,
-  pro: ['#FFF7D9', '#FFE08B'] as const,
-  proEdge: '#D3A74C',
-  proInk: '#78500E',
-};
 
 export function PricingTeaser({ wide = false }: { wide?: boolean }) {
   const action = (

@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { ScrollView, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '@/theme/colors';
 import { maxContentWidth } from '@/theme/layout';
 import { AmbientBackground } from './AmbientBackground';
 
-export function Screen({ children, scroll = true, contentStyle, ambient = true, scrollRef }: { children: React.ReactNode; scroll?: boolean; contentStyle?: StyleProp<ViewStyle>; ambient?: boolean; scrollRef?: React.Ref<ScrollView> }) {
+export function Screen({ children, scroll = true, contentStyle, ambient = false, scrollRef }: { children: React.ReactNode; scroll?: boolean; contentStyle?: StyleProp<ViewStyle>; ambient?: boolean; scrollRef?: React.Ref<ScrollView> }) {
+  const id = useId();
   const body = <View style={[styles.content, contentStyle]}>{children}</View>;
   return (
-    <SafeAreaView edges={['top']} style={styles.safe}>
+    <SafeAreaView nativeID={'hum-screen-' + id} edges={['top']} style={styles.safe}>
       {ambient && <AmbientBackground />}
       {scroll ? <ScrollView ref={scrollRef} contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>{body}</ScrollView> : body}
     </SafeAreaView>
