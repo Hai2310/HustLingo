@@ -1,73 +1,237 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Link } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Screen } from '@/components/Screen';
 import { HustLogo } from '@/components/HustLogo';
-import { AppCard } from '@/components/AppCard';
-import { SectionTitle } from '@/components/SectionTitle';
-import { FadeIn, ScaleIn } from '@/components/Motion';
-import { HeroSlideshow } from '@/components/HeroSlideshow';
-import { PricingTeaser } from '@/components/PricingTeaser';
+import { HomeLesson } from '@/components/home/HomeLesson';
+import { HomePaperPressable, useHomeMotionPreference } from '@/components/home/HomePaperPressable';
+import { PricingTeaser } from '@/components/home/PricingTeaser';
+import { hum, humType, paperButton } from '@/components/home/homeHum';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLearning } from '@/contexts/LearningContext';
 import { learningTopics } from '@/data/content';
-import { colors } from '@/theme/colors';
+import { getVocabularyArtwork } from '@/features/lessons/data/vocabulary-artwork';
+import { maxContentWidth } from '@/theme/layout';
+import '@/components/home/homeHum.css';
 
-const quick = [
-  ['Từ vựng', 'text-outline', '/vocabulary', colors.primarySoft, colors.primary],
-  ['Nghe', 'headset-outline', '/listening', colors.cyanSoft, colors.cyan],
-  ['Đọc', 'reader-outline', '/reading', colors.blueSoft, colors.blue],
-  ['Ngữ pháp', 'library-outline', '/grammar', colors.violetSoft, colors.violet],
+const libraryShortcuts = [
+  { label: 'Nghe', icon: 'headset-outline', path: '/listening' },
+  { label: 'Đọc', icon: 'reader-outline', path: '/reading' },
 ] as const;
 
 export default function Home() {
-  const { user } = useAuth();
-  const { state, accuracy } = useLearning();
-  const goal = user?.dailyMinutes || 15;
-  const firstName = (user?.displayName || 'Hải').trim().split(/\s+/).slice(-1)[0];
+  const { user, isGuest } = useAuth();
+  const { state, accuracy, ready } = useLearning();
+  const reducedMotion = useHomeMotionPreference();
+  const { width } = useWindowDimensions();
+  const desktop = width >= 1000;
+  const wide = width >= 680;
+  const firstName = user?.displayName?.trim().split(/\s+/).pop();
+  const greeting = isGuest || !firstName ? 'Chào bạn!' : 'Chào ' + firstName + '!';
+  const dailyGoal = user?.dailyMinutes || 15;
+  const dailyProgress = Math.min(100, Math.max(0, state.minutesToday / dailyGoal * 100));
+  const stats = [
+    { label: 'Từ đã học', value: state.studiedWordIds.length },
+    { label: 'Cần ôn', value: state.reviewWordIds.length },
+    { label: 'Chính xác', value: state.totalAnswers > 0 ? accuracy + '%' : '—' },
+    { label: 'Phút hôm nay', value: state.minutesToday + ' / ' + dailyGoal },
+  ];
 
-  return <Screen>
-    <FadeIn><View style={styles.topbar}><HustLogo size={40}/><View style={styles.topActions}><Pressable onPress={()=>router.push('/pricing')} style={styles.premiumMini}><Ionicons name="diamond-outline" size={15} color={colors.primary}/><Text style={styles.premiumMiniText}>PLUS</Text></Pressable><Pressable onPress={()=>router.push('/settings')} style={styles.iconBtn}><Ionicons name="notifications-outline" size={20} color={colors.text}/></Pressable></View></View></FadeIn>
+  return (
+    <View nativeID="hustlingo-home" style={styles.canvas}>
+      <SafeAreaView edges={['top']} style={styles.safeArea}>
+        <ScrollView contentContainerStyle={styles.scroll}>
+          <View style={[styles.page, wide && styles.pageWide]}>
+            <View style={styles.topbar}>
+              <View style={styles.brand}>
+                <HustLogo size={36} showWordmark={false} />
+                <Text style={styles.wordmark}>HustLingo</Text>
+              </View>
+              <View style={styles.topActions}>
+                <Link href="/pricing" style={styles.plusLink} asChild>
+                  <Pressable>
+                    <Text style={styles.linkText}>Plus</Text>
+                  </Pressable>
+                </Link>
+                <Link href="/settings" style={styles.settings} asChild>
+                  <Pressable accessibilityLabel="Cài đặt">
+                    <Ionicons aria-hidden name="settings-outline" size={19} color={hum.ink} />
+                  </Pressable>
+                </Link>
+              </View>
+            </View>
 
-    <FadeIn delay={70}><View style={styles.heading}><Text style={styles.kicker}>HÔM NAY · GIỮ NHỊP HỌC</Text><Text style={styles.title}>Chào {firstName},{`\n`}bắt đầu nhé.</Text><Text style={styles.date}>Mỗi ngày tiến một chút, tiếng Anh sẽ thành phản xạ.</Text></View></FadeIn>
+            <Text accessibilityRole="header" aria-level={1} style={[styles.greeting, wide && styles.greetingWide]}>
+              {greeting}
+            </Text>
+            <View style={[styles.study, desktop && styles.studyDesktop]}>
+              <HomeLesson wide={wide} learnerId={user.id} reducedMotion={reducedMotion} />
+              <View style={[styles.quick, desktop && styles.quickDesktop]}>
+                <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>Học nhanh</Text>
+                <View style={styles.quickCards}>
+                  <Link href="/vocabulary" style={styles.quickFeature} asChild>
+                    <HomePaperPressable
+                      nativeID="home-vocabulary" accessibilityLabel="Từ vựng"
+                      faceStyle={styles.vocabularyFace} reducedMotion={reducedMotion !== false}
+                    >
+                      <Text style={styles.quickLabel}>Từ vựng</Text>
+                      <Text nativeID="home-vocabulary-sample" accessible={false} aria-hidden style={styles.wordSample}>Aa</Text>
+                    </HomePaperPressable>
+                  </Link>
+                  <Link href="/grammar" style={styles.quickGrammar} asChild>
+                    <HomePaperPressable
+                      nativeID="home-grammar" accessibilityLabel="Ngữ pháp"
+                      faceStyle={styles.grammarFace} reducedMotion={reducedMotion !== false}
+                    >
+                      <View nativeID="home-grammar-icon" style={styles.grammarIcon} aria-hidden>
+                        <Ionicons aria-hidden name="library-outline" size={24} color={hum.blue} />
+                      </View>
+                      <Text style={styles.quickLabel}>Ngữ pháp</Text>
+                    </HomePaperPressable>
+                  </Link>
+                </View>
+                <View style={styles.libraryRail}>
+                  {libraryShortcuts.map(item => (
+                    <Link key={item.path} href={item.path} style={styles.libraryLink} asChild>
+                      <Pressable accessibilityLabel={item.label + ', mở thư viện bài học'}>
+                        <Ionicons aria-hidden name={item.icon} size={19} color={hum.blue} />
+                        <Text style={styles.linkText}>{item.label}</Text>
+                        <Ionicons aria-hidden name="chevron-forward" size={14} color={hum.blue} style={styles.chevron} />
+                      </Pressable>
+                    </Link>
+                  ))}
+                </View>
+              </View>
+            </View>
 
-    <FadeIn delay={110}><HeroSlideshow goal={goal} minutesToday={state.minutesToday}/></FadeIn>
+            <View style={styles.section}>
+              <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>Tiến độ của bạn</Text>
+              <View nativeID="home-stats" style={styles.stats}>
+                {stats.map((item, index) => (
+                  <View
+                    key={item.label}
+                    style={[
+                      styles.stat,
+                      !wide && styles.statCompact,
+                      (wide ? index > 0 : index % 2 === 1) && styles.statDivider,
+                      !wide && index > 1 && styles.statLower,
+                    ]}
+                  >
+                    <Text style={styles.statValue}>{ready ? item.value : '—'}</Text>
+                    <Text style={styles.statLabel}>{item.label}</Text>
+                    {index === 3 && ready && (
+                      <View
+                        accessibilityRole="progressbar"
+                        accessibilityLabel="Mục tiêu học hôm nay"
+                        accessibilityValue={{ min: 0, max: 100, now: Math.round(dailyProgress) }}
+                        style={styles.goalTrack}
+                      >
+                        <View style={[styles.goalFill, { width: `${dailyProgress}%` }]} />
+                      </View>
+                    )}
+                  </View>
+                ))}
+              </View>
+            </View>
 
-    <View style={styles.stats}>
-      {[
-        ['Từ đã học', state.studiedWordIds.length, 'book-outline', colors.orangeSoft, colors.orange],
-        ['Chính xác', `${accuracy}%`, 'checkmark-circle-outline', colors.mintSoft, colors.mint],
-        ['Cần ôn', state.reviewWordIds.length, 'refresh-outline', colors.violetSoft, colors.violet],
-      ].map(([label,value,icon,bg,fg],i)=><ScaleIn key={String(label)} delay={160+i*55} style={{flex:1}}><AppCard style={[styles.statCard,{backgroundColor:String(bg)}]}><View style={[styles.statIcon,{backgroundColor:colors.white}]}><Ionicons name={icon as any} size={16} color={String(fg)}/></View><Text style={styles.statValue}>{value}</Text><Text style={styles.statLabel}>{label}</Text></AppCard></ScaleIn>)}
+            <View style={styles.section}>
+              <View style={styles.sectionHeading}>
+                <Text accessibilityRole="header" aria-level={2} style={[styles.sectionTitle, styles.headingText]}>
+                  Chủ đề đề xuất
+                </Text>
+                <Link href="/(tabs)/lessons" style={styles.moreLink} asChild>
+                  <Pressable>
+                    <Text style={styles.linkText}>Xem tất cả</Text>
+                  </Pressable>
+                </Link>
+              </View>
+              <View style={[styles.topics, wide && styles.topicsWide]}>
+                {learningTopics.slice(0, 3).map((topic, index) => (
+                  <Link
+                    key={topic.id}
+                    href={{ pathname: '/vocabulary', params: { topic: topic.title } }}
+                    style={[styles.topic, wide && styles.topicWide, (wide || index === 0) && styles.topicTopRule]}
+                    asChild
+                  >
+                    <Pressable>
+                      <Image
+                        accessible={false}
+                        source={getVocabularyArtwork(topic.id).image}
+                        resizeMode="cover"
+                        style={styles.topicImage}
+                      />
+                      <View style={styles.topicCopy}>
+                        <Text style={styles.topicTitle}>{topic.title}</Text>
+                        <Text style={styles.topicDescription}>{topic.subtitle}</Text>
+                      </View>
+                      <Text style={styles.topicLevel}>{topic.level}</Text>
+                    </Pressable>
+                  </Link>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.section}><PricingTeaser wide={wide} /></View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
     </View>
-
-    <FadeIn delay={250}><SectionTitle title="Học nhanh" subtitle="Vào học ngay, không vòng vo"/></FadeIn>
-    <View style={styles.quickRow}>{quick.map(([label,icon,path,bg,fg],i)=><FadeIn key={label} delay={280+i*55} style={{flex:1}}><Pressable onPress={()=>router.push(path as any)} style={({pressed})=>[styles.quickItem,{backgroundColor:bg},pressed&&styles.quickPressed]}><View style={[styles.quickIcon,{backgroundColor:colors.white}]}><Ionicons name={icon} size={20} color={fg}/></View><Text style={styles.quickText}>{label}</Text><Ionicons name="arrow-forward" size={13} color={fg}/></Pressable></FadeIn>)}</View>
-
-    <View style={{height:24}}/>
-    <FadeIn delay={410}><SectionTitle title="Bài đang học" subtitle="Tiếp tục đúng chỗ bạn dừng lại"/><AppCard onPress={()=>router.push({pathname:'/vocabulary',params:{topic:'University'}})} style={styles.currentCard}><View style={styles.currentGlow}/><View style={styles.currentRow}><View style={styles.topicMark}><Text style={styles.topicMarkText}>UL</Text></View><View style={{flex:1}}><Text style={styles.currentKicker}>ENGLISH FOUNDATION · A1</Text><Text style={styles.currentTitle}>University Life</Text><Text style={styles.currentSub}>12/20 từ đã học · tiếp tục khoảng 4 phút</Text></View><View style={styles.arrow}><Ionicons name="arrow-forward" size={17} color={colors.white}/></View></View><View style={styles.track}><View style={[styles.fill,{width:'58%'}]}/></View></AppCard></FadeIn>
-
-    <View style={{height:24}}/>
-    <PricingTeaser />
-
-    <View style={{height:26}}/>
-    <SectionTitle title="Chủ đề đề xuất" subtitle="Học theo ngữ cảnh thực tế" action={<Pressable onPress={()=>router.push('/(tabs)/lessons')}><Text style={styles.more}>Xem tất cả</Text></Pressable>}/>
-    <View style={{gap:9}}>{learningTopics.slice(0,3).map((t,i)=>{
-      const palette=[
-        [colors.coralSoft,colors.coral],
-        [colors.blueSoft,colors.blue],
-        [colors.orangeSoft,colors.orange],
-      ][i%3];
-      return <FadeIn key={t.id} delay={520+i*60}><AppCard onPress={()=>router.push({pathname:'/vocabulary',params:{topic:t.title}})} style={styles.topicCard}><View style={styles.topicRow}><View style={[styles.topicIcon,{backgroundColor:palette[0]}]}><Ionicons name={t.icon} size={20} color={palette[1]}/></View><View style={{flex:1}}><Text style={styles.topicTitle}>{t.title}</Text><Text style={styles.topicSub}>{t.subtitle}</Text></View><Text style={[styles.level,{backgroundColor:palette[0],color:palette[1]}]}>{t.level}</Text><Ionicons name="chevron-forward" size={15} color={colors.textMuted}/></View></AppCard></FadeIn>})}</View>
-  </Screen>;
+  );
 }
 
-const styles=StyleSheet.create({
-  topbar:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:22},topActions:{flexDirection:'row',alignItems:'center',gap:8},iconBtn:{width:40,height:40,borderRadius:12,backgroundColor:colors.surface,borderWidth:1,borderColor:colors.border,alignItems:'center',justifyContent:'center'},premiumMini:{height:40,paddingHorizontal:11,borderRadius:12,backgroundColor:colors.primarySoft,borderWidth:1,borderColor:'#FFD0D8',flexDirection:'row',alignItems:'center',gap:5},premiumMiniText:{fontSize:8.5,fontWeight:'900',color:colors.primary,letterSpacing:.7},
-  heading:{marginBottom:16},kicker:{fontSize:9,fontWeight:'900',letterSpacing:1.1,color:colors.primary},title:{fontSize:31,lineHeight:34,fontWeight:'900',color:colors.text,letterSpacing:-1.2,marginTop:5},date:{fontSize:12.5,color:colors.textSecondary,marginTop:7},
-  stats:{flexDirection:'row',gap:9,marginBottom:26},statCard:{padding:12,borderColor:'rgba(130,90,80,.08)'},statIcon:{width:30,height:30,borderRadius:10,alignItems:'center',justifyContent:'center',marginBottom:9},statValue:{fontSize:20,fontWeight:'900',color:colors.text},statLabel:{fontSize:9.5,color:colors.textSecondary,marginTop:2},
-  quickRow:{flexDirection:'row',gap:8},quickItem:{borderWidth:1,borderColor:'rgba(130,90,80,.08)',borderRadius:16,paddingVertical:12,alignItems:'center',gap:7,shadowColor:'#7B3B32',shadowOpacity:.04,shadowRadius:12,shadowOffset:{width:0,height:6}},quickPressed:{transform:[{translateY:1},{scale:.985}],opacity:.92},quickIcon:{width:39,height:39,borderRadius:12,alignItems:'center',justifyContent:'center'},quickText:{fontSize:10.5,fontWeight:'800',color:colors.text,textAlign:'center'},
-  currentCard:{padding:15,backgroundColor:colors.charcoal,borderColor:'#24242A',overflow:'hidden'},currentGlow:{position:'absolute',width:160,height:160,borderRadius:80,backgroundColor:'rgba(209,10,52,.22)',right:-55,top:-75},currentRow:{flexDirection:'row',alignItems:'center',gap:12,zIndex:2},topicMark:{width:46,height:46,borderRadius:13,backgroundColor:'#FFE7A7',alignItems:'center',justifyContent:'center'},topicMarkText:{fontSize:11,fontWeight:'900',color:'#93691A'},currentKicker:{fontSize:7.5,fontWeight:'900',letterSpacing:.9,color:'#C9C3BC'},currentTitle:{fontSize:15,fontWeight:'900',color:colors.white,marginTop:2},currentSub:{fontSize:10,color:'#BCB7AF',marginTop:3},arrow:{width:36,height:36,borderRadius:11,backgroundColor:colors.primary,alignItems:'center',justifyContent:'center'},track:{height:5,borderRadius:99,backgroundColor:'#3D3E41',overflow:'hidden',marginTop:13},fill:{height:'100%',backgroundColor:colors.coral,borderRadius:99},
-  more:{fontSize:11.5,fontWeight:'800',color:colors.primary},topicCard:{padding:13},topicRow:{flexDirection:'row',alignItems:'center',gap:11},topicIcon:{width:43,height:43,borderRadius:13,alignItems:'center',justifyContent:'center'},topicTitle:{fontSize:14,fontWeight:'800',color:colors.text},topicSub:{fontSize:11,color:colors.textSecondary,marginTop:3},level:{fontSize:9.5,fontWeight:'900',paddingHorizontal:7,paddingVertical:5,borderRadius:99},
+const styles = StyleSheet.create({
+  canvas: { flex: 1, backgroundColor: hum.paper },
+  safeArea: { flex: 1 },
+  scroll: { alignItems: 'center', paddingBottom: 34 },
+  page: { width: '100%', maxWidth: maxContentWidth, paddingHorizontal: 18, paddingTop: 14 },
+  pageWide: { paddingHorizontal: 26, paddingTop: 20 },
+  topbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: hum.rule },
+  brand: { flexDirection: 'row', alignItems: 'center', gap: 8, flexShrink: 1 },
+  wordmark: { color: hum.ink, fontWeight: humType.bold, fontSize: 21, letterSpacing: -0.5 },
+  topActions: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  plusLink: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 12, borderRadius: 12 },
+  linkText: { color: hum.blue, fontSize: 15, fontWeight: humType.bold, flexShrink: 1 },
+  settings: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 14, backgroundColor: hum.card, borderWidth: 1, borderColor: hum.rule },
+  greeting: { color: hum.ink, fontSize: 29, lineHeight: 35, letterSpacing: -0.8, fontWeight: humType.bold, marginTop: 13, marginBottom: 11, minWidth: 0 },
+  greetingWide: { fontSize: 34, lineHeight: 41, marginTop: 19, marginBottom: 13 },
+  study: { gap: 25, paddingBottom: 2 },
+  studyDesktop: { flexDirection: 'row', alignItems: 'stretch', gap: 25 },
+  quick: { gap: 11, minWidth: 0 },
+  quickDesktop: { flex: 1, justifyContent: 'center', paddingVertical: 4 },
+  sectionTitle: { color: hum.ink, fontSize: 23, lineHeight: 29, letterSpacing: -0.45, fontWeight: humType.bold },
+  quickCards: { flexDirection: 'row', alignItems: 'stretch', gap: 10 },
+  quickFeature: { flex: 1.2, minWidth: 0, minHeight: 100, backgroundColor: hum.coralEdge },
+  quickGrammar: { flex: 1, minWidth: 0, alignSelf: 'flex-end', minHeight: 81, backgroundColor: hum.skyEdge },
+  vocabularyFace: { ...paperButton, justifyContent: 'space-between', paddingVertical: 12, paddingHorizontal: 20, backgroundColor: hum.coral, borderColor: hum.coralEdge },
+  grammarFace: { ...paperButton, justifyContent: 'space-between', paddingVertical: 9, paddingHorizontal: 13, backgroundColor: hum.sky, borderColor: hum.skyEdge },
+  grammarIcon: { alignSelf: 'flex-start' },
+  quickLabel: { color: hum.ink, fontSize: 16, lineHeight: 21, fontWeight: humType.bold },
+  wordSample: { alignSelf: 'flex-end', color: hum.ink, fontWeight: humType.bold, fontSize: 40, lineHeight: 44, letterSpacing: -2.5 },
+  libraryRail: { flexDirection: 'row', gap: 10, marginTop: 1, borderTopWidth: 1, borderBottomWidth: 1, borderColor: hum.rule },
+  libraryLink: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 45, paddingHorizontal: 8, borderRadius: 9 },
+  chevron: { marginLeft: 'auto' },
+  section: { gap: 10, marginTop: 20 },
+  stats: { flexDirection: 'row', flexWrap: 'wrap', borderRadius: 19, backgroundColor: hum.mint, borderWidth: 1, borderColor: hum.mintRule, overflow: 'hidden' },
+  stat: { flex: 1, minWidth: 0, gap: 3, paddingHorizontal: 16, paddingVertical: 11 },
+  statCompact: { flexBasis: '50%', flexGrow: 0 },
+  statDivider: { borderLeftWidth: 1, borderLeftColor: hum.mintRule },
+  statLower: { borderTopWidth: 1, borderTopColor: hum.mintRule },
+  statValue: { color: hum.ink, fontSize: 24, lineHeight: 28, fontWeight: humType.bold, fontVariant: ['tabular-nums'] },
+  statLabel: { color: hum.greenInk, fontSize: 14, lineHeight: 19 },
+  goalTrack: { height: 5, borderRadius: 3, backgroundColor: hum.mintTrack, marginTop: 2, maxWidth: 180 },
+  goalFill: { height: 5, borderRadius: 3, backgroundColor: hum.greenInk },
+  sectionHeading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  headingText: { flexShrink: 1 },
+  moreLink: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 7, borderRadius: 9 },
+  topics: { gap: 0 },
+  topicsWide: { flexDirection: 'row', alignItems: 'stretch', gap: 14 },
+  topic: { flexDirection: 'row', alignItems: 'center', gap: 9, borderBottomWidth: 1, borderColor: hum.rule, paddingVertical: 9, paddingHorizontal: 4, minHeight: 67 },
+  topicTopRule: { borderTopWidth: 1 },
+  topicWide: { flex: 1, minWidth: 0 },
+  topicImage: { width: 52, height: 44, borderRadius: 10, backgroundColor: hum.paperDeep },
+  topicCopy: { flex: 1, minWidth: 0, gap: 2 },
+  topicTitle: { color: hum.ink, fontSize: 16, lineHeight: 21, fontWeight: humType.bold },
+  topicDescription: { color: hum.muted, fontSize: 13, lineHeight: 18 },
+  topicLevel: { color: hum.blue, fontSize: 13, fontWeight: humType.bold, fontVariant: ['tabular-nums'] },
 });

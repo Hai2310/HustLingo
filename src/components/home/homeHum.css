@@ -1,0 +1,107 @@
+/* Hallmark · shape: app screen · genre: playful · theme: Hum (by request) · redesign: full
+ * nav: kept · signature: active lesson and two offset cardstock shortcuts · states: new, in progress, loading, offline
+ * axes: light/rounded-sans/chromatic-yellow · posture: full-palette · v2.0.0 */
+/* Hallmark · critique: varied control silhouettes and stronger typography give each Home action its own place. */
+
+:root {
+  --home-focus: #24548c;
+  --home-focus-on-ink: #f3d642;
+  --home-soft-edge: #fffcf3;
+  --home-fiber-shadow: #d9d0b9;
+  --home-stock-hover: rgb(22 24 32 / 0.08);
+  --home-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.83' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath filter='url(%23g)' opacity='.06' d='M0 0h150v150H0z'/%3E%3C/svg%3E");
+  --home-cut: polygon(0 0, 100% 0, 100% 37%, 95% 62%, 91% 42%, 87% 74%, 83% 68%, 80% 90%, 76% 58%, 71% 81%, 65% 51%, 60% 74%, 56% 59%, 52% 89%, 48% 62%, 40% 84%, 36% 58%, 30% 76%, 25% 59%, 21% 83%, 15% 63%, 10% 70%, 5% 46%, 0 55%);
+}
+
+html:has(#hustlingo-home),
+body:has(#hustlingo-home) {
+  overflow-x: clip;
+}
+
+#hustlingo-home,
+#hustlingo-home #home-lesson,
+#hustlingo-home #home-vocabulary-face,
+#hustlingo-home #home-grammar-face,
+#hustlingo-home #home-stats {
+  background-image: var(--home-grain);
+}
+
+#hustlingo-home #home-lesson::before,
+#hustlingo-home #home-lesson::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  right: 9px;
+  left: 9px;
+  bottom: -7px;
+  height: 8px;
+  clip-path: var(--home-cut);
+}
+
+#hustlingo-home #home-lesson::before {
+  background: var(--home-fiber-shadow);
+  transform: translateY(2px);
+}
+
+#hustlingo-home #home-lesson::after {
+  background: var(--home-soft-edge);
+}
+
+#hustlingo-home [role="heading"] {
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+
+#hustlingo-home a:focus-visible {
+  outline: 2px solid var(--home-focus);
+  outline-offset: 3px;
+}
+
+#hustlingo-home #home-plans a:focus-visible {
+  outline-color: var(--home-focus-on-ink);
+}
+
+#hustlingo-home #home-lesson-action-face {
+  transition: transform 160ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#hustlingo-home :is(#home-vocabulary-face, #home-grammar-face, #home-vocabulary-sample, #home-grammar-icon) {
+  transition: transform 140ms ease-out;
+}
+
+#hustlingo-home :is(#home-lesson-action, #home-vocabulary, #home-grammar):active > * {
+  transform: translateY(3px);
+  transition-duration: 75ms;
+  transition-timing-function: ease-out;
+}
+
+#hustlingo-home a:not(:is(#home-lesson-action, #home-vocabulary, #home-grammar)):active {
+  opacity: 0.83;
+}
+
+@media (hover: hover) {
+  #hustlingo-home #home-vocabulary:hover #home-vocabulary-sample {
+    transform: translateY(-3px);
+  }
+
+  #hustlingo-home #home-grammar:hover #home-grammar-icon {
+    transform: rotate(-7deg);
+  }
+
+  #hustlingo-home a:not(:is(#home-lesson-action, #home-vocabulary, #home-grammar)):hover {
+    box-shadow: inset 0 0 0 2px var(--home-stock-hover);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #hustlingo-home :is(#home-lesson-action-face, #home-vocabulary-face, #home-grammar-face, #home-vocabulary-sample, #home-grammar-icon),
+  #hustlingo-home :is(#home-lesson-action, #home-vocabulary, #home-grammar):active > * {
+    transition: none;
+  }
+
+  #hustlingo-home :is(#home-lesson-action, #home-vocabulary, #home-grammar):active > *,
+  #hustlingo-home #home-vocabulary:hover #home-vocabulary-sample,
+  #hustlingo-home #home-grammar:hover #home-grammar-icon {
+    transform: none;
+  }
+}
