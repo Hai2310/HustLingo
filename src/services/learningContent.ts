@@ -115,3 +115,7 @@ export async function loadLessonContent(lesson: CatalogLesson, source: LessonCat
     return { ...fallback, notice: 'Showing the offline copy of this lesson. Your progress will still be saved.' };
   } finally { timeout.dispose(); }
 }
+
+// Keep the original shared API available from this module while Lessons keeps
+// using the project-specific local/cloud loader above.
+export * from './learningContentApi';

@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="vi" data-hustlingo-presentation>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Trình chiếu HustLingo</title>
+  <style>
+    :root { --red:#c8102e; --ink:#20252b; --muted:#69737e; --line:#dfe4ea; --paper:#f5f6f8; --screen-width:390px; --screen-height:844px; }
+    * { box-sizing:border-box; }
+    html,body { margin:0; width:100%; height:100%; }
+    body { background:var(--paper); color:var(--ink); font-family:"Segoe UI Variable Display","Segoe UI",Aptos,sans-serif; }
+    button,a { -webkit-tap-highlight-color:transparent; }
+    button { font:inherit; cursor:pointer; }
+    button:focus-visible,a:focus-visible { outline:3px solid var(--red); outline-offset:4px; }
+    button:disabled { cursor:wait; }
+    .layout { width:100%; max-width:1440px; height:100svh; margin:auto; display:grid; grid-template-columns:minmax(270px,370px) minmax(0,1fr); gap:clamp(32px,6vw,100px); padding:32px clamp(24px,5vw,80px); }
+    .panel { display:flex; flex-direction:column; justify-content:center; min-height:0; gap:32px; }
+    .brand { display:flex; gap:11px; align-items:center; font-size:23px; font-weight:750; letter-spacing:-.8px; }
+    .brand-mark { width:39px; height:43px; background:var(--red); color:white; border-radius:11px 11px 16px 11px; display:grid; place-items:center; font-size:26px; font-weight:800; }
+    h1 { font-size:clamp(32px,3.4vw,48px); line-height:1.14; font-weight:650; letter-spacing:-1.8px; margin:0 0 16px; }
+    .intro p { max-width:290px; margin:0; color:var(--muted); font-size:15px; line-height:1.65; }
+    .controls { padding-top:25px; border-top:1px solid var(--line); }
+    .control-label { display:block; font-size:13px; font-weight:650; margin-bottom:12px; }
+    .devices { display:flex; gap:7px; }
+    .device-choice { min-height:42px; padding:9px 15px; border:1px solid var(--line); border-radius:10px; background:transparent; color:var(--muted); font-size:13px; font-weight:600; }
+    .device-choice:hover { background:white; color:var(--ink); }
+    .device-choice[aria-pressed="true"] { background:white; border-color:var(--ink); color:var(--ink); box-shadow:0 2px 5px #20252b08; }
+    .dimensions { margin:12px 0 23px; color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums; }
+    .actions { display:flex; gap:8px; margin-bottom:12px; }
+    .secondary { flex:1; display:flex; justify-content:center; align-items:center; gap:8px; min-height:42px; border-radius:10px; background:white; border:1px solid var(--line); color:var(--ink); font-size:13px; font-weight:600; }
+    .secondary:hover { border-color:#a8b1bc; }
+    .primary { width:100%; min-height:46px; display:flex; justify-content:center; align-items:center; gap:9px; background:var(--red); border:1px solid var(--red); border-radius:11px; color:white; font-weight:650; font-size:13px; }
+    .primary:hover { background:#ad0c26; border-color:#ad0c26; }
+    svg { width:18px; height:18px; flex-shrink:0; }
+    .open-app { display:inline-flex; align-items:center; gap:6px; margin-top:17px; color:var(--muted); font-size:12px; text-decoration:none; }
+    .open-app:hover { color:var(--red); }
+    .open-app svg { width:14px; height:14px; }
+    .stage { position:relative; display:flex; align-items:center; justify-content:center; min-width:0; min-height:0; border-left:1px solid var(--line); }
+    .phone-slot { flex:none; position:relative; }
+    .phone { position:absolute; left:0; top:0; width:calc(var(--screen-width) + 18px); height:calc(var(--screen-height) + 18px); padding:9px; border-radius:53px; background:#191b20; transform-origin:top left; box-shadow:0 0 0 1px #5b5d62,0 0 0 3px #c4c6cb,0 22px 42px -14px #20252b4d,0 8px 13px -9px #20252b66; }
+    .phone::before,.phone::after { content:""; position:absolute; background:#797c83; width:3px; border-radius:2px; left:-5px; }
+    .phone::before { top:145px; height:28px; box-shadow:0 42px #797c83; }
+    .phone::after { left:auto; right:-5px; top:172px; height:64px; }
+    .screen { width:100%; height:100%; position:relative; display:flex; flex-direction:column; overflow:hidden; border-radius:44px; background:#fff8f1; }
+    .status-bar { height:44px; flex:none; display:flex; align-items:center; justify-content:space-between; padding:0 27px; position:relative; color:#202126; font-size:15px; font-weight:650; pointer-events:none; }
+    .island { position:absolute; top:10px; left:50%; transform:translateX(-50%); width:116px; height:29px; border-radius:30px; background:#191b20; }
+    .status-icons { display:flex; align-items:center; gap:6px; }
+    .status-icons svg { width:16px; height:16px; }
+    .status-icons .battery { width:25px; height:14px; }
+    iframe { display:block; width:100%; flex:1; min-height:0; border:0; background:#fff8f1; }
+    .home-bar { height:22px; flex:none; display:flex; align-items:center; justify-content:center; background:#fff8f1; pointer-events:none; }
+    .home-bar::after { content:""; width:125px; height:5px; border-radius:5px; background:#191b20; }
+    .loading { position:absolute; inset:44px 0 22px; z-index:2; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:16px; background:#fff8f1; font-size:14px; color:var(--muted); transition:opacity .18s ease; }
+    .loading.hidden { opacity:0; pointer-events:none; }
+    .loading .brand-mark { width:52px; height:57px; font-size:34px; }
+    .loading p { margin:0; }
+    .live-status { display:flex; align-items:center; gap:7px; color:var(--muted); font-size:12px; }
+    .live-status::before { content:""; width:6px; height:6px; border-radius:50%; background:var(--red); flex:none; }
+    .android .phone { border-radius:40px; }
+    .android .screen { border-radius:31px; }
+    .android .island { width:13px; height:13px; top:15px; }
+    .android .home-bar::after { width:100px; height:4px; }
+    .exit-presentation { display:none; position:fixed; z-index:5; right:24px; top:24px; width:auto; padding:0 16px; box-shadow:0 3px 15px #20252b0a; }
+    body.presenting .layout { grid-template-columns:minmax(0,1fr); padding:24px; gap:0; max-width:none; }
+    body.presenting .panel { display:none; }
+    body.presenting .stage { border:0; }
+    body.presenting .exit-presentation { display:flex; }
+    @media (max-width:760px) {
+      .layout { padding:16px; gap:18px; grid-template-columns:minmax(0,1fr); grid-template-rows:auto minmax(0,1fr); }
+      .panel { gap:12px; }
+      .brand { font-size:20px; }
+      .brand-mark { width:30px; height:33px; font-size:21px; border-radius:8px 8px 12px 8px; }
+      .intro,.control-label,.dimensions,.open-app,.live-status { display:none; }
+      .controls { padding:0; border:0; display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+      .devices { flex:1; }
+      .device-choice { flex:1; min-height:38px; padding:8px 10px; }
+      .actions { margin:0; }
+      .secondary { padding:9px; min-height:38px; }
+      .actions .button-text { display:none; }
+      .primary { width:auto; padding:10px 13px; min-height:38px; }
+      .primary .button-text { display:none; }
+      .stage { border:0; }
+      body.presenting .layout { grid-template-rows:minmax(0,1fr); }
+      .exit-presentation { right:12px; top:12px; }
+    }
+    @media (max-height:650px) and (min-width:761px) {
+      .layout { padding-top:20px; padding-bottom:20px; }
+      .panel { gap:18px; }
+      h1 { font-size:32px; }
+      .controls { padding-top:18px; }
+    }
+    @media (prefers-reduced-motion:reduce) { * { transition:none !important; } }
+  </style>
+</head>
+<body>
+  <main class="layout">
+    <aside class="panel" aria-label="Điều khiển trình chiếu">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">H</span><span>HustLingo</span></div>
+      <div class="intro"><h1>Tiếng Anh<br>trong tầm tay.</h1><p>Chọn thiết bị và thao tác trực tiếp trên màn hình điện thoại.</p></div>
+      <section class="controls" aria-label="Thiết lập màn hình">
+        <span class="control-label">Thiết bị trình chiếu</span>
+        <div class="devices" role="group" aria-label="Chọn thiết bị">
+          <button class="device-choice" data-device="iphone" aria-pressed="true">iPhone</button>
+          <button class="device-choice" data-device="android" aria-pressed="false">Android</button>
+          <button class="device-choice" data-device="compact" aria-pressed="false">Nhỏ gọn</button>
+        </div>
+        <p class="dimensions" id="dimensions">390 × 844</p>
+        <div class="actions">
+          <button class="secondary" id="go-home" aria-label="Về trang chủ ứng dụng"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg><span class="button-text">Trang chủ</span></button>
+          <button class="secondary" id="reload-app" aria-label="Tải lại ứng dụng"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1"/></svg><span class="button-text">Tải lại</span></button>
+        </div>
+        <button class="primary" id="present" aria-label="Trình chiếu toàn màn hình"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg><span class="button-text">Trình chiếu toàn màn hình</span></button>
+        <a class="open-app" href="/home" target="_blank" rel="noopener">Mở ứng dụng ở tab mới<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M14 3h7v7m0-7L10 14M10 3H4a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-6"/></svg></a>
+      </section>
+      <div class="live-status" id="live-status" role="status">Đang mở ứng dụng…</div>
+    </aside>
+    <section class="stage" id="stage" aria-label="Màn hình điện thoại">
+      <div class="phone-slot" id="phone-slot">
+        <div class="phone" id="phone">
+          <div class="screen">
+            <div class="status-bar" aria-hidden="true"><span>9:41</span><span class="island"></span><div class="status-icons"><svg viewBox="0 0 18 16" fill="currentColor"><rect x="1" y="10" width="3" height="5" rx=".8"/><rect x="5" y="7" width="3" height="8" rx=".8"/><rect x="9" y="4" width="3" height="11" rx=".8"/><rect x="13" y="1" width="3" height="14" rx=".8"/></svg><svg viewBox="0 0 20 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 5a13 13 0 0 1 16 0M5 8a8 8 0 0 1 10 0m-7 3a3 3 0 0 1 4 0"/><circle cx="10" cy="14" r=".7" fill="currentColor" stroke="none"/></svg><svg class="battery" viewBox="0 0 27 14" fill="none"><rect x=".7" y=".7" width="22" height="12.6" rx="3" stroke="currentColor" stroke-opacity=".5" stroke-width="1.2"/><rect x="2.5" y="2.5" width="18.5" height="9" rx="1.5" fill="currentColor"/><path d="M24.5 4.5v5a2.5 2.5 0 0 0 0-5" fill="currentColor" opacity=".5"/></svg></div></div>
+            <iframe id="app-frame" title="Ứng dụng HustLingo" src="/home" allow="microphone; clipboard-write; autoplay"></iframe>
+            <div class="home-bar" aria-hidden="true"></div>
+            <div class="loading" id="loading"><span class="brand-mark" aria-hidden="true">H</span><p>Đang mở HustLingo…</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <button class="secondary exit-presentation" id="exit-presentation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6-6 6 6 6m-6-6h18"/></svg>Thoát trình chiếu</button>
+  <script>
+    const presets = { iphone:{width:390,height:844}, android:{width:412,height:892}, compact:{width:360,height:740} };
+    const stage = document.getElementById('stage');
+    const slot = document.getElementById('phone-slot');
+    const phone = document.getElementById('phone');
+    const frame = document.getElementById('app-frame');
+    const loading = document.getElementById('loading');
+    const status = document.getElementById('live-status');
+    let device = 'iphone';
+    function fitPhone() {
+      const {width,height} = presets[device];
+      const scale = Math.max(.1,Math.min((stage.clientWidth-24)/(width+18),(stage.clientHeight-24)/(height+18),1.15));
+      slot.style.width = (width+18)*scale+'px';
+      slot.style.height = (height+18)*scale+'px';
+      phone.style.transform = `scale(${scale})`;
+    }
+    function setDevice(name) {
+      device = name;
+      const {width,height} = presets[name];
+      document.documentElement.style.setProperty('--screen-width',width+'px');
+      document.documentElement.style.setProperty('--screen-height',height+'px');
+      document.body.classList.toggle('android',name==='android');
+      document.getElementById('dimensions').textContent = `${width} × ${height}`;
+      document.querySelectorAll('[data-device]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.device===name)));
+      fitPhone();
+    }
+    document.querySelectorAll('[data-device]').forEach(button=>button.addEventListener('click',()=>setDevice(button.dataset.device)));
+    new ResizeObserver(fitPhone).observe(stage);
+    window.addEventListener('resize',fitPhone);
+    function showLoading() { loading.classList.remove('hidden'); status.textContent='Đang mở ứng dụng…'; }
+    frame.addEventListener('load',()=>{ loading.classList.add('hidden'); status.textContent='Sẵn sàng trình chiếu'; });
+    document.getElementById('go-home').addEventListener('click',()=>{showLoading();frame.src='/home';});
+    document.getElementById('reload-app').addEventListener('click',()=>{
+      showLoading();
+      try { frame.contentWindow.location.reload(); } catch { frame.src='/home'; }
+    });
+    document.getElementById('present').addEventListener('click',async()=>{
+      document.body.classList.add('presenting');
+      fitPhone();
+      try { await document.documentElement.requestFullscreen(); } catch { /* The focused layout also works without browser fullscreen. */ }
+    });
+    async function leavePresentation() {
+      document.body.classList.remove('presenting');
+      if(document.fullscreenElement) await document.exitFullscreen().catch(()=>{});
+      fitPhone();
+    }
+    document.getElementById('exit-presentation').addEventListener('click',leavePresentation);
+    document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement){document.body.classList.remove('presenting');fitPhone();}});
+    document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!document.fullscreenElement) leavePresentation();});
+    fitPhone();
+  </script>
+</body>
+</html>
