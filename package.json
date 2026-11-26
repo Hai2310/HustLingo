@@ -19,7 +19,8 @@
     "db:seed:content": "node scripts/import-content.mjs",
     "validate": "node scripts/validate-project.mjs",
     "test:lessons": "node --test scripts/test-lessons.mjs",
-    "check": "npm run validate && npm run typecheck && npm run test:lessons"
+    "test:practice": "node --test scripts/test-practice.mjs",
+    "check": "npm run validate && npm run typecheck && npm run test:lessons && npm run test:practice"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

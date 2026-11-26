@@ -4,3 +4,5 @@ export * from './practiceModes';
 export * from './sourceData';
 export * from './examCatalog';
 export * from './reviewConfig';
+export * from './skillBanks';
+export * from './examBank';
