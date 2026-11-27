@@ -2,3 +2,6 @@ project_id = "hustlingo"
 
 [functions.tutor-chat]
 verify_jwt = true
+
+[functions.pronunciation-assessment]
+verify_jwt = true
