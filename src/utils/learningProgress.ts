@@ -5,7 +5,7 @@ const strings = (value: unknown): string[] => Array.isArray(value) ? unique(valu
 const count = (value: unknown) => typeof value === 'number' && Number.isFinite(value) ? Math.max(0, value) : 0;
 
 export function emptyProgress(day: string): LearningState {
-  return { studiedWordIds: [], reviewWordIds: [], savedWordIds: [], completedLessonIds: [], correctAnswers: 0, totalAnswers: 0, minutesToday: 0, lastStudyDate: day, lessonProgress: {} };
+  return { studiedWordIds: [], reviewWordIds: [], savedWordIds: [], completedLessonIds: [], completedPracticeIds: [], correctAnswers: 0, totalAnswers: 0, minutesToday: 0, lastStudyDate: day, lessonProgress: {} };
 }
 
 export function normaliseProgress(value: unknown, day: string): LearningState {
@@ -20,7 +20,8 @@ export function normaliseProgress(value: unknown, day: string): LearningState {
   const totalAnswers = count(row.totalAnswers);
   return {
     studiedWordIds: strings(row.studiedWordIds), reviewWordIds: strings(row.reviewWordIds), savedWordIds: strings(row.savedWordIds),
-    completedLessonIds: strings(row.completedLessonIds), totalAnswers, correctAnswers: Math.min(count(row.correctAnswers), totalAnswers),
+    completedLessonIds: strings(row.completedLessonIds), completedPracticeIds: strings(row.completedPracticeIds).filter(id => id.trim()),
+    totalAnswers, correctAnswers: Math.min(count(row.correctAnswers), totalAnswers),
     minutesToday: row.lastStudyDate === day ? count(row.minutesToday) : 0, lastStudyDate: day, lessonProgress,
   };
 }
@@ -38,9 +39,15 @@ export function mergeLearningProgress(localValue: unknown, remoteValue: unknown,
     reviewWordIds: unique([...local.reviewWordIds, ...remote.reviewWordIds]),
     savedWordIds: unique([...local.savedWordIds, ...remote.savedWordIds]),
     completedLessonIds: unique([...local.completedLessonIds, ...remote.completedLessonIds]),
+    completedPracticeIds: unique([...local.completedPracticeIds, ...remote.completedPracticeIds]),
     correctAnswers: Math.max(local.correctAnswers, remote.correctAnswers), totalAnswers: Math.max(local.totalAnswers, remote.totalAnswers),
     minutesToday: Math.max(local.minutesToday, remote.minutesToday), lastStudyDate: day, lessonProgress,
   };
+}
+
+export function recordPracticeCompletion(state: LearningState, practiceId: string): LearningState {
+  if (!practiceId.trim() || state.completedPracticeIds.includes(practiceId)) return state;
+  return { ...state, completedPracticeIds: [...state.completedPracticeIds, practiceId] };
 }
 
 export function recordLessonStep(state: LearningState, lessonId: string, stepId: string, requiredSteps: string[], wordId?: string, timestamp = new Date().toISOString()): LearningState {
@@ -75,7 +82,8 @@ export async function importGuestProgress(storage: ProgressStorage, prefix: stri
   } catch { /* An unreadable old transfer record must not prevent local learning. */ }
   const guestRaw = await storage.getItem(guestKey);
   const guest = parseProgress(guestRaw, day);
-  const hasGuestProgress = guest.studiedWordIds.length || guest.savedWordIds.length || guest.completedLessonIds.length || Object.keys(guest.lessonProgress || {}).length || guest.totalAnswers || guest.minutesToday;
+  const hasGuestProgress = guest.studiedWordIds.length || guest.savedWordIds.length || guest.completedLessonIds.length ||
+    guest.completedPracticeIds.length || Object.keys(guest.lessonProgress || {}).length || guest.totalAnswers || guest.minutesToday;
   if (guestRaw && hasGuestProgress && guestRaw !== transfers.claimedGuest) {
     transfers.pending[userId] = mergeLearningProgress(transfers.pending[userId], guest, day);
     transfers.claimedGuest = guestRaw;

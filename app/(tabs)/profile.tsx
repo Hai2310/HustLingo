@@ -5,11 +5,13 @@ import {Ionicons} from '@expo/vector-icons';
 import {Screen} from '@/components/Screen';
 import {AppCard} from '@/components/AppCard';
 import {AppButton} from '@/components/Buttons';
+import { RankBadge, RankedName, RankProgress } from '@/components/common/LearnerRank';
 import {FadeIn,ScaleIn} from '@/components/Motion';
 import {useAuth} from '@/contexts/AuthContext';
 import {useLearning} from '@/contexts/LearningContext';
 import {colors} from '@/theme/colors';
 import { hum, paperCard } from '@/theme/hum';
+import { getLearnerRank } from '@/utils/learnerRank';
 
 const items=[
   ['Gói Plus & Pro','pricing','diamond-outline'],
@@ -22,14 +24,40 @@ const items=[
 
 export default function Profile(){
   const {user,signOut,isGuest}=useAuth();
-  const {state,accuracy,syncNow}=useLearning();
+  const {state,accuracy,syncNow,ready}=useLearning();
+  const lessons = state.completedLessonIds.length;
+  const practice = state.completedPracticeIds.length;
+  const { rank } = getLearnerRank(lessons, practice);
+  const displayName = isGuest ? 'Học viên HustLingo' : user.displayName;
   const [syncing,setSyncing]=useState(false);
   async function sync(){try{setSyncing(true);await syncNow();Alert.alert('Đã đồng bộ','Tiến độ đã được lưu lên Supabase.')}catch(e:any){Alert.alert('Chưa đồng bộ được',e?.message||'Kiểm tra kết nối Supabase.')}finally{setSyncing(false)}}
   async function logout(){await signOut();router.replace('/(tabs)/home')}
   return <Screen>
     <FadeIn><Text style={styles.title}>Hồ sơ</Text><Text style={styles.sub}>Tiến độ, gói học và cài đặt của bạn.</Text></FadeIn>
 
-    <FadeIn delay={70}><View style={styles.identity}><View style={styles.avatar}><Text style={styles.avatarText}>{(isGuest?'H':user.displayName||'H').slice(0,1).toUpperCase()}</Text></View><View style={{flex:1,zIndex:2}}><Text style={styles.name}>{isGuest?'Học viên HustLingo':user.displayName}</Text><Text style={styles.email}>{isGuest?'Chế độ khách • dữ liệu lưu trên thiết bị':user.email||'Tài khoản mạng xã hội'}</Text><View style={styles.meta}><Text style={styles.tagOn}>{user.englishLevel||'A1'}</Text><Text style={styles.tag}>{user.learningGoal||'Giao tiếp'}</Text><Pressable onPress={()=>router.push('/pricing')}><Text style={styles.premiumTag}>FREE · NÂNG CẤP</Text></Pressable></View></View></View></FadeIn>
+    <FadeIn delay={70}>
+      <View style={styles.identity}>
+        <View style={styles.avatar}><Text style={styles.avatarText}>{(displayName || 'H').slice(0, 1).toUpperCase()}</Text></View>
+        <View style={styles.identityCopy}>
+          {ready ? <RankedName key={rank.id} rank={rank} name={displayName} placement="profile" style={styles.name} />
+            : <Text style={styles.name}>{displayName}</Text>}
+          {ready && (
+            <View style={styles.rankLine}>
+              <RankBadge key={rank.id} rank={rank} placement="profile" decorative />
+              <Text style={styles.rankTitle}>{rank.title}</Text>
+            </View>
+          )}
+          <Text style={styles.email}>{isGuest ? 'Chế độ khách • dữ liệu lưu trên thiết bị' : user.email || 'Tài khoản mạng xã hội'}</Text>
+          <View style={styles.meta}>
+            <Text style={styles.tagOn}>{user.englishLevel || 'A1'}</Text>
+            <Text style={styles.tag}>{user.learningGoal || 'Giao tiếp'}</Text>
+            <Pressable onPress={() => router.push('/pricing')}><Text style={styles.premiumTag}>FREE · NÂNG CẤP</Text></Pressable>
+          </View>
+        </View>
+      </View>
+    </FadeIn>
+
+    {ready && <RankProgress lessons={lessons} practice={practice} />}
 
     <View style={styles.stats}>{[[state.studiedWordIds.length,'Từ đã học',colors.orangeSoft],[`${accuracy}%`,'Chính xác',colors.mintSoft],[state.reviewWordIds.length,'Cần ôn',colors.violetSoft]].map(([n,l,bg],i)=><ScaleIn key={String(l)} delay={120+i*55} style={{flex:1}}><AppCard style={[styles.stat,{backgroundColor:String(bg)}]}><Text style={styles.num}>{n}</Text><Text style={styles.label}>{l}</Text></AppCard></ScaleIn>)}</View>
 
@@ -46,6 +74,7 @@ export default function Profile(){
 const styles=StyleSheet.create({
   title:{fontSize:32,fontWeight:'700',color:colors.text,letterSpacing:-1.1,marginTop:5},sub:{fontSize:14,lineHeight:21,color:colors.textSecondary,marginTop:5,marginBottom:16},
   identity:{...paperCard,backgroundColor:hum.sky,borderColor:hum.skyEdge,borderRadius:22,padding:18,flexDirection:'row',alignItems:'center',gap:14,marginBottom:12},avatar:{width:64,height:64,borderRadius:20,backgroundColor:hum.card,borderWidth:1,borderColor:hum.skyEdge,alignItems:'center',justifyContent:'center',zIndex:2},avatarText:{fontSize:24,fontWeight:'700',color:hum.blue},name:{fontSize:21,fontWeight:'700',color:hum.ink,marginTop:3},email:{fontSize:13,lineHeight:18,color:hum.muted,marginTop:3},meta:{flexDirection:'row',gap:6,marginTop:8,flexWrap:'wrap'},tag:{fontSize:12,fontWeight:'700',color:hum.ink,backgroundColor:hum.card,paddingHorizontal:8,paddingVertical:5,borderRadius:99},tagOn:{fontSize:12,fontWeight:'700',color:hum.blue,backgroundColor:hum.card,paddingHorizontal:8,paddingVertical:5,borderRadius:99},premiumTag:{fontSize:12,fontWeight:'700',color:hum.ink,backgroundColor:hum.pear,paddingHorizontal:8,paddingVertical:5,borderRadius:99},
+  identityCopy:{flex:1,minWidth:0,zIndex:2},rankLine:{flexDirection:'row',alignItems:'center',gap:8,marginVertical:4},rankTitle:{color:hum.ink,fontSize:14,fontWeight:'700',flexShrink:1},
   stats:{flexDirection:'row',gap:8,marginBottom:14},stat:{padding:11,borderColor:hum.rule},num:{fontSize:18,fontWeight:'900',color:colors.text},label:{fontSize:12,color:colors.textSecondary,marginTop:3},
   upgrade:{...paperCard,backgroundColor:hum.pearSoft,borderColor:hum.pearEdge,padding:14,marginBottom:15,flexDirection:'row',alignItems:'center',gap:11},upgradeIcon:{width:42,height:42,borderRadius:13,backgroundColor:hum.pear,alignItems:'center',justifyContent:'center'},upgradeKicker:{fontSize:7.5,fontWeight:'900',letterSpacing:1,color:colors.primary},upgradeTitle:{fontSize:15,fontWeight:'700',color:colors.text,marginTop:2},upgradeSub:{fontSize:13,color:colors.textSecondary,marginTop:3},
   guestBox:{backgroundColor:colors.blueSoft,borderRadius:16,padding:14,marginBottom:18,flexDirection:'row',alignItems:'center',gap:12,borderWidth:1,borderColor:hum.skyEdge},guestKicker:{fontSize:7.5,fontWeight:'900',letterSpacing:1.1,color:colors.blue},guestTitle:{fontSize:15,fontWeight:'700',color:colors.text,marginTop:3},guestSub:{fontSize:13,color:colors.textSecondary,marginTop:3},guestArrow:{width:44,height:44,borderRadius:11,backgroundColor:hum.card,alignItems:'center',justifyContent:'center'},

@@ -3,6 +3,7 @@ import { Animated, Easing, Image, Platform, Pressable, StyleSheet, Text, View } 
 import type { GestureResponderEvent } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
+import { WebMascot } from '@/components/common/WebMascot';
 import { getVocabularyArtwork } from '@/features/lessons/data/vocabulary-artwork';
 import { hum, humType, paperButton } from '@/theme/hum';
 
@@ -168,6 +169,7 @@ export function HeroSlideshow({ wide, reducedMotion }: { wide: boolean; reducedM
           </Pressable>
         </View>
       </View>
+      <WebMascot placement="hero" />
     </View>
   );
 }

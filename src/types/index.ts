@@ -17,6 +17,7 @@ export interface LearningState {
   reviewWordIds: string[];
   savedWordIds: string[];
   completedLessonIds: string[];
+  completedPracticeIds: string[];
   correctAnswers: number;
   totalAnswers: number;
   minutesToday: number;

@@ -74,7 +74,7 @@ function GrammarQuestion({ exercise, number }: { exercise: GrammarExercise; numb
   const [sourceError, setSourceError] = useState(false);
   return <>
     <ExerciseHeading skill="grammar" label={grammarTopicTitle(exercise.grammar_topic)} title={number ? `Câu ${number}` : 'Điền chỗ trống'} />
-    <ChoiceExercise question={exercise.gapped_text} options={options} answer={options.indexOf(exercise.solution)} review={exercise.filled_text} />
+    <ChoiceExercise practiceId={`grammar:${exercise.id}`} question={exercise.gapped_text} options={options} answer={options.indexOf(exercise.solution)} review={exercise.filled_text} />
     <View style={styles.source}>
       <Text style={practiceStyles.detail}>{exercise.source_license}</Text>
       {exercise.source_url.startsWith('https://') && (
@@ -102,7 +102,7 @@ function Comprehension({ exercise }: { exercise: Extract<SkillExercise, { skill:
         {speech.audioError && <Text style={styles.passage}>{exercise.transcript}</Text>}
       </View>
     )}
-    <ChoiceExercise question={exercise.question} options={exercise.options} answer={exercise.answer} review={exercise.skill === 'listening' ? exercise.transcript : undefined} />
+    <ChoiceExercise practiceId={`${exercise.skill}:${exercise.id}`} question={exercise.question} options={exercise.options} answer={exercise.answer} review={exercise.skill === 'listening' ? exercise.transcript : undefined} />
   </>;
 }
 
@@ -115,8 +115,8 @@ function ExerciseHeading({ skill, label, title }: { skill: PracticeSkill; label:
   );
 }
 
-function ChoiceExercise({ question, options, answer, review }: {
-  question: string; options: string[]; answer: number; review?: string;
+function ChoiceExercise({ practiceId, question, options, answer, review }: {
+  practiceId: string; question: string; options: string[]; answer: number; review?: string;
 }) {
   const { ready, recordAnswer } = useLearning();
   const [selected, setSelected] = useState<number | null>(null);
@@ -150,7 +150,7 @@ function ChoiceExercise({ question, options, answer, review }: {
         <AppButton title="Kiểm tra đáp án" icon="checkmark-outline" disabled={selected === null || !ready} onPress={() => {
           if (selected === null || !ready || recorded.current) return;
           recorded.current = true;
-          recordAnswer(correct);
+          recordAnswer(correct, practiceId);
           setChecked(true);
         }} />
       )}

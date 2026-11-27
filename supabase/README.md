@@ -51,6 +51,8 @@ tiền tố `EXPO_PUBLIC_`, và không lưu secret trong `.env` của frontend. 
 Expo hoặc domain web, cập nhật cả Authorized JavaScript origins (Google) và Redirect
 URLs (Supabase).
 
+Đăng ký bằng email trên web cũng dùng địa chỉ `/oauth` tương ứng trong danh sách trên. Nếu bật **Confirm email**, người dùng cần mở liên kết xác nhận trước khi đăng nhập. Nếu gặp `email_address_not_authorized` khi dùng dịch vụ gửi email mặc định của Supabase, quản trị viên có thể cấu hình SMTP hoặc dùng tài khoản Google trong lúc kiểm thử.
+
 ## Quan hệ dữ liệu
 
 ```mermaid

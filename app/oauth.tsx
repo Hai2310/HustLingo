@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
+import { authMessage } from '@/services/authMessages';
 import { supabase, supabaseConfigured } from '@/services/supabase';
 import { colors } from '@/theme/colors';
 
@@ -55,7 +56,7 @@ export default function OAuthComplete() {
           return;
         }
 
-        throw new Error('Không tìm thấy mã xác thực Google trong đường dẫn trả về.');
+        throw new Error('Không tìm thấy mã xác thực. Nếu bạn vừa xác nhận email, hãy quay lại trang đăng nhập và thử đăng nhập bằng mật khẩu.');
       }
 
       const { data, error } = await supabase.auth.getSession();
@@ -66,7 +67,7 @@ export default function OAuthComplete() {
     void finish().catch((error: unknown) => {
       if (mounted) {
         setErrorMessage(
-          error instanceof Error ? error.message : 'Không thể hoàn tất đăng nhập Google.'
+          authMessage(error, 'Không thể hoàn tất xác thực.')
         );
       }
     });

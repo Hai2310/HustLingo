@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 import { makeRedirectUri } from 'expo-auth-session';
 import * as QueryParams from 'expo-auth-session/build/QueryParams';
 import * as WebBrowser from 'expo-web-browser';
-import { requireSupabaseConfig, supabase, supabaseConfigured } from '@/services/supabase';
+import { requireSupabaseConfig, supabase, supabaseConfigured, webAuthCallbackUrl } from '@/services/supabase';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -11,10 +11,7 @@ type Provider = 'google';
 
 export function useSocialAuth() {
   const redirectTo = useMemo(
-    () =>
-      Platform.OS === 'web' && typeof window !== 'undefined'
-        ? `${window.location.origin}/oauth`
-        : makeRedirectUri({ scheme: 'hustlingo', path: 'oauth' }),
+    () => webAuthCallbackUrl() ?? makeRedirectUri({ scheme: 'hustlingo', path: 'oauth' }),
     []
   );
 

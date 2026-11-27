@@ -8,6 +8,7 @@ import { HeroSlideshow } from '@/components/home/HeroSlideshow';
 import { HomeLesson } from '@/components/home/HomeLesson';
 import { HomePaperPressable } from '@/components/home/HomePaperPressable';
 import { PricingTeaser } from '@/components/home/PricingTeaser';
+import { RankBadge, RankedName } from '@/components/common/LearnerRank';
 import { hum, humType, paperButton } from '@/theme/hum';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLearning } from '@/contexts/LearningContext';
@@ -15,6 +16,7 @@ import { learningTopics } from '@/data/content';
 import { getVocabularyArtwork } from '@/features/lessons/data/vocabulary-artwork';
 import { maxContentWidth } from '@/theme/layout';
 import { useMotionPreference } from '@/theme/MotionPreference';
+import { getLearnerRank } from '@/utils/learnerRank';
 
 const libraryShortcuts = [
   { label: 'Nghe', icon: 'headset-outline', path: '/listening' },
@@ -28,8 +30,8 @@ export default function Home() {
   const { width } = useWindowDimensions();
   const desktop = width >= 1000;
   const wide = width >= 680;
-  const firstName = user?.displayName?.trim().split(/\s+/).pop();
-  const greeting = isGuest || !firstName ? 'Chào bạn!' : 'Chào ' + firstName + '!';
+  const firstName = isGuest ? 'bạn' : user.displayName.trim().split(/\s+/).pop() || 'bạn';
+  const { rank } = getLearnerRank(state.completedLessonIds.length, state.completedPracticeIds.length);
   const dailyGoal = user?.dailyMinutes || 15;
   const dailyProgress = Math.min(100, Math.max(0, state.minutesToday / dailyGoal * 100));
   const stats = [
@@ -63,9 +65,12 @@ export default function Home() {
               </View>
             </View>
 
-            <Text accessibilityRole="header" aria-level={1} style={[styles.greeting, wide && styles.greetingWide]}>
-              {greeting}
-            </Text>
+            <View nativeID="home-greeting" style={[styles.greetingRow, wide && styles.greetingRowWide]}>
+              <Text accessibilityRole="header" aria-level={1} style={[styles.greeting, wide && styles.greetingWide]}>
+                Chào {ready ? <RankedName key={rank.id} rank={rank} name={firstName} placement="home" /> : firstName}!
+              </Text>
+              {ready && <RankBadge key={rank.id} rank={rank} placement="home" />}
+            </View>
             <HeroSlideshow wide={wide} reducedMotion={reducedMotion !== false} />
             <View style={[styles.study, desktop && styles.studyDesktop]}>
               <HomeLesson wide={wide} learnerId={user.id} reducedMotion={reducedMotion} />
@@ -195,8 +200,10 @@ const styles = StyleSheet.create({
   plusLink: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 12, borderRadius: 12 },
   linkText: { color: hum.blue, fontSize: 15, fontWeight: humType.bold, flexShrink: 1 },
   settings: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 14, backgroundColor: hum.card, borderWidth: 1, borderColor: hum.rule },
-  greeting: { color: hum.ink, fontSize: 29, lineHeight: 35, letterSpacing: -0.8, fontWeight: humType.bold, marginTop: 13, marginBottom: 11, minWidth: 0 },
-  greetingWide: { fontSize: 34, lineHeight: 41, marginTop: 19, marginBottom: 13 },
+  greetingRow: { flexDirection: 'row', alignItems: 'center', gap: 9, marginTop: 13, marginBottom: 11, minWidth: 0 },
+  greetingRowWide: { marginTop: 19, marginBottom: 13 },
+  greeting: { color: hum.ink, fontSize: 29, lineHeight: 35, letterSpacing: -0.8, fontWeight: humType.bold, minWidth: 0, flexShrink: 1 },
+  greetingWide: { fontSize: 34, lineHeight: 41 },
   study: { gap: 25, paddingBottom: 2 },
   studyDesktop: { flexDirection: 'row', alignItems: 'stretch', gap: 25 },
   quick: { gap: 11, minWidth: 0 },

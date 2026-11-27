@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,18 +8,35 @@ import { AuthField } from '@/components/AuthField';
 import { AppButton } from '@/components/Buttons';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSocialAuth } from '@/hooks/useSocialAuth';
+import { authMessage } from '@/services/authMessages';
 import { colors } from '@/theme/colors';
 import { paperButton, paperCard } from '@/theme/hum';
 
 export default function SignIn(){
  const {signIn}=useAuth(); const social=useSocialAuth(); const[email,setEmail]=useState(''); const[password,setPassword]=useState(''); const[loading,setLoading]=useState(false); const[socialLoading,setSocialLoading]=useState(false); const[socialError,setSocialError]=useState<string|null>(null);
- async function submit(){try{setLoading(true);await signIn(email.trim(),password);router.replace('/(tabs)/home')}catch(e:any){Alert.alert('Không thể đăng nhập',e?.message||'Kiểm tra thông tin tài khoản.')}finally{setLoading(false)}}
+ const [formError, setFormError] = useState('');
+ async function submit() {
+   if (!email.trim() || !password) {
+     setFormError('Hãy nhập email và mật khẩu.');
+     return;
+   }
+   setFormError('');
+   try {
+     setLoading(true);
+     await signIn(email.trim(), password);
+     router.replace('/(tabs)/home');
+   } catch (error) {
+     setFormError(authMessage(error, 'Chưa thể đăng nhập. Vui lòng thử lại.'));
+   } finally {
+     setLoading(false);
+   }
+ }
  async function signInWithGoogle(){setSocialError(null);try{setSocialLoading(true);const completed=await social.signInWithGoogle();if(completed)router.replace('/(tabs)/home')}catch(e:any){setSocialError(e?.message||'Vui lòng thử lại.')}finally{setSocialLoading(false)}}
  return <SafeAreaView nativeID="hum-screen-signin" style={styles.safe} edges={['top','bottom']}><ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled"><View style={styles.page}>
    <Pressable onPress={()=>router.back()} style={styles.back}><Ionicons name="arrow-back" size={20} color={colors.text}/></Pressable>
    <HustLogo size={44}/>
    <Text style={styles.title}>Đăng nhập HustLingo</Text><Text style={styles.sub}>Đồng bộ tiến độ trên nhiều thiết bị. Bạn vẫn có thể học ở chế độ khách.</Text>
-   <View style={styles.form}><AuthField label="Email" autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail}/><AuthField label="Mật khẩu" secureTextEntry value={password} onChangeText={setPassword}/><AppButton title="Đăng nhập" loading={loading} onPress={submit}/></View>
+   <View style={styles.form}><AuthField label="Email" autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail}/><AuthField label="Mật khẩu" secureTextEntry value={password} onChangeText={setPassword}/>{formError ? <Text accessibilityRole="alert" style={styles.socialError}>{formError}</Text> : null}<AppButton title="Đăng nhập" loading={loading} onPress={submit}/></View>
    <View style={styles.or}><View style={styles.line}/><Text style={styles.orText}>hoặc</Text><View style={styles.line}/></View>
    <View style={styles.social}><AppButton title="Tiếp tục với Google" variant="secondary" loading={socialLoading} onPress={()=>signInWithGoogle()}/></View>
    {socialError?<Text accessibilityRole="alert" style={styles.socialError}>{socialError}</Text>:null}

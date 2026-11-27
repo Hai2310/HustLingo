@@ -17,7 +17,7 @@ function wordFeedback(word: Word) {
   return 'Tốt';
 }
 
-export function PronunciationFeedback({ result }: { result: PronunciationResult }) {
+export function PronunciationFeedback({ result, demo = false }: { result: PronunciationResult; demo?: boolean }) {
   const [selection, setSelection] = useState<number | null>(null);
   const selected = selection === null ? undefined : result.words[selection];
   const metrics = [
@@ -29,7 +29,7 @@ export function PronunciationFeedback({ result }: { result: PronunciationResult 
   return (
     <View style={styles.result}>
       <View style={styles.score} aria-live="polite" accessibilityLiveRegion="polite">
-        <Text style={practiceStyles.heading}>Điểm phát âm</Text>
+        <Text style={practiceStyles.heading}>{demo ? 'Điểm minh họa' : 'Điểm phát âm'}</Text>
         <Text style={styles.total}>{result.score}<Text style={practiceStyles.label}> / 100</Text></Text>
       </View>
       <View style={styles.row}>

@@ -1,17 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
-import { assessPronunciation } from '../data/pronunciation';
+import { assessPronunciation, previewPronunciation, PronunciationUnavailableError } from '../data/pronunciation';
 import type { PronunciationResult } from '../data/pronunciation';
 
 type State =
   | { status: 'idle' | 'loading' }
   | { status: 'ready'; result: PronunciationResult }
-  | { status: 'error'; message: string };
+  | { status: 'error'; message: string; retryable: boolean };
 
-export function usePronunciationAssessment(exerciseId: string, accountId?: string) {
+export function usePronunciationAssessment(exerciseId: string, accountId?: string, demoReference?: string) {
   const request = useRef<AbortController | null>(null);
   const [state, setState] = useState<State>({ status: 'idle' });
-  const account = useRef(accountId);
-  account.current = accountId;
+  const scope = demoReference ? 'localhost-demo' : accountId;
+  const currentScope = useRef(scope);
+  currentScope.current = scope;
 
   useEffect(() => {
     setState({ status: 'idle' });
@@ -19,7 +20,7 @@ export function usePronunciationAssessment(exerciseId: string, accountId?: strin
       request.current?.abort();
       request.current = null;
     };
-  }, [exerciseId, accountId]);
+  }, [exerciseId, scope, demoReference]);
 
   function reset() {
     request.current?.abort();
@@ -28,16 +29,22 @@ export function usePronunciationAssessment(exerciseId: string, accountId?: strin
   }
 
   async function assess(uri: string) {
-    if (!accountId || account.current !== accountId || request.current) return;
+    if (!scope || currentScope.current !== scope || request.current) return;
     const controller = new AbortController();
     request.current = controller;
     setState({ status: 'loading' });
     try {
-      const result = await assessPronunciation(exerciseId, uri, controller.signal);
+      const result = demoReference
+        ? await previewPronunciation(demoReference, uri, controller.signal)
+        : await assessPronunciation(exerciseId, uri, controller.signal);
       if (!controller.signal.aborted) setState({ status: 'ready', result });
     } catch (cause) {
       if (!controller.signal.aborted) {
-        setState({ status: 'error', message: cause instanceof Error ? cause.message : 'Chưa chấm được bản ghi.' });
+        setState({
+          status: 'error',
+          message: cause instanceof Error ? cause.message : 'Chưa chấm được bản ghi.',
+          retryable: !(cause instanceof PronunciationUnavailableError),
+        });
       }
     } finally {
       if (request.current === controller) request.current = null;

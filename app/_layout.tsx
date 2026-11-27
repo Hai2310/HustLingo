@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { LearningProvider } from '@/contexts/LearningContext';
+import { WebMascot } from '@/components/common/WebMascot';
 import { colors } from '@/theme/colors';
 import { MotionPreferenceProvider } from '@/theme/MotionPreference';
 import '@/theme/hum.css';
@@ -16,6 +17,7 @@ export default function RootLayout() {
           <LearningProvider>
             <StatusBar style="dark" />
             <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }} />
+            <WebMascot />
           </LearningProvider>
         </AuthProvider>
       </MotionPreferenceProvider>

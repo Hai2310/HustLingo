@@ -12,6 +12,7 @@ import {
   requireSupabaseConfig,
   supabase,
   supabaseConfigured,
+  webAuthCallbackUrl,
 } from '@/services/supabase';
 import { supabaseData } from '@/services/supabaseData';
 
@@ -165,6 +166,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           email,
           password,
           options: {
+            emailRedirectTo: webAuthCallbackUrl(),
             data: {
               display_name: displayName,
               full_name: displayName,

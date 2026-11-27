@@ -27,6 +27,7 @@ function loader(supabaseModule) {
   return load;
 }
 const load = loader(), progress = load('@/utils/learningProgress'), catalog = load('@/features/lessons/data/catalog');
+const { getLearnerRank, learnerRanks } = load('@/utils/learnerRank');
 const day = '2026-10-26', empty = () => progress.emptyProgress(day);
 function storage(seed = {}) {
   const values = new Map(Object.entries(seed));
@@ -96,6 +97,42 @@ test('local and cloud progress merge without losing either device’s steps', ()
   assert.deepEqual(new Set(merged.lessonProgress.lesson.completedSteps), new Set(['a', 'b']));
   assert.equal(merged.lessonProgress.lesson.lastStepId, 'b');
   assert.deepEqual(new Set(merged.studiedWordIds), new Set(['word-a', 'word-b']));
+});
+
+test('rank promotion requires both lesson and practice milestones', () => {
+  assert.equal(getLearnerRank(0, 0).rank.title, 'Newbie');
+  for (const [index, rank] of learnerRanks.entries()) {
+    const status = getLearnerRank(rank.lessons, rank.practice);
+    assert.equal(status.rank.id, rank.id);
+    assert.equal(status.next?.id, learnerRanks[index + 1]?.id);
+    if (index > 0) {
+      assert.equal(getLearnerRank(rank.lessons - 1, rank.practice).rank.id, learnerRanks[index - 1].id);
+      assert.equal(getLearnerRank(rank.lessons, rank.practice - 1).rank.id, learnerRanks[index - 1].id);
+    }
+  }
+  assert.equal(getLearnerRank(120, 0).rank.id, 'newbie');
+  assert.equal(getLearnerRank(0, 120).rank.id, 'newbie');
+});
+
+test('practice counts unique IDs and preserves historical answers separately', () => {
+  const legacy = progress.normaliseProgress({ completedLessonIds: ['old-lesson'], totalAnswers: 90 }, day);
+  assert.deepEqual(legacy.completedPracticeIds, []);
+  const first = progress.recordPracticeCompletion(legacy, 'reading:read-1');
+  assert.equal(progress.recordPracticeCompletion(first, 'reading:read-1'), first);
+  assert.equal(progress.recordPracticeCompletion(first, '  '), first);
+  const otherDevice = progress.recordPracticeCompletion(first, 'grammar:g-2');
+  const merged = progress.mergeLearningProgress(first, otherDevice, day);
+  assert.deepEqual(merged.completedPracticeIds, ['reading:read-1', 'grammar:g-2']);
+  assert.deepEqual(merged.completedLessonIds, ['old-lesson']);
+  assert.equal(merged.totalAnswers, 90);
+});
+
+test('practice-only guest progress can be transferred to a signed-in profile', async () => {
+  const guest = progress.recordPracticeCompletion(empty(), 'speaking:speak-1');
+  const store = storage({ 'learning:guest-local': JSON.stringify(guest) });
+  const profile = await progress.importGuestProgress(store, 'learning', 'account-a', empty(), day);
+  assert.deepEqual(profile.completedPracticeIds, ['speaking:speak-1']);
+  assert.equal(await store.getItem('learning:guest-local'), null);
 });
 
 test('guest progress is claimed once and cannot leak into another account', async () => {

@@ -29,3 +29,5 @@ Người học đăng nhập, đọc câu mẫu và bấm **Dừng ghi âm**. Tr
 4. Mở `/practice?skill=speaking` từ localhost hoặc HTTPS, đăng nhập và thử ghi âm một câu mẫu.
 
 Bản ghi được chuyển tiếp trong yêu cầu chấm. HustLingo chỉ lưu bộ đếm theo ngày trong Supabase và hiển thị điểm của bản ghi trong màn hiện tại.
+
+Để xem giao diện khi chưa có tài khoản hay khóa Azure, chạy Expo ở chế độ phát triển và mở `http://localhost:8081/practice/speak-1?skill=speaking&demo=pronunciation`. Bản thử ghi âm và nghe lại ngay trong trình duyệt, rồi hiển thị điểm minh họa.

@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { supabaseData } from '@/services/supabaseData';
 import type { LearningState } from '@/types';
-import { emptyProgress, importGuestProgress, mergeLearningProgress, normaliseProgress, parseProgress, recordLessonStep as applyLessonStep } from '@/utils/learningProgress';
+import { emptyProgress, importGuestProgress, mergeLearningProgress, normaliseProgress, parseProgress, recordLessonStep as applyLessonStep, recordPracticeCompletion } from '@/utils/learningProgress';
 import { useAuth } from './AuthContext';
 
 const KEY_PREFIX = 'hustlingo_learning_state_v1';
@@ -14,7 +14,8 @@ interface LearningContextValue {
   syncStatus: SyncStatus;
   markWord(wordId: string, remembered: boolean): void;
   toggleSaved(wordId: string): void;
-  recordAnswer(correct: boolean): void;
+  recordAnswer(correct: boolean, practiceId: string): void;
+  completePractice(practiceId: string): void;
   addMinutes(minutes: number): void;
   completeLesson(id: string): void;
   markLessonStep(lessonId: string, stepId: string, requiredSteps: string[], wordId?: string): void;
@@ -115,7 +116,14 @@ export function LearningProvider({ children }: { children: React.ReactNode }) {
     state, ready, syncStatus,
     markWord(wordId, remembered) { update(previous => ({ ...previous, studiedWordIds: [...new Set([...previous.studiedWordIds, wordId])], reviewWordIds: remembered ? previous.reviewWordIds.filter(id => id !== wordId) : [...new Set([...previous.reviewWordIds, wordId])] })); },
     toggleSaved(wordId) { update(previous => ({ ...previous, savedWordIds: previous.savedWordIds.includes(wordId) ? previous.savedWordIds.filter(id => id !== wordId) : [...previous.savedWordIds, wordId] })); },
-    recordAnswer(correct) { update(previous => ({ ...previous, totalAnswers: previous.totalAnswers + 1, correctAnswers: previous.correctAnswers + (correct ? 1 : 0) })); },
+    recordAnswer(correct, practiceId) {
+      update(previous => ({
+        ...recordPracticeCompletion(previous, practiceId),
+        totalAnswers: previous.totalAnswers + 1,
+        correctAnswers: previous.correctAnswers + (correct ? 1 : 0),
+      }));
+    },
+    completePractice(practiceId) { update(previous => recordPracticeCompletion(previous, practiceId)); },
     addMinutes(minutes) { if (Number.isFinite(minutes) && minutes > 0) update(previous => ({ ...previous, minutesToday: previous.minutesToday + minutes })); },
     completeLesson(id) { update(previous => ({ ...previous, completedLessonIds: [...new Set([...previous.completedLessonIds, id])] })); },
     markLessonStep(lessonId, stepId, requiredSteps, wordId) { update(previous => applyLessonStep(previous, lessonId, stepId, requiredSteps, wordId)); },

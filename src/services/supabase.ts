@@ -4,13 +4,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 import { AppState, Platform } from 'react-native';
 
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL?.trim();
+export const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL?.trim();
 const supabaseKey = (
   process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
   process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
 )?.trim();
 
 export const supabaseConfigured = Boolean(supabaseUrl && supabaseKey);
+
+export function webAuthCallbackUrl() {
+  return Platform.OS === 'web' && typeof window !== 'undefined' ? `${window.location.origin}/oauth` : undefined;
+}
 
 const fallbackUrl = 'https://example.supabase.co';
 const fallbackKey = 'missing-supabase-publishable-key';
