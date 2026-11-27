@@ -29,9 +29,9 @@ export default function TopicDetailScreen() {
       <Text style={ui.kicker}>EXPLORE A TOPIC</Text><Text style={ui.heading}>{topic.title}</Text><Text style={ui.description}>{topic.description}</Text>
       <View style={styles.topicProgress}><View style={styles.progressLabel}><Text style={styles.progressTitle}>{stats.complete} of {stats.count} lessons completed</Text><Text style={styles.percent}>{stats.percent}%</Text></View><ProgressBar percent={stats.percent} label={`${topic.title} progress`} /></View>
       {catalog?.notice && <Notice text={catalog.notice} retry={retry} busy={loading} />}
-      <View style={{ marginTop: 24 }}><LevelFilter value={level} onChange={value => { setLevel(value); setVisible(18); }} /><KindFilter value={kind} onChange={value => { setKind(value); setVisible(18); }} /></View>
+      <View style={{ marginTop: 24 }}><LevelFilter value={level} onChange={value => { setLevel(value); setVisible(18); }} /><KindFilter options={['all', 'vocabulary', 'grammar']} value={kind} onChange={value => { setKind(value); setVisible(18); }} /></View>
       <View style={ui.sectionHeader}><Text style={ui.sectionHeading}>Your lessons</Text><Text style={styles.count}>{lessons.length} available</Text></View>
-      {lessons.length ? <View style={{ gap: 12 }}>{lessons.slice(0, visible).map(lesson => <LessonCard key={lesson.id} lesson={lesson} topic={topic} />)}{lessons.length > visible && <LessonButton secondary label="Show more lessons" onPress={() => setVisible(value => value + 18)} />}</View> : <LessonState kind="empty" title="No lessons at this level yet" description="Choose another CEFR level or lesson type. Your topic progress is kept separately." action="Show all lessons in this topic" onAction={() => { setLevel('all'); setKind('all'); }} />}
+      {lessons.length ? <View style={{ gap: 12 }}>{lessons.slice(0, visible).map(lesson => <LessonCard key={lesson.id} lesson={lesson} topic={topic} />)}{lessons.length > visible && <LessonButton secondary label="Show more lessons" onPress={() => setVisible(value => value + 18)} />}</View> : <LessonState kind="empty" title="No lessons at this level yet" description="Choose another level or lesson type. Your topic progress is kept separately." action="Show all lessons in this topic" onAction={() => { setLevel('all'); setKind('all'); }} />}
     </>}
   </Reveal></Screen>;
 }

@@ -1,3 +1,4 @@
+import { getLevelLabel } from '@/utils/levelLabels';
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
@@ -69,7 +70,7 @@ function TutorChatWorkspace({ scenario, tutor }: { scenario: TutorScenario; tuto
   return (
     <Screen scroll={false} ambient={false} contentStyle={styles.screenContent}>
       <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}>
-        <View style={[styles.header, isDesktop && styles.desktopHeader]}><PageHeader title={scenario.title} subtitle={`${tutor.name} · ${scenario.level}`} right={<Pressable onPress={endSession} style={styles.end}><Ionicons name="stop-circle-outline" size={18} color={colors.primary} /></Pressable>} /></View>
+        <View style={[styles.header, isDesktop && styles.desktopHeader]}><PageHeader title={scenario.title} subtitle={`${tutor.name} · ${getLevelLabel(scenario.level)}`} right={<Pressable onPress={endSession} style={styles.end}><Ionicons name="stop-circle-outline" size={18} color={colors.primary} /></Pressable>} /></View>
         {confirmEnd && <View style={styles.confirmEnd}>
           <Text style={styles.toolText}>End practice and view your summary?</Text>
           <Pressable accessibilityRole="button" onPress={() => setConfirmEnd(false)} style={styles.tool}><Text style={styles.toolText}>Keep practising</Text></Pressable>

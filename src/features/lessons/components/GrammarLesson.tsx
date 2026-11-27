@@ -1,3 +1,4 @@
+import { getLevelLabel } from '@/utils/levelLabels';
 import React, { useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -30,7 +31,7 @@ export function GrammarLesson({ lesson, points, onSectionChange }: { lesson: Cat
     })}</View>
     {audioError && <Notice text={audioError} />}
     <Reveal key={`${point.id}:${part.id}`}><View style={styles.paper}>
-      <Text style={styles.kicker}>{point.category.toUpperCase()} · {point.level}</Text><Text style={styles.title}>{point.title}</Text>
+      <Text style={styles.kicker}>{point.category.toUpperCase()} · {getLevelLabel(point.level)}</Text><Text style={styles.title}>{point.title}</Text>
       {part.id === 'rule' && <><Text style={styles.label}>PATTERN</Text><View style={styles.pattern}><Text style={styles.patternText}>{point.pattern}</Text></View><Text style={styles.label}>EXPLANATION</Text><Text style={styles.explanation}>{point.explanation}</Text></>}
       {part.id === 'examples' && <><Text style={styles.sectionLead}>Read the examples and listen to how the pattern is used.</Text>{point.examples.map((example, index) => <View key={`${point.id}:${index}`} style={styles.example}><View style={{ flex: 1 }}><Text style={styles.exampleText}>{example}</Text>{point.exampleTranslations[index] && <Text style={styles.translation}>{point.exampleTranslations[index]}</Text>}</View><Pressable accessibilityRole="button" accessibilityLabel={`Listen to example ${index + 1}`} onPress={() => { void speak(`${point.id}:${index}`, example); }} style={styles.listen}><Ionicons name={speaking === `${point.id}:${index}` ? 'stop-circle-outline' : 'volume-high-outline'} size={22} color={colors.primary} /></Pressable></View>)}</>}
       {part.id === 'mistakes' && <><Text style={styles.sectionLead}>Notice what changes between these two sentences.</Text><View style={[styles.mistake, { backgroundColor: colors.errorSoft }]}><Text style={[styles.mistakeLabel, { color: colors.error }]}>AVOID</Text><Text style={styles.exampleText}>{point.commonMistake.incorrect}</Text></View><View style={[styles.mistake, { backgroundColor: colors.successSoft }]}><Text style={[styles.mistakeLabel, { color: colors.success }]}>USE THIS</Text><Text style={styles.exampleText}>{point.commonMistake.correct}</Text></View><Text style={styles.explanation}>{point.commonMistake.explanation}</Text></>}

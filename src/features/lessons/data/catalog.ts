@@ -1,10 +1,11 @@
 import { PRODUCTION_VOCABULARY } from '@/data/vocabulary-en';
 import { VOCABULARY_TOPICS } from '@/data/vocabulary-topics';
 import { grammarPoints } from './grammar';
+import { LEARNING_LEVELS } from '@/utils/levelLabels';
 import type { LearningState } from '@/types';
 import type { CatalogLesson, LessonCatalog, LessonLevel, LessonTopic } from '../types';
 
-export const LESSON_LEVELS: LessonLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1'];
+export const LESSON_LEVELS = LEARNING_LEVELS;
 export const isLessonLevel = (value?: string): value is LessonLevel => LESSON_LEVELS.includes(value as LessonLevel);
 const presentations: Record<string, Partial<LessonTopic>> = {
   education: { title: 'University', description: 'Campus life, studying and new ideas.', icon: 'school-outline' },

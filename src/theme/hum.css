@@ -23,7 +23,7 @@ body:has(#hustlingo-home) {
 #hustlingo-home #home-lesson,
 #hustlingo-home #home-vocabulary-face,
 #hustlingo-home #home-grammar-face,
-#hustlingo-home #home-stats {
+#hustlingo-home :is(#home-progress-lesson, #home-progress-practice, #home-progress-goal) {
   background-image: var(--home-grain);
 }
 

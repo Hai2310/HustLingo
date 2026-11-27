@@ -18,11 +18,17 @@ export interface LearningState {
   savedWordIds: string[];
   completedLessonIds: string[];
   completedPracticeIds: string[];
+  practiceResults: Record<string, PracticeResult>;
   correctAnswers: number;
   totalAnswers: number;
   minutesToday: number;
   lastStudyDate?: string;
   lessonProgress?: Record<string, LessonStudyProgress>;
+}
+
+export interface PracticeResult {
+  correct: boolean;
+  answeredAt: number;
 }
 
 export interface LessonStudyProgress {

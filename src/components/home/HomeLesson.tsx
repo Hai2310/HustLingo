@@ -1,3 +1,4 @@
+import { getLevelLabel } from '@/utils/levelLabels';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Animated, Easing, Image, Platform, StyleSheet, Text, View } from 'react-native';
 import { Link, useFocusEffect } from 'expo-router';
@@ -66,7 +67,7 @@ export function HomeLesson({ wide, learnerId, reducedMotion }: {
             </Text>
             {current ? (
               <Text style={styles.detail}>
-                Bài đang học: {current.lesson.kind === 'grammar' ? 'Ngữ pháp' : 'Từ vựng'} {current.lesson.level}
+                Bài đang học: {current.lesson.kind === 'grammar' ? 'Ngữ pháp' : 'Từ vựng'} {getLevelLabel(current.lesson.level)}
               </Text>
             ) : (
               <Text accessibilityLiveRegion={checking ? 'polite' : undefined} style={styles.detail}>

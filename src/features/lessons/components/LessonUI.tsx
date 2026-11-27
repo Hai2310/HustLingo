@@ -1,3 +1,4 @@
+import { getLevelLabel } from '@/utils/levelLabels';
 import React, { useEffect, useRef } from 'react';
 import { ActivityIndicator, Animated, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -48,11 +49,23 @@ export function LessonBack({ fallback = '/(tabs)/lessons', label = 'Lessons' }: 
 }
 
 export function LevelFilter({ value, onChange }: { value: LessonLevel | 'all'; onChange(value: LessonLevel | 'all'): void }) {
-  return <View style={ui.chips} accessibilityLabel="Filter by CEFR level">{(['all', ...LESSON_LEVELS] as const).map(level => <Pressable key={level} accessibilityRole="button" accessibilityLabel={level === 'all' ? 'All levels' : `Level ${level}`} accessibilityState={{ selected: value === level }} onPress={() => onChange(level)} style={[ui.chip, value === level && ui.selectedChip]}><Text style={[ui.chipText, value === level && ui.selectedChipText]}>{level === 'all' ? 'All levels' : level}</Text></Pressable>)}</View>;
+  return (
+    <View style={ui.chips} accessibilityLabel="Filter by level">
+      {(['all', ...LESSON_LEVELS] as const).map(level => {
+        const label = level === 'all' ? 'All levels' : getLevelLabel(level);
+        const selected = level === value;
+        return (
+          <Pressable key={level} accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ selected }} onPress={() => onChange(level)} style={[ui.chip, selected && ui.selectedChip]}>
+            <Text style={[ui.chipText, selected && ui.selectedChipText]}>{label}</Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
 }
 
-export function KindFilter({ value, onChange }: { value: LessonKind | 'all'; onChange(value: LessonKind | 'all'): void }) {
-  return <View style={ui.kindRow}>{(['all', 'vocabulary', 'grammar'] as const).map(kind => <Pressable key={kind} accessibilityRole="button" accessibilityLabel={kind === 'all' ? 'All lesson types' : `${kind} lessons`} accessibilityState={{ selected: kind === value }} onPress={() => onChange(kind)} style={[ui.kind, value === kind && ui.kindSelected]}><Text style={[ui.kindText, value === kind && { color: colors.primary }]}>{kind === 'all' ? 'All lessons' : kind === 'vocabulary' ? 'Vocabulary' : 'Grammar'}</Text></Pressable>)}</View>;
+export function KindFilter<T extends LessonKind | 'all'>({ options, value, onChange }: { options: readonly T[]; value: T; onChange(value: T): void }) {
+  return <View style={ui.kindRow}>{options.map(kind => <Pressable key={kind} accessibilityRole="button" accessibilityLabel={kind === 'all' ? 'All lesson types' : `${kind} lessons`} accessibilityState={{ selected: kind === value }} onPress={() => onChange(kind)} style={[ui.kind, value === kind && ui.kindSelected]}><Text style={[ui.kindText, value === kind && { color: colors.primary }]}>{kind === 'all' ? 'All lessons' : kind === 'vocabulary' ? 'Vocabulary' : 'Grammar'}</Text></Pressable>)}</View>;
 }
 
 export function LessonSearch({ value, onChange }: { value: string; onChange(value: string): void }) {
@@ -61,7 +74,8 @@ export function LessonSearch({ value, onChange }: { value: string; onChange(valu
 
 export function LessonCard({ lesson, topic }: { lesson: CatalogLesson; topic?: LessonTopic }) {
   const { state, ready } = useLearning(), stats = lessonStats(lesson, state);
-  return <Pressable accessibilityRole="button" accessibilityLabel={`${lesson.title}, ${lesson.level}, ${stats.percent}% complete`} onPress={() => router.push({ pathname: '/lessons/[lessonId]', params: { lessonId: lesson.id } })} style={({ pressed }) => [ui.lessonCard, pressed && { opacity: .85 }]}><View style={ui.lessonTop}><View style={[ui.lessonIcon, { backgroundColor: lesson.kind === 'grammar' ? colors.blueSoft : hum.coralSoft }]}><Ionicons name={lesson.kind === 'grammar' ? 'library-outline' : 'text-outline'} size={22} color={lesson.kind === 'grammar' ? colors.blue : hum.coralEdge} /></View><View style={{ flex: 1 }}><Text style={ui.lessonKicker}>{lesson.kind === 'grammar' ? 'GRAMMAR' : topic?.title.toUpperCase() || 'VOCABULARY'} · {lesson.level}</Text><Text style={ui.lessonTitle}>{lesson.title}</Text></View><Ionicons name={stats.complete ? 'checkmark-circle' : 'arrow-forward'} size={23} color={stats.complete ? colors.success : colors.textMuted} /></View><Text style={ui.lessonMeta}>{lesson.kind === 'grammar' ? `${lesson.grammarIds.length} grammar point${lesson.grammarIds.length === 1 ? '' : 's'} · rule, examples & common mistakes` : `${lesson.vocabularyIds.length} words · pronunciation & examples`}</Text><View style={ui.progressLabel}><Text style={[ui.progressText, stats.complete && { color: colors.success }]}>{!ready ? 'Loading progress…' : stats.complete ? 'Completed' : stats.done ? 'In progress' : 'Not started'}</Text><Text style={ui.progressText}>{stats.percent}%</Text></View><ProgressBar percent={stats.percent} label={`${lesson.title} progress`} /></Pressable>;
+  const levelLabel = getLevelLabel(lesson.level);
+  return <Pressable accessibilityRole="button" accessibilityLabel={`${lesson.title}, ${levelLabel}, ${stats.percent}% complete`} onPress={() => router.push({ pathname: '/lessons/[lessonId]', params: { lessonId: lesson.id } })} style={({ pressed }) => [ui.lessonCard, pressed && { opacity: .85 }]}><View style={ui.lessonTop}><View style={[ui.lessonIcon, { backgroundColor: lesson.kind === 'grammar' ? colors.blueSoft : hum.coralSoft }]}><Ionicons name={lesson.kind === 'grammar' ? 'library-outline' : 'text-outline'} size={22} color={lesson.kind === 'grammar' ? colors.blue : hum.coralEdge} /></View><View style={{ flex: 1 }}><Text style={ui.lessonKicker}>{lesson.kind === 'grammar' ? 'GRAMMAR' : topic?.title.toUpperCase() || 'VOCABULARY'} · {levelLabel}</Text><Text style={ui.lessonTitle}>{lesson.title}</Text></View><Ionicons name={stats.complete ? 'checkmark-circle' : 'arrow-forward'} size={23} color={stats.complete ? colors.success : colors.textMuted} /></View><Text style={ui.lessonMeta}>{lesson.kind === 'grammar' ? `${lesson.grammarIds.length} grammar point${lesson.grammarIds.length === 1 ? '' : 's'} · rule, examples & common mistakes` : `${lesson.vocabularyIds.length} words · pronunciation & examples`}</Text><View style={ui.progressLabel}><Text style={[ui.progressText, stats.complete && { color: colors.success }]}>{!ready ? 'Loading progress…' : stats.complete ? 'Completed' : stats.done ? 'In progress' : 'Not started'}</Text><Text style={ui.progressText}>{stats.percent}%</Text></View><ProgressBar percent={stats.percent} label={`${lesson.title} progress`} /></Pressable>;
 }
 
 export const ui = StyleSheet.create({

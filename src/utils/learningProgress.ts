@@ -5,7 +5,7 @@ const strings = (value: unknown): string[] => Array.isArray(value) ? unique(valu
 const count = (value: unknown) => typeof value === 'number' && Number.isFinite(value) ? Math.max(0, value) : 0;
 
 export function emptyProgress(day: string): LearningState {
-  return { studiedWordIds: [], reviewWordIds: [], savedWordIds: [], completedLessonIds: [], completedPracticeIds: [], correctAnswers: 0, totalAnswers: 0, minutesToday: 0, lastStudyDate: day, lessonProgress: {} };
+  return { studiedWordIds: [], reviewWordIds: [], savedWordIds: [], completedLessonIds: [], completedPracticeIds: [], practiceResults: {}, correctAnswers: 0, totalAnswers: 0, minutesToday: 0, lastStudyDate: day, lessonProgress: {} };
 }
 
 export function normaliseProgress(value: unknown, day: string): LearningState {
@@ -17,10 +17,17 @@ export function normaliseProgress(value: unknown, day: string): LearningState {
       lessonProgress[id] = { completedSteps: strings(entry.completedSteps), lastStepId: typeof entry.lastStepId === 'string' ? entry.lastStepId : undefined, updatedAt: typeof entry.updatedAt === 'string' ? entry.updatedAt : undefined };
     }
   }
+  const storedResults = Array.isArray(row.practiceResults) ? {} : row.practiceResults ?? {};
+  const practiceResults = Object.fromEntries(Object.entries(storedResults).flatMap(([id, result]) => {
+    if (!id.trim() || typeof result?.correct !== 'boolean' || !Number.isSafeInteger(result.answeredAt) || result.answeredAt < 0) return [];
+    return [[id, { correct: result.correct, answeredAt: result.answeredAt }]];
+  }));
   const totalAnswers = count(row.totalAnswers);
   return {
     studiedWordIds: strings(row.studiedWordIds), reviewWordIds: strings(row.reviewWordIds), savedWordIds: strings(row.savedWordIds),
-    completedLessonIds: strings(row.completedLessonIds), completedPracticeIds: strings(row.completedPracticeIds).filter(id => id.trim()),
+    completedLessonIds: strings(row.completedLessonIds),
+    completedPracticeIds: unique([...strings(row.completedPracticeIds).filter(id => id.trim()), ...Object.keys(practiceResults)]),
+    practiceResults,
     totalAnswers, correctAnswers: Math.min(count(row.correctAnswers), totalAnswers),
     minutesToday: row.lastStudyDate === day ? count(row.minutesToday) : 0, lastStudyDate: day, lessonProgress,
   };
@@ -29,6 +36,13 @@ export function normaliseProgress(value: unknown, day: string): LearningState {
 export function mergeLearningProgress(localValue: unknown, remoteValue: unknown, day: string): LearningState {
   const local = normaliseProgress(localValue, day), remote = normaliseProgress(remoteValue, day);
   const lessonProgress = { ...remote.lessonProgress, ...local.lessonProgress };
+  const practiceResults = { ...local.practiceResults, ...remote.practiceResults };
+  for (const [id, result] of Object.entries(local.practiceResults)) {
+    const remoteResult = remote.practiceResults[id];
+    if (!remoteResult || result.answeredAt > remoteResult.answeredAt || (result.answeredAt === remoteResult.answeredAt && result.correct)) {
+      practiceResults[id] = result;
+    }
+  }
   for (const id of new Set([...Object.keys(local.lessonProgress || {}), ...Object.keys(remote.lessonProgress || {})])) {
     const left = local.lessonProgress?.[id], right = remote.lessonProgress?.[id];
     const latest = (left?.updatedAt || '') >= (right?.updatedAt || '') ? left : right;
@@ -40,6 +54,7 @@ export function mergeLearningProgress(localValue: unknown, remoteValue: unknown,
     savedWordIds: unique([...local.savedWordIds, ...remote.savedWordIds]),
     completedLessonIds: unique([...local.completedLessonIds, ...remote.completedLessonIds]),
     completedPracticeIds: unique([...local.completedPracticeIds, ...remote.completedPracticeIds]),
+    practiceResults,
     correctAnswers: Math.max(local.correctAnswers, remote.correctAnswers), totalAnswers: Math.max(local.totalAnswers, remote.totalAnswers),
     minutesToday: Math.max(local.minutesToday, remote.minutesToday), lastStudyDate: day, lessonProgress,
   };
@@ -48,6 +63,20 @@ export function mergeLearningProgress(localValue: unknown, remoteValue: unknown,
 export function recordPracticeCompletion(state: LearningState, practiceId: string): LearningState {
   if (!practiceId.trim() || state.completedPracticeIds.includes(practiceId)) return state;
   return { ...state, completedPracticeIds: [...state.completedPracticeIds, practiceId] };
+}
+
+export function recordPracticeAnswer(state: LearningState, practiceId: string, correct: boolean, answeredAt: number): LearningState {
+  if (!practiceId.trim()) return state;
+  const lastAnswer = state.practiceResults[practiceId];
+  return {
+    ...recordPracticeCompletion(state, practiceId),
+    practiceResults: {
+      ...state.practiceResults,
+      [practiceId]: { correct, answeredAt: Math.max(answeredAt, (lastAnswer?.answeredAt ?? -1) + 1) },
+    },
+    totalAnswers: state.totalAnswers + 1,
+    correctAnswers: state.correctAnswers + Number(correct),
+  };
 }
 
 export function recordLessonStep(state: LearningState, lessonId: string, stepId: string, requiredSteps: string[], wordId?: string, timestamp = new Date().toISOString()): LearningState {

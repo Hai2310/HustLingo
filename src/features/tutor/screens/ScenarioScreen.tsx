@@ -1,3 +1,4 @@
+import { getLevelLabel } from '@/utils/levelLabels';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
@@ -23,7 +24,7 @@ export default function ScenarioScreen() {
 
   return (
     <Screen>
-      <PageHeader title="Scenario" subtitle={`${tutor.name} · ${scenario.level}`} />
+      <PageHeader title="Scenario" subtitle={`${tutor.name} · ${getLevelLabel(scenario.level)}`} />
       <View style={styles.hero}>
         <View style={styles.icon}><Ionicons name={(scenario.icon || 'chatbubbles-outline') as keyof typeof Ionicons.glyphMap} size={30} color={colors.primary} /></View>
         <Text style={styles.title}>{scenario.title}</Text>

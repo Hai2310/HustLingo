@@ -1,3 +1,4 @@
+import { getLevelLabel } from '@/utils/levelLabels';
 import React from 'react';
 import { StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,7 +23,7 @@ export function ScenarioCard({
       <View style={styles.copy}>
         <View style={styles.titleRow}>
           <Text style={styles.title}>{scenario.title}</Text>
-          <View style={styles.level}><Text style={styles.levelText}>{scenario.level}</Text></View>
+          <View style={styles.level}><Text style={styles.levelText}>{getLevelLabel(scenario.level)}</Text></View>
         </View>
         <Text style={styles.subtitle}>{scenario.subtitle}</Text>
         <Text style={styles.tutor}>{scenario.tutor} · {scenario.topicIds?.slice(0, 2).join(' · ')}</Text>

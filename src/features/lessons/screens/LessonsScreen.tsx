@@ -1,3 +1,4 @@
+import { getLevelLabel } from '@/utils/levelLabels';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,22 +16,22 @@ import { VocabularyLibraryHero, VocabularyTopicCover } from '../components/Vocab
 export function LessonsScreen() {
   const params = useLocalSearchParams<{ level?: string; type?: string }>();
   const [level, setLevel] = useState<LessonLevel | 'all'>(isLessonLevel(params.level) ? params.level : 'all');
-  const [kind, setKind] = useState<LessonKind | 'all'>(params.type === 'grammar' || params.type === 'vocabulary' ? params.type : 'all');
+  const kind: LessonKind = params.type === 'grammar' ? 'grammar' : 'vocabulary';
   const [search, setSearch] = useState(''), [showTopics, setShowTopics] = useState(false), [visible, setVisible] = useState(18);
   const { catalog, loading, error, retry } = useLessonCatalog();
   const { state, ready } = useLearning();
   const { width } = useWindowDimensions(), wide = width >= 760;
-  useEffect(() => { if (params.type === 'grammar' || params.type === 'vocabulary') setKind(params.type); }, [params.type]);
+  const searchQuery = search.trim().toLowerCase();
   useEffect(() => { if (isLessonLevel(params.level)) setLevel(params.level); }, [params.level]);
   useEffect(() => { setVisible(18); }, [level, kind, search]);
 
   const topics = useMemo(() => new Map(catalog?.topics.map(topic => [topic.id, topic]) || []), [catalog]);
-  const filtered = useMemo(() => (catalog?.lessons || []).filter(lesson => (level === 'all' || lesson.level === level) && (kind === 'all' || lesson.kind === kind) && (!search.trim() || `${lesson.title} ${topics.get(lesson.topicId)?.title || ''}`.toLowerCase().includes(search.trim().toLowerCase()))), [catalog, level, kind, search, topics]);
+  const filtered = useMemo(() => (catalog?.lessons || []).filter(lesson => (level === 'all' || lesson.level === level) && lesson.kind === kind && (!searchQuery || `${lesson.title} ${topics.get(lesson.topicId)?.title || ''}`.toLowerCase().includes(searchQuery))), [catalog, level, kind, searchQuery, topics]);
   const recommended = useMemo(() => [...filtered].sort((a, b) => (state.lessonProgress?.[b.id]?.updatedAt || '').localeCompare(state.lessonProgress?.[a.id]?.updatedAt || '')).find(lesson => !lessonStats(lesson, state).complete) || filtered[0], [filtered, state]);
   const overall = topicStats(catalog?.lessons || [], state);
   const recommendedStats = recommended ? lessonStats(recommended, state) : null;
   const featuredIds = ['education', 'family', 'travel', 'technology', 'workplace', 'grammar', 'food'];
-  const orderedTopics = [...(catalog?.topics || [])].filter(topic => kind !== 'vocabulary' || catalog?.lessons.some(lesson => lesson.topicId === topic.id && lesson.kind === 'vocabulary')).sort((a, b) => {
+  const orderedTopics = (catalog?.topics || []).filter(topic => catalog?.lessons.some(lesson => lesson.topicId === topic.id && lesson.kind === 'vocabulary')).sort((a, b) => {
     const left = featuredIds.indexOf(a.id), right = featuredIds.indexOf(b.id);
     return (left < 0 ? 99 : left) - (right < 0 ? 99 : right) || a.title.localeCompare(b.title);
   });
@@ -38,21 +39,21 @@ export function LessonsScreen() {
   const topicWidth = wide ? (availableWidth - 24) / 3 : width >= 560 ? (availableWidth - 12) / 2 : availableWidth;
 
   return <Screen ambient={false} contentStyle={ui.content}><Reveal>
-    <View style={styles.top}><Text accessibilityRole="header" style={ui.heading}>{kind === 'vocabulary' ? 'Vocabulary' : kind === 'grammar' ? 'Grammar' : 'Lessons'}</Text><SyncLabel /></View>
-    <Text style={ui.description}>{kind === 'vocabulary' ? 'Explore words by level and topic, with audio and examples.' : kind === 'grammar' ? 'Study rules, examples and common mistakes at your CEFR level.' : 'Learn useful words. Understand the grammar. Make it part of your day.'}</Text>
+    <View style={styles.top}><Text accessibilityRole="header" style={ui.heading}>{kind === 'vocabulary' ? 'Vocabulary' : 'Grammar'}</Text><SyncLabel /></View>
+    <Text style={ui.description}>{kind === 'vocabulary' ? 'Explore words by level and topic, with audio and examples.' : 'Study rules, examples and common mistakes at your level.'}</Text>
 
-    {catalog && recommended && !search.trim() && (kind === 'vocabulary' ? <VocabularyLibraryHero lesson={recommended} onStart={() => router.push({ pathname: '/lessons/[lessonId]', params: { lessonId: recommended.id } })} /> : <View style={[styles.hero, kind === 'grammar' && styles.grammarHero, !wide && { flexDirection: 'column' }]}>
-      <View style={{ flex: 1 }}><Text style={styles.heroKicker}>{recommendedStats?.done ? 'PICK UP WHERE YOU LEFT OFF' : 'A GOOD PLACE TO START'}</Text><Text style={styles.heroTitle}>{recommended.title}</Text><Text style={styles.heroDescription}>{recommended.kind === 'grammar' ? 'A clear rule, useful examples and a common mistake to avoid.' : `Build your vocabulary with ${recommended.vocabularyIds.length} words, pronunciation and examples.`}</Text><View style={styles.heroAction}><LessonButton label={recommendedStats?.done ? 'Continue lesson' : 'Start lesson'} icon="arrow-forward" onPress={() => router.push({ pathname: '/lessons/[lessonId]', params: { lessonId: recommended.id } })} /><Text style={styles.heroLevel}>{recommended.level} · {recommended.kind === 'grammar' ? 'Grammar' : 'Vocabulary'}</Text></View></View>
+    {catalog && recommended && !searchQuery && (kind === 'vocabulary' ? <VocabularyLibraryHero lesson={recommended} onStart={() => router.push({ pathname: '/lessons/[lessonId]', params: { lessonId: recommended.id } })} /> : <View style={[styles.grammarHero, !wide && { flexDirection: 'column' }]}>
+      <View style={{ flex: 1 }}><Text style={styles.heroKicker}>{recommendedStats?.done ? 'PICK UP WHERE YOU LEFT OFF' : 'A GOOD PLACE TO START'}</Text><Text style={styles.heroTitle}>{recommended.title}</Text><Text style={styles.heroDescription}>A clear rule, useful examples and a common mistake to avoid.</Text><View style={styles.heroAction}><LessonButton label={recommendedStats?.done ? 'Continue lesson' : 'Start lesson'} icon="arrow-forward" onPress={() => router.push({ pathname: '/lessons/[lessonId]', params: { lessonId: recommended.id } })} /><Text style={styles.heroLevel}>{getLevelLabel(recommended.level)} · Grammar</Text></View></View>
       <View style={[styles.heroSummary, !wide && { width: '100%' }]}><Text style={styles.summaryNumber}>{ready ? overall.complete : '—'}</Text><Text style={styles.summaryLabel}>lessons completed</Text><View style={styles.summaryRule} /><View style={styles.summaryRow}><Text style={styles.summaryLabel}>Words studied</Text><Text style={styles.summaryValue}>{ready ? state.studiedWordIds.length : '—'}</Text></View><View style={styles.summaryRow}><Text style={styles.summaryLabel}>Saved words</Text><Text style={styles.summaryValue}>{ready ? state.savedWordIds.length : '—'}</Text></View></View>
     </View>)}
 
     {catalog?.notice && <Notice text={catalog.notice} retry={retry} busy={loading} />}
-    <View style={styles.filters}><LessonSearch value={search} onChange={setSearch} /><View style={styles.filterLabel}><Text style={styles.label}>CHOOSE YOUR LEVEL</Text><Text style={styles.filterHint}>CEFR A1–C1</Text></View><LevelFilter value={level} onChange={setLevel} /><KindFilter value={kind} onChange={setKind} /></View>
+    <View style={styles.filters}><LessonSearch value={search} onChange={setSearch} /><Text style={styles.filterLabel}>CHOOSE YOUR LEVEL</Text><LevelFilter value={level} onChange={setLevel} /><KindFilter options={['vocabulary', 'grammar']} value={kind} onChange={value => router.setParams({ type: value })} /></View>
 
     {loading && !catalog ? <LessonState kind="loading" title="Opening your library" description="Loading published lessons and your learning options." /> : error ? <LessonState kind="error" title="The library could not load" description={error} action="Try again" onAction={retry} /> : catalog && <>
-      {kind !== 'grammar' && !search.trim() && <><View style={ui.sectionHeader}><Text style={ui.sectionHeading}>Explore by topic</Text><Pressable accessibilityRole="button" onPress={() => setShowTopics(value => !value)} style={styles.textButton}><Text style={styles.textButtonLabel}>{showTopics ? 'Show less' : 'See all topics'}</Text><Ionicons name={showTopics ? 'chevron-up' : 'arrow-forward'} size={15} color={colors.primary} /></Pressable></View>
+      {kind === 'vocabulary' && !searchQuery && orderedTopics.length > 0 && <><View style={ui.sectionHeader}><Text style={ui.sectionHeading}>Explore by topic</Text><Pressable accessibilityRole="button" onPress={() => setShowTopics(value => !value)} style={styles.textButton}><Text style={styles.textButtonLabel}>{showTopics ? 'Show less' : 'See all topics'}</Text><Ionicons name={showTopics ? 'chevron-up' : 'arrow-forward'} size={15} color={colors.primary} /></Pressable></View>
         <View style={styles.topicGrid}>{(showTopics ? orderedTopics : orderedTopics.slice(0, 6)).map(topic => {
-          const selected = catalog.lessons.filter(lesson => lesson.topicId === topic.id && (level === 'all' || lesson.level === level) && (kind === 'all' || lesson.kind === kind));
+          const selected = catalog.lessons.filter(lesson => lesson.topicId === topic.id && (level === 'all' || lesson.level === level) && lesson.kind === 'vocabulary');
           const stats = topicStats(selected, state);
           const illustrated = topic.id !== 'grammar';
           return <Pressable key={topic.id} accessibilityRole="button" accessibilityLabel={`${topic.title}, ${stats.count} lessons, ${stats.percent}% complete`} onPress={() => router.push({ pathname: '/lessons/topics/[topicId]', params: { topicId: topic.id, level, type: kind } })} style={({ pressed }) => [styles.topicCard, { width: topicWidth }, illustrated && styles.illustratedTopicCard, pressed && { opacity: .8 }]}>
@@ -60,8 +61,11 @@ export function LessonsScreen() {
             <View style={illustrated ? styles.topicBody : undefined}><Text style={[styles.topicTitle, illustrated && { marginTop: 0 }]}>{topic.title}</Text><Text style={styles.topicDescription} numberOfLines={2}>{topic.description}</Text><View style={styles.topicProgress}><Text style={styles.topicMeta}>{stats.count ? `${stats.complete} / ${stats.count} lessons completed` : 'No lessons at this level'}</Text><Text style={styles.topicMeta}>{stats.percent}%</Text></View><ProgressBar percent={stats.percent} label={`${topic.title} progress`} /></View>
           </Pressable>;
         })}</View></>}
-      <View style={ui.sectionHeader}><Text style={ui.sectionHeading}>{search.trim() ? 'Search results' : kind === 'grammar' ? 'Grammar lessons' : kind === 'vocabulary' ? 'Vocabulary lessons' : 'All lessons'}</Text><Text style={styles.count}>{filtered.length} lessons</Text></View>
-      {filtered.length ? <><View style={styles.lessonList}>{filtered.slice(0, visible).map(lesson => <LessonCard key={lesson.id} lesson={lesson} topic={topics.get(lesson.topicId)} />)}</View>{filtered.length > visible && <View style={styles.loadMore}><LessonButton secondary label={`Show more (${filtered.length - visible} remaining)`} onPress={() => setVisible(value => value + 18)} /></View>}</> : <LessonState kind="empty" title="No lessons found" description="Try another level, lesson type or search. Your progress will stay saved." action="Clear filters" onAction={() => { setLevel('all'); setKind('all'); setSearch(''); }} />}
+      {(kind === 'grammar' || searchQuery !== '') && <>
+        <View style={ui.sectionHeader}><Text style={ui.sectionHeading}>{searchQuery ? 'Search results' : 'Grammar lessons'}</Text><Text style={styles.count}>{filtered.length} lessons</Text></View>
+        {filtered.length ? <><View style={styles.lessonList}>{filtered.slice(0, visible).map(lesson => <LessonCard key={lesson.id} lesson={lesson} topic={topics.get(lesson.topicId)} />)}</View>{filtered.length > visible && <View style={styles.loadMore}><LessonButton secondary label={`Show more (${filtered.length - visible} remaining)`} onPress={() => setVisible(value => value + 18)} /></View>}</> : <LessonState kind="empty" title="No lessons found" description="Try another level or search term." action="Clear filters" onAction={() => { setLevel('all'); setSearch(''); }} />}
+      </>}
+      {kind === 'vocabulary' && !searchQuery && orderedTopics.length === 0 && <LessonState kind="empty" title="No vocabulary topics yet" description="Vocabulary topics will appear here when lessons are available." />}
     </>}
   </Reveal></Screen>;
 }
@@ -69,15 +73,14 @@ export default LessonsScreen;
 
 const styles = StyleSheet.create({
   top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' },
-  hero: { ...paperCard, backgroundColor: hum.pearSoft, borderColor: hum.pearEdge, borderRadius: 23, padding: 23, marginTop: 22, flexDirection: 'row', gap: 20 },
-  grammarHero: { backgroundColor: hum.sky, borderColor: hum.skyEdge },
+  grammarHero: { ...paperCard, backgroundColor: hum.sky, borderColor: hum.skyEdge, borderRadius: 23, padding: 23, marginTop: 22, flexDirection: 'row', gap: 20 },
   heroKicker: { color: colors.textSecondary, fontSize: 10, fontWeight: '700', marginBottom: 9 },
   heroTitle: { color: colors.text, fontSize: 29, fontWeight: '800', lineHeight: 37, letterSpacing: -.7 },
   heroDescription: { color: colors.textSecondary, fontSize: 13, lineHeight: 21, marginTop: 10, maxWidth: 530 },
   heroAction: { flexDirection: 'row', alignItems: 'center', gap: 15, flexWrap: 'wrap', marginTop: 22 }, heroLevel: { color: colors.textSecondary, fontSize: 11, fontWeight: '600' },
   heroSummary: { width: 220, backgroundColor: hum.card, padding: 21, borderRadius: 16 }, summaryNumber: { color: colors.text, fontSize: 40, fontWeight: '800', lineHeight: 46 }, summaryLabel: { color: colors.textSecondary, fontSize: 12, lineHeight: 19 },
   summaryRule: { height: 1, backgroundColor: hum.rule, marginVertical: 13 }, summaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }, summaryValue: { color: colors.text, fontSize: 13, fontWeight: '700' },
-  filters: { marginTop: 26 }, filterLabel: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }, label: { color: colors.textSecondary, fontSize: 10, fontWeight: '800', letterSpacing: 1 }, filterHint: { color: colors.textMuted, fontSize: 11 },
+  filters: { marginTop: 26 }, filterLabel: { marginBottom: 12, color: colors.textSecondary, fontSize: 10, fontWeight: '800', letterSpacing: 1 },
   textButton: { minHeight: 40, flexDirection: 'row', gap: 6, alignItems: 'center' }, textButtonLabel: { fontSize: 12, color: colors.primary, fontWeight: '700' },
   topicGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 }, topicCard: { ...paperCard, padding: 19 },
   illustratedTopicCard: { padding: 0, overflow: 'hidden' }, topicBody: { padding: 19 },

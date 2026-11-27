@@ -1,3 +1,4 @@
+import { getLevelLabel } from '@/utils/levelLabels';
 import React,{useState} from 'react';
 import {Alert,Pressable,StyleSheet,Text,View} from 'react-native';
 import {router} from 'expo-router';
@@ -49,7 +50,7 @@ export default function Profile(){
           )}
           <Text style={styles.email}>{isGuest ? 'Chế độ khách • dữ liệu lưu trên thiết bị' : user.email || 'Tài khoản mạng xã hội'}</Text>
           <View style={styles.meta}>
-            <Text style={styles.tagOn}>{user.englishLevel || 'A1'}</Text>
+            <Text style={styles.tagOn}>{getLevelLabel(user.englishLevel || 'A1')}</Text>
             <Text style={styles.tag}>{user.learningGoal || 'Giao tiếp'}</Text>
             <Pressable onPress={() => router.push('/pricing')}><Text style={styles.premiumTag}>FREE · NÂNG CẤP</Text></Pressable>
           </View>

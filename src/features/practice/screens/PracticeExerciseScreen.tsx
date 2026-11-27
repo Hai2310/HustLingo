@@ -1,3 +1,4 @@
+import { getLevelLabel } from '@/utils/levelLabels';
 import React, { useCallback, useRef, useState } from 'react';
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,8 +10,9 @@ import { useLearning } from '@/contexts/LearningContext';
 import { useLessonSpeech } from '@/features/lessons/hooks/useLessonSpeech';
 import { hum, paperButton } from '@/theme/hum';
 import { SpeakingResponse, WritingResponse } from '../components/PracticeResponses';
+import { PracticeStatusBadge } from '../components/PracticeStatus';
 import { PracticeNotice, practiceStyles, skillLabels } from '../components/PracticeUI';
-import { grammarTopicTitle, isPracticeSkill, loadGrammarExercise, loadPracticeCatalog } from '../data/catalog';
+import { grammarTopicTitle, isPracticeSkill, loadGrammarExercise, loadPracticeCatalog, practiceKey } from '../data/catalog';
 import type { GrammarExercise, PracticeSkill, SkillExercise } from '../data/catalog';
 import { usePracticeRequest } from '../hooks/usePracticeRequest';
 
@@ -44,7 +46,7 @@ function SkillDetail({ id, skill }: { id: string; skill: Exclude<PracticeSkill, 
   const exercise = request.data.exercises.find(item => item.id === id && item.skill === skill);
   if (!exercise) return <PracticeNotice message="Bài luyện tập này không có trong danh sách hiện tại." retry={request.retry} />;
   return <>
-    <ExerciseHeading skill={skill} label={exercise.level} title={skill === 'speaking' ? 'Luyện nói theo mẫu' : exercise.title} />
+    <ExerciseHeading skill={skill} label={getLevelLabel(exercise.level)} title={skill === 'speaking' ? 'Luyện nói theo mẫu' : exercise.title} />
     {request.data.source === 'local' && <Text style={practiceStyles.detail}>Bản có sẵn trên thiết bị.</Text>}
     {exercise.skill === 'writing' ? (
       authLoading ? <PracticeNotice loading message="Đang mở bản nháp…" /> :
@@ -74,7 +76,7 @@ function GrammarQuestion({ exercise, number }: { exercise: GrammarExercise; numb
   const [sourceError, setSourceError] = useState(false);
   return <>
     <ExerciseHeading skill="grammar" label={grammarTopicTitle(exercise.grammar_topic)} title={number ? `Câu ${number}` : 'Điền chỗ trống'} />
-    <ChoiceExercise practiceId={`grammar:${exercise.id}`} question={exercise.gapped_text} options={options} answer={options.indexOf(exercise.solution)} review={exercise.filled_text} />
+    <ChoiceExercise practiceId={practiceKey('grammar', exercise.id)} question={exercise.gapped_text} options={options} answer={options.indexOf(exercise.solution)} review={exercise.filled_text} />
     <View style={styles.source}>
       <Text style={practiceStyles.detail}>{exercise.source_license}</Text>
       {exercise.source_url.startsWith('https://') && (
@@ -102,7 +104,7 @@ function Comprehension({ exercise }: { exercise: Extract<SkillExercise, { skill:
         {speech.audioError && <Text style={styles.passage}>{exercise.transcript}</Text>}
       </View>
     )}
-    <ChoiceExercise practiceId={`${exercise.skill}:${exercise.id}`} question={exercise.question} options={exercise.options} answer={exercise.answer} review={exercise.skill === 'listening' ? exercise.transcript : undefined} />
+    <ChoiceExercise practiceId={practiceKey(exercise.skill, exercise.id)} question={exercise.question} options={exercise.options} answer={exercise.answer} review={exercise.skill === 'listening' ? exercise.transcript : undefined} />
   </>;
 }
 
@@ -118,15 +120,22 @@ function ExerciseHeading({ skill, label, title }: { skill: PracticeSkill; label:
 function ChoiceExercise({ practiceId, question, options, answer, review }: {
   practiceId: string; question: string; options: string[]; answer: number; review?: string;
 }) {
-  const { ready, recordAnswer } = useLearning();
+  const { state, ready, recordAnswer } = useLearning();
   const [selected, setSelected] = useState<number | null>(null);
   const [checked, setChecked] = useState(false);
   const recorded = useRef(false);
   const correct = selected === answer;
+  const previousResult = ready ? state.practiceResults[practiceId] : undefined;
 
   return (
     <View style={practiceStyles.sheet}>
       <Text style={practiceStyles.heading}>{question}</Text>
+      {!checked && previousResult && (
+        <View style={styles.previousResult}>
+          <Text style={practiceStyles.detail}>Lần làm gần nhất</Text>
+          <PracticeStatusBadge status={previousResult.correct ? 'correct' : 'incorrect'} />
+        </View>
+      )}
       {options.map((option, index) => (
         <Pressable
           key={index}
@@ -164,6 +173,7 @@ const styles = StyleSheet.create({
   heading: { gap: 6 },
   reading: { backgroundColor: hum.sky, borderColor: hum.skyEdge },
   passage: { color: hum.ink, fontSize: 16, lineHeight: 25 },
+  previousResult: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 7 },
   option: { ...paperButton, flexDirection: 'row', alignItems: 'center', backgroundColor: hum.card, borderColor: hum.rule, gap: 10, padding: 11, minHeight: 46 },
   optionText: { flex: 1, color: hum.ink, fontSize: 15, lineHeight: 21 },
   selected: { backgroundColor: hum.pearSoft, borderColor: hum.pearEdge },

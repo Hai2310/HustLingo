@@ -1,3 +1,4 @@
+import { getLevelLabel } from '@/utils/levelLabels';
 import React from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,6 +8,7 @@ import { HustLogo } from '@/components/HustLogo';
 import { HeroSlideshow } from '@/components/home/HeroSlideshow';
 import { HomeLesson } from '@/components/home/HomeLesson';
 import { HomePaperPressable } from '@/components/home/HomePaperPressable';
+import { HomeProgress } from '@/components/home/HomeProgress';
 import { PricingTeaser } from '@/components/home/PricingTeaser';
 import { RankBadge, RankedName } from '@/components/common/LearnerRank';
 import { hum, humType, paperButton } from '@/theme/hum';
@@ -32,14 +34,7 @@ export default function Home() {
   const wide = width >= 680;
   const firstName = isGuest ? 'bạn' : user.displayName.trim().split(/\s+/).pop() || 'bạn';
   const { rank } = getLearnerRank(state.completedLessonIds.length, state.completedPracticeIds.length);
-  const dailyGoal = user?.dailyMinutes || 15;
-  const dailyProgress = Math.min(100, Math.max(0, state.minutesToday / dailyGoal * 100));
-  const stats = [
-    { label: 'Từ đã học', value: state.studiedWordIds.length },
-    { label: 'Cần ôn', value: state.reviewWordIds.length },
-    { label: 'Chính xác', value: state.totalAnswers > 0 ? accuracy + '%' : '—' },
-    { label: 'Phút hôm nay', value: state.minutesToday + ' / ' + dailyGoal },
-  ];
+  const dailyGoal = user.dailyMinutes && user.dailyMinutes > 0 ? user.dailyMinutes : 15;
 
   return (
     <View nativeID="hustlingo-home" style={styles.canvas}>
@@ -112,35 +107,7 @@ export default function Home() {
               </View>
             </View>
 
-            <View style={styles.section}>
-              <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>Tiến độ của bạn</Text>
-              <View nativeID="home-stats" style={styles.stats}>
-                {stats.map((item, index) => (
-                  <View
-                    key={item.label}
-                    style={[
-                      styles.stat,
-                      !wide && styles.statCompact,
-                      (wide ? index > 0 : index % 2 === 1) && styles.statDivider,
-                      !wide && index > 1 && styles.statLower,
-                    ]}
-                  >
-                    <Text style={styles.statValue}>{ready ? item.value : '—'}</Text>
-                    <Text style={styles.statLabel}>{item.label}</Text>
-                    {index === 3 && ready && (
-                      <View
-                        accessibilityRole="progressbar"
-                        accessibilityLabel="Mục tiêu học hôm nay"
-                        accessibilityValue={{ min: 0, max: 100, now: Math.round(dailyProgress) }}
-                        style={styles.goalTrack}
-                      >
-                        <View style={[styles.goalFill, { width: `${dailyProgress}%` }]} />
-                      </View>
-                    )}
-                  </View>
-                ))}
-              </View>
-            </View>
+            <HomeProgress state={state} accuracy={accuracy} ready={ready} dailyGoal={dailyGoal} wide={wide} />
 
             <View style={styles.section}>
               <View style={styles.sectionHeading}>
@@ -172,7 +139,7 @@ export default function Home() {
                         <Text style={styles.topicTitle}>{topic.title}</Text>
                         <Text style={styles.topicDescription}>{topic.subtitle}</Text>
                       </View>
-                      <Text style={styles.topicLevel}>{topic.level}</Text>
+                      <Text style={styles.topicLevel}>{getLevelLabel(topic.level)}</Text>
                     </Pressable>
                   </Link>
                 ))}
@@ -221,15 +188,6 @@ const styles = StyleSheet.create({
   libraryLink: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 45, paddingHorizontal: 8, borderRadius: 9 },
   chevron: { marginLeft: 'auto' },
   section: { gap: 10, marginTop: 20 },
-  stats: { flexDirection: 'row', flexWrap: 'wrap', borderRadius: 19, backgroundColor: hum.mint, borderWidth: 1, borderColor: hum.mintRule, overflow: 'hidden' },
-  stat: { flex: 1, minWidth: 0, gap: 3, paddingHorizontal: 16, paddingVertical: 11 },
-  statCompact: { flexBasis: '50%', flexGrow: 0 },
-  statDivider: { borderLeftWidth: 1, borderLeftColor: hum.mintRule },
-  statLower: { borderTopWidth: 1, borderTopColor: hum.mintRule },
-  statValue: { color: hum.ink, fontSize: 24, lineHeight: 28, fontWeight: humType.bold, fontVariant: ['tabular-nums'] },
-  statLabel: { color: hum.greenInk, fontSize: 14, lineHeight: 19 },
-  goalTrack: { height: 5, borderRadius: 3, backgroundColor: hum.mintTrack, marginTop: 2, maxWidth: 180 },
-  goalFill: { height: 5, borderRadius: 3, backgroundColor: hum.greenInk },
   sectionHeading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   headingText: { flexShrink: 1 },
   moreLink: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 7, borderRadius: 9 },

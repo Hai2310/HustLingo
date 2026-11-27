@@ -58,6 +58,7 @@ const grammarTopicNames: Record<string, string> = {
 
 export const grammarPageSize = 24;
 export const isPracticeSkill = (value?: string): value is PracticeSkill => skills.some(skill => skill === value);
+export const practiceKey = (skill: PracticeSkill, id: string) => `${skill}:${id}`;
 export const grammarTopicLabel = (topic: string) => topic.replace(/_/g, ' ').replace(/^\w/, letter => letter.toUpperCase());
 export const grammarTopicTitle = (topic: string) => Object.hasOwn(grammarTopicNames, topic) ? grammarTopicNames[topic] : grammarTopicLabel(topic);
 

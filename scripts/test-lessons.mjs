@@ -127,11 +127,37 @@ test('practice counts unique IDs and preserves historical answers separately', (
   assert.equal(merged.totalAnswers, 90);
 });
 
+test('practice saves the latest submitted result per question across reloads and devices', () => {
+  const first = progress.recordPracticeAnswer(empty(), 'grammar:g-1', false, 100);
+  const retried = progress.recordPracticeAnswer(first, 'grammar:g-1', true, 100);
+  const reloaded = progress.parseProgress(JSON.stringify(retried), day);
+  const remote = progress.recordPracticeAnswer(first, 'reading:r-1', false, 102);
+  const merged = progress.mergeLearningProgress(reloaded, remote, day);
+  assert.deepEqual(merged.practiceResults, {
+    'grammar:g-1': { correct: true, answeredAt: 101 },
+    'reading:r-1': { correct: false, answeredAt: 102 },
+  });
+  assert.deepEqual(progress.mergeLearningProgress(remote, reloaded, day).practiceResults, merged.practiceResults);
+  assert.deepEqual(reloaded.completedPracticeIds, ['grammar:g-1']);
+  assert.equal(reloaded.totalAnswers, 2);
+  assert.equal(reloaded.correctAnswers, 1);
+});
+
+test('practice preserves legacy completions without assigning a correct or incorrect result', () => {
+  const legacy = progress.normaliseProgress({
+    completedPracticeIds: ['grammar:legacy'],
+    practiceResults: { 'grammar:bad': { correct: 'false', answeredAt: 50 }, 'grammar:valid': { correct: false, answeredAt: 60 } },
+  }, day);
+  assert.deepEqual(legacy.completedPracticeIds, ['grammar:legacy', 'grammar:valid']);
+  assert.deepEqual(legacy.practiceResults, { 'grammar:valid': { correct: false, answeredAt: 60 } });
+});
+
 test('practice-only guest progress can be transferred to a signed-in profile', async () => {
-  const guest = progress.recordPracticeCompletion(empty(), 'speaking:speak-1');
+  const guest = progress.recordPracticeAnswer(progress.recordPracticeCompletion(empty(), 'speaking:speak-1'), 'listening:listen-1', false, 100);
   const store = storage({ 'learning:guest-local': JSON.stringify(guest) });
   const profile = await progress.importGuestProgress(store, 'learning', 'account-a', empty(), day);
-  assert.deepEqual(profile.completedPracticeIds, ['speaking:speak-1']);
+  assert.deepEqual(profile.completedPracticeIds, ['speaking:speak-1', 'listening:listen-1']);
+  assert.deepEqual(profile.practiceResults, { 'listening:listen-1': { correct: false, answeredAt: 100 } });
   assert.equal(await store.getItem('learning:guest-local'), null);
 });
 

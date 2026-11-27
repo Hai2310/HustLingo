@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLearning } from '@/contexts/LearningContext';
 import { useLessonSpeech } from '@/features/lessons/hooks/useLessonSpeech';
 import { hum } from '@/theme/hum';
-import type { SkillExercise } from '../data/catalog';
+import { practiceKey, type SkillExercise } from '../data/catalog';
 import { usePronunciationAssessment } from '../hooks/usePronunciationAssessment';
 import { practiceStyles } from './PracticeUI';
 import { PronunciationFeedback } from './PronunciationFeedback';
@@ -18,7 +18,7 @@ export function WritingResponse({ exercise, storageKey }: {
   storageKey: string;
 }) {
   const { state, ready, completePractice } = useLearning();
-  const practiceId = `writing:${exercise.id}`;
+  const practiceId = practiceKey('writing', exercise.id);
   const completed = state.completedPracticeIds.includes(practiceId);
   const [draft, setDraft] = useState('');
   const [loaded, setLoaded] = useState(false);
@@ -84,7 +84,7 @@ export function WritingResponse({ exercise, storageKey }: {
 export function SpeakingResponse({ exercise }: { exercise: Extract<SkillExercise, { skill: 'speaking' }> }) {
   const { isGuest, loading: authLoading, user } = useAuth();
   const { state, ready, completePractice } = useLearning();
-  const practiceId = `speaking:${exercise.id}`;
+  const practiceId = practiceKey('speaking', exercise.id);
   const { demo } = useLocalSearchParams<{ demo?: string }>();
   const supportsAssessment = Platform.OS === 'web' && typeof OfflineAudioContext !== 'undefined';
   const canPreview = __DEV__ && supportsAssessment && typeof window !== 'undefined' &&

@@ -1,3 +1,4 @@
+import { getLevelLabel } from '@/utils/levelLabels';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
@@ -29,7 +30,7 @@ export default function TutorDetailScreen() {
       <View style={styles.levelPanel}>
         <Text style={styles.levelTitle}>Recommended levels</Text>
         <View style={styles.levels}>
-          {tutor.suitableLevels.map(level => (
+          {[...new Set(tutor.suitableLevels.map(getLevelLabel))].map(level => (
             <View key={level} style={styles.levelBadge}><Text style={styles.levelText}>{level}</Text></View>
           ))}
         </View>

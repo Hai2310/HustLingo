@@ -1,3 +1,4 @@
+import { getLevelLabel } from '@/utils/levelLabels';
 import React from 'react';
 import { Image, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,7 +28,7 @@ export function VocabularyLibraryHero({ lesson, onStart }: { lesson: CatalogLess
       <Text style={styles.libraryDescription}>Discover useful English through pictures, pronunciation and everyday examples.</Text>
       <Pressable accessibilityRole="button" accessibilityLabel={`${stats.done ? 'Continue' : 'Start'} ${lesson.title}`} onPress={onStart} style={styles.continueCard}>
         <View style={styles.continueIcon}><Ionicons name="play" size={17} color={colors.primary} /></View>
-        <View style={{ flex: 1 }}><Text style={styles.continueKicker}>{stats.done ? 'PICK UP WHERE YOU LEFT OFF' : 'YOUR NEXT LESSON'}</Text><Text style={styles.continueTitle}>{lesson.title}</Text><Text style={styles.continueMeta}>{lesson.level} · {lesson.vocabularyIds.length} words{stats.done ? ` · ${stats.percent}% complete` : ''}</Text></View>
+        <View style={{ flex: 1 }}><Text style={styles.continueKicker}>{stats.done ? 'PICK UP WHERE YOU LEFT OFF' : 'YOUR NEXT LESSON'}</Text><Text style={styles.continueTitle}>{lesson.title}</Text><Text style={styles.continueMeta}>{getLevelLabel(lesson.level)} · {lesson.vocabularyIds.length} words{stats.done ? ` · ${stats.percent}% complete` : ''}</Text></View>
         <Ionicons name="arrow-forward" size={20} color={colors.primary} />
       </Pressable>
       <View style={styles.libraryStats}><View style={styles.statItem}><Ionicons name="checkmark-circle-outline" size={16} color={hum.greenInk} /><Text style={styles.statText}>{ready ? state.studiedWordIds.length : '—'} words studied</Text></View><View style={styles.statItem}><Ionicons name="bookmark-outline" size={15} color={colors.primary} /><Text style={styles.statText}>{ready ? state.savedWordIds.length : '—'} saved words</Text></View></View>
@@ -44,7 +45,7 @@ export function VocabularyLessonHeader({ lesson }: { lesson: CatalogLesson }) {
     <View style={[styles.lessonHero, compact && styles.lessonHeroMobile]}>
       <View style={[styles.lessonArt, compact && styles.lessonArtMobile]}><Image source={art.image} resizeMode="contain" style={styles.fullImage} accessible={false} /></View>
       <View style={[styles.lessonCopy, compact && { padding: 22 }]}>
-        <View style={styles.badges}><View style={[styles.badge, { backgroundColor: art.wash }]}><Text style={[styles.badgeText, { color: art.color }]}>{art.label}</Text></View><View style={styles.levelBadge}><Text style={styles.levelText}>{lesson.level}</Text></View><Text style={styles.wordCount}>{lesson.vocabularyIds.length} words</Text></View>
+        <View style={styles.badges}><View style={[styles.badge, { backgroundColor: art.wash }]}><Text style={[styles.badgeText, { color: art.color }]}>{art.label}</Text></View><View style={styles.levelBadge}><Text style={styles.levelText}>{getLevelLabel(lesson.level)}</Text></View><Text style={styles.wordCount}>{lesson.vocabularyIds.length} words</Text></View>
         <Text style={[styles.lessonTitle, compact && { fontSize: 28, lineHeight: 35 }]}>{lesson.title}</Text>
         <Text style={styles.lessonDescription}>A little practice today. More confidence tomorrow.</Text>
         <View style={styles.progressLabel}><Text style={styles.progressText}>{!ready ? 'Loading saved progress…' : stats.complete ? 'Lesson completed' : `${stats.done} of ${stats.total} study steps completed`}</Text><Text style={[styles.percent, stats.complete && { color: colors.success }]}>{stats.percent}%</Text></View>

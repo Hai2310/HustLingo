@@ -7,6 +7,7 @@ const EMPTY_PROGRESS: LearningState = {
   savedWordIds: [],
   completedLessonIds: [],
   completedPracticeIds: [],
+  practiceResults: {},
   correctAnswers: 0,
   totalAnswers: 0,
   minutesToday: 0,
