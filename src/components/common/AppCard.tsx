@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { colors } from '@/theme/colors';
-import { paperCard } from '@/theme/hum';
+import { glassCard } from '@/theme/cosmic';
 import { MotionPressable } from '../motion/Motion';
 
 export function AppCard({ children, onPress, style, dark = false }: { children: React.ReactNode; onPress?: () => void; style?: StyleProp<ViewStyle>; dark?: boolean }) {
@@ -11,6 +11,6 @@ export function AppCard({ children, onPress, style, dark = false }: { children: 
 }
 
 const styles = StyleSheet.create({
-  card: { ...paperCard, padding: 16 },
+  card: { ...glassCard, padding: 16 },
   dark:{backgroundColor:colors.charcoal,borderColor:colors.charcoal},
 });

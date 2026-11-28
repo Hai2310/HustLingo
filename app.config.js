@@ -1,4 +1,5 @@
 const HUST_RED = '#C8102E';
+const COSMIC_BACKGROUND = '#080a17';
 
 module.exports = {
   expo: {
@@ -7,13 +8,13 @@ module.exports = {
     version: '1.1.0',
     orientation: 'portrait',
     scheme: 'hustlingo',
-    userInterfaceStyle: 'light',
+    userInterfaceStyle: 'dark',
     newArchEnabled: true,
     icon: './assets/icon.png',
     splash: {
       image: './assets/splash-icon.png',
       resizeMode: 'contain',
-      backgroundColor: '#FFFFFF'
+      backgroundColor: COSMIC_BACKGROUND
     },
     ios: {
       supportsTablet: true,

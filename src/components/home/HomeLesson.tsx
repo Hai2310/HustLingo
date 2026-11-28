@@ -1,14 +1,23 @@
 import { getLevelLabel } from '@/utils/levelLabels';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, Image, Platform, StyleSheet, Text, View } from 'react-native';
 import { Link, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useLearning } from '@/contexts/LearningContext';
 import { getLocalCatalog, lessonStats } from '@/features/lessons/data/catalog';
-import { getVocabularyArtwork } from '@/features/lessons/data/vocabulary-artwork';
+import { WebMascot } from '@/components/common/WebMascot';
 import { useLessonCatalog } from '@/features/lessons/hooks/useLessonCatalog';
-import { hum, humType, paperButton } from '@/theme/hum';
+import { cosmic, cosmicType, gameButton } from '@/theme/cosmic';
+import { explorerBom, explorerBomBlink, heroCrystal } from '@/theme/cosmicArt';
 import { HomePaperPressable } from './HomePaperPressable';
+import { Float } from '@/components/motion/Motion';
+
+const heroStars = [
+  [28, 18, 2, .37], [38, 74, 2, .37], [52, 11, 3, .66], [56, 56, 2, .46],
+  [59, 82, 4, .76], [62, 24, 2, .45], [70, 14, 4, .9], [76, 86, 2, .5],
+  [82, 9, 2, .64], [91, 20, 4, .82], [96, 59, 2, .52], [92, 82, 3, .83],
+] as const;
 
 export function HomeLesson({ wide, learnerId, reducedMotion }: {
   wide: boolean;
@@ -33,37 +42,32 @@ export function HomeLesson({ wide, learnerId, reducedMotion }: {
   }, [catalog, ready, state]);
 
   const checking = !ready || (loading && !catalog && !current && !!Object.keys(state.lessonProgress ?? {}).length);
-  const art = getVocabularyArtwork(current?.lesson.topicId);
   const actionLabel = current ? 'Tiếp tục học' : 'Chọn bài đầu tiên';
-  const letterMotion = usePaperLetterMotion(reducedMotion !== false);
   const progressKey = learnerId + ':' + (current?.lesson.id ?? '');
-  const illustration = (
-    <View style={[styles.art, wide && styles.artWide]}>
-      <Image
-        source={art.image}
-        style={[styles.image, wide && styles.imageWide]}
-        resizeMode="cover"
-        accessible={false}
-        importantForAccessibility="no"
-      />
-      <Animated.View
-        nativeID="home-paper-letter"
-        aria-hidden
-        importantForAccessibility="no-hide-descendants"
-        style={[styles.paperLetter, wide && styles.paperLetterWide, letterMotion]}
-      >
-        <Text style={[styles.letter, wide && styles.letterWide]}>A</Text>
-      </Animated.View>
-    </View>
-  );
 
   return (
-    <View nativeID="home-lesson" style={[styles.panel, wide && styles.panelWide]}>
+    <LinearGradient nativeID="home-lesson" colors={['#161c39', '#231839', '#3a2257']} start={{ x: 0, y: 1 }} end={{ x: 1, y: 0 }} style={[styles.panel, wide && styles.panelWide]}>
+      <View nativeID="home-hero-light" style={styles.light} pointerEvents="none" aria-hidden>
+        <View nativeID="home-hero-nebula" style={styles.nebula} />
+        {heroStars.map(([x, y, size, opacity]) => (
+          <View key={x} nativeID={size >= 3 ? `home-hero-star-${x}` : undefined} style={[styles.star, { left: `${x}%`, top: `${y}%`, width: size, height: size, opacity }]} />
+        ))}
+        <View style={[styles.art, wide && styles.artWide]}>
+          <View nativeID="home-hero-floor" style={styles.floor} />
+          <View nativeID="home-hero-orbit-distant" style={[styles.orbit, styles.orbitDistant]} />
+          <View nativeID="home-hero-orbit" style={styles.orbit} />
+          <Image nativeID="home-hero-crystal-near" source={heroCrystal} style={[styles.crystal, styles.crystalNear]} resizeMode="contain" accessible={false} />
+          <Image nativeID="home-hero-crystal-far" source={heroCrystal} style={[styles.crystal, styles.crystalFar]} resizeMode="contain" accessible={false} />
+          <Image nativeID="home-hero-crystal-high" source={heroCrystal} style={[styles.crystal, styles.crystalHigh]} resizeMode="contain" accessible={false} />
+          {Platform.OS !== 'web' && <NativeBom animated={reducedMotion === false} />}
+        </View>
+      </View>
       <View style={styles.content}>
         <View style={styles.intro}>
           <View style={styles.copy}>
-            <Text accessibilityRole="header" aria-level={2} style={[styles.heading, wide && styles.headingWide]}>
-              {current ? current.lesson.title : 'Bắt đầu học'}
+            <View style={styles.eyebrow}><Ionicons aria-hidden name="sparkles" size={14} color={cosmic.gold} /><Text style={styles.eyebrowText}>Bài học tiếp theo</Text></View>
+            <Text nativeID="home-lesson-heading" accessibilityRole="header" aria-level={2} style={[styles.heading, wide && styles.headingWide]}>
+              {current ? current.lesson.title : 'Sẵn sàng khám phá?'}
             </Text>
             {current ? (
               <Text style={styles.detail}>
@@ -71,11 +75,10 @@ export function HomeLesson({ wide, learnerId, reducedMotion }: {
               </Text>
             ) : (
               <Text accessibilityLiveRegion={checking ? 'polite' : undefined} style={styles.detail}>
-                {checking ? 'Đang mở tiến độ của bạn…' : 'Chọn bài từ vựng hoặc ngữ pháp theo trình độ của bạn.'}
+                {checking ? 'Đang mở tiến độ của bạn…' : 'Cùng Bờm chọn bài tiếng Anh đầu tiên.'}
               </Text>
             )}
           </View>
-          {!wide && illustration}
         </View>
         {current && (
           <View style={styles.progress}>
@@ -100,45 +103,39 @@ export function HomeLesson({ wide, learnerId, reducedMotion }: {
             faceStyle={styles.actionFace} reducedMotion={reducedMotion !== false} primary
           >
             <Text style={styles.actionLabel}>{actionLabel}</Text>
-            <Ionicons aria-hidden name="arrow-forward" size={17} color={hum.ink} />
+            <Ionicons aria-hidden name="arrow-forward" size={17} color={cosmic.text} />
           </HomePaperPressable>
         </Link>
       </View>
-      {wide && illustration}
-    </View>
+      <WebMascot placement="hero" />
+    </LinearGradient>
   );
 }
 
-let paperLetterPlayed = false;
+function NativeBom({ animated }: { animated: boolean }) {
+  const blink = useRef(new Animated.Value(0)).current;
+  useFocusEffect(useCallback(() => {
+    if (!animated) return;
+    const blinkOnce = (delay: number) => [
+      Animated.delay(delay),
+      Animated.timing(blink, { toValue: 1, duration: 50, useNativeDriver: true, isInteraction: false }),
+      Animated.delay(70),
+      Animated.timing(blink, { toValue: 0, duration: 60, useNativeDriver: true, isInteraction: false }),
+    ];
+    const sequence = Animated.sequence([...blinkOnce(3600), ...blinkOnce(4700)]);
+    sequence.start();
+    return () => { sequence.stop(); blink.setValue(0); };
+  }, [animated, blink]));
 
-function usePaperLetterMotion(reducedMotion: boolean) {
-  const [position] = useState(() => new Animated.Value(0));
-  const pose = useMemo(() => ({
-    transform: [
-      { translateY: position.interpolate({ inputRange: [0, 0.46, 0.74, 1], outputRange: [0, -8, -2, 0] }) },
-      { rotate: position.interpolate({ inputRange: [0, 0.46, 0.74, 1], outputRange: ['-8deg', '-14deg', '-5deg', '-8deg'] }) },
-    ],
-  }), [position]);
-
-  useEffect(() => {
-    if (reducedMotion || paperLetterPlayed) return;
-    const timing = { isInteraction: false, useNativeDriver: Platform.OS !== 'web' };
-    const animation = Animated.sequence([
-      Animated.timing(position, { ...timing, toValue: 0.46, duration: 200, easing: Easing.out(Easing.quad) }),
-      Animated.timing(position, { ...timing, toValue: 1, duration: 250, easing: Easing.out(Easing.cubic) }),
-    ]);
-    const firstFrame = requestAnimationFrame(() => {
-      paperLetterPlayed = true;
-      animation.start();
-    });
-    return () => {
-      cancelAnimationFrame(firstFrame);
-      animation.stop();
-      position.setValue(0);
-    };
-  }, [position, reducedMotion]);
-
-  return pose;
+  if (!animated) return <Image source={explorerBom} style={styles.image} resizeMode="contain" accessible={false} />;
+  return (
+    <Float style={styles.image} distance={5} duration={3200} iterations={2}>
+      <Image source={explorerBom} style={styles.mascotImage} resizeMode="contain" accessible={false} />
+      <Animated.View style={[StyleSheet.absoluteFill, { opacity: blink }]}>
+        <Image source={explorerBomBlink} style={styles.mascotImage} resizeMode="contain" accessible={false} />
+      </Animated.View>
+    </Float>
+  );
 }
 
 // Home can remount when the lesson closes. Remember only the last displayed bar.
@@ -183,7 +180,9 @@ function LessonProgress({ progressKey, percent, reducedMotion }: {
     <View
       accessibilityRole="progressbar"
       accessibilityLabel="Tiến độ bài học"
-      accessibilityValue={{ min: 0, max: 100, now: percent }}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={percent}
       style={styles.track}
     >
       <Animated.View nativeID="home-lesson-progress-fill" style={[styles.fill, { transform: [{ scaleX: fill }] }]} />
@@ -192,29 +191,44 @@ function LessonProgress({ progressKey, percent, reducedMotion }: {
 }
 
 const styles = StyleSheet.create({
-  panel: { paddingHorizontal: 16, paddingVertical: 16, borderRadius: 21, backgroundColor: hum.card, borderWidth: 1, borderColor: hum.rule, boxShadow: '1px 4px 0 ' + hum.paperDeep },
-  panelWide: { flex: 1.6, minWidth: 0, minHeight: 257, flexDirection: 'row', alignItems: 'center', gap: 17, paddingHorizontal: 23, paddingVertical: 21 },
+  panel: { paddingHorizontal: 17, paddingVertical: 20, paddingRight: '37%', minHeight: 225, borderRadius: 26, borderWidth: 1, borderColor: cosmic.actionEdge, justifyContent: 'center', boxShadow: '0 12px 32px #4822695c' },
+  panelWide: { paddingHorizontal: 26, paddingRight: '37%', minHeight: 263 },
+  light: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
+    borderRadius: 25,
+  },
+  nebula: { ...StyleSheet.absoluteFillObject, ...(Platform.OS !== 'web' && { experimental_backgroundImage: 'radial-gradient(ellipse farthest-corner at 84% 40%, #aa6def69 0%, #4c41995c 35%, transparent 72%), radial-gradient(ellipse farthest-corner at 56% 100%, #4673c142 0%, transparent 66%)' }) },
+  star: { position: 'absolute', backgroundColor: '#f9ecff', borderRadius: 9 },
   content: { flex: 1, minWidth: 0, gap: 11 },
   intro: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   copy: { flex: 1, minWidth: 0, gap: 5 },
-  heading: { color: hum.ink, fontSize: 27, lineHeight: 33, letterSpacing: -0.7, fontWeight: humType.bold, minWidth: 0 },
-  headingWide: { fontSize: 39, lineHeight: 44, letterSpacing: -1.45 },
-  detail: { color: hum.ink, fontSize: 15, lineHeight: 21 },
-  offline: { color: hum.muted, fontSize: 13, lineHeight: 18 },
-  art: { flexShrink: 0, width: '33%', padding: 4, backgroundColor: hum.sky, borderRadius: 13, transform: [{ rotate: '2deg' }] },
-  artWide: { width: '43%', maxWidth: 275, padding: 7, borderRadius: 17 },
-  image: { width: '100%', height: 76, borderRadius: 10, backgroundColor: hum.paperDeep },
-  imageWide: { height: 174, borderRadius: 12 },
-  paperLetter: { position: 'absolute', pointerEvents: 'none', top: -3, right: -3, width: 27, height: 30, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderBottomWidth: 3, borderColor: hum.rule, borderRadius: 7, backgroundColor: hum.card },
-  paperLetterWide: { top: -5, right: -6, width: 40, height: 44, borderRadius: 10 },
-  letter: { color: hum.ink, fontSize: 19, lineHeight: 23, fontWeight: humType.bold },
-  letterWide: { fontSize: 27, lineHeight: 32 },
-  action: { alignSelf: 'flex-start', minHeight: 49, backgroundColor: hum.pearEdge },
-  actionFace: { ...paperButton, flexDirection: 'row', alignItems: 'center', gap: 13, paddingHorizontal: 14, backgroundColor: hum.pear, borderColor: hum.pearEdge },
-  actionLabel: { color: hum.ink, fontSize: 16, lineHeight: 21, fontWeight: humType.bold },
+  heading: { color: cosmic.text, fontSize: 36, lineHeight: 40, letterSpacing: -0.95, fontWeight: '800', minWidth: 0 },
+  headingWide: { fontSize: 42, lineHeight: 46, letterSpacing: -1.45 },
+  detail: { color: cosmic.text, fontSize: 14, lineHeight: 20 },
+  offline: { color: cosmic.muted, fontSize: 11, lineHeight: 16 },
+  eyebrow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 3 },
+  eyebrowText: { color: cosmic.gold, fontSize: 12, fontWeight: '600' },
+  art: { position: 'absolute', top: 7, bottom: 5, right: 4, width: '43%', justifyContent: 'center', alignItems: 'center' },
+  artWide: { width: '49%', right: 2 },
+  image: { width: '83%', height: '83%', marginTop: '11%', marginLeft: '9%' },
+  mascotImage: { width: '100%', height: '100%' },
+  orbit: { position: 'absolute', top: '47%', width: '105%', aspectRatio: 2.65, borderRadius: 999, borderWidth: 1, borderColor: '#b59aff75', borderBottomColor: '#ead4ffe3', transform: [{ rotate: '-24deg' }] },
+  orbitDistant: { top: '32%', width: '98%', aspectRatio: 2.9, borderColor: '#9789eb38', borderBottomColor: '#9aa4ff7d', transform: [{ rotate: '-33deg' }] },
+  floor: { position: 'absolute', bottom: '3%', width: '109%', height: '27%', borderRadius: 999, ...(Platform.OS !== 'web' && { experimental_backgroundImage: 'radial-gradient(ellipse closest-side at center, #ffe5d340 0%, #c86ffe33 30%, transparent 100%)' }) },
+  crystal: { position: 'absolute', width: '16%', height: '31%' },
+  crystalNear: { left: '11%', bottom: '22%', transform: [{ rotate: '-17deg' }] },
+  crystalFar: { right: '2%', top: '22%', width: '13%', height: '23%', opacity: 0.78, transform: [{ rotate: '20deg' }] },
+  crystalHigh: { left: '29%', top: '5%', width: '11%', height: '18%', opacity: 0.7, transform: [{ rotate: '-29deg' }] },
+  action: { alignSelf: 'flex-start', minHeight: 49, backgroundColor: cosmic.actionEdge },
+  actionFace: {
+    ...gameButton, flexDirection: 'row', alignItems: 'center', gap: 13, paddingHorizontal: 14, backgroundColor: cosmic.action, borderColor: cosmic.actionEdge,
+    ...(Platform.OS !== 'web' && { experimental_backgroundImage: 'linear-gradient(168deg, #b590ff 0%, #7950d9 21%, #643bbf 56%, #4e2f9d 100%)' }),
+  },
+  actionLabel: { color: cosmic.text, fontSize: 16, lineHeight: 21, fontWeight: cosmicType.bold },
   progress: { gap: 5 },
   progressLabels: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
-  percent: { fontSize: 15, fontWeight: humType.bold, color: hum.greenInk, fontVariant: ['tabular-nums'] },
-  track: { height: 7, borderRadius: 4, backgroundColor: hum.mintTrack, overflow: 'hidden' },
-  fill: { height: 7, borderRadius: 4, backgroundColor: hum.greenInk, transformOrigin: 'left center' },
+  percent: { fontSize: 15, fontWeight: cosmicType.bold, color: cosmic.mint, fontVariant: ['tabular-nums'] },
+  track: { height: 7, borderRadius: 4, backgroundColor: cosmic.mintTrack, overflow: 'hidden' },
+  fill: { height: 7, borderRadius: 4, backgroundColor: cosmic.mint, transformOrigin: 'left center' },
 });

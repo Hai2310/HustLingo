@@ -3,14 +3,14 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLearning } from '@/contexts/LearningContext';
 import { colors } from '@/theme/colors';
-import { hum } from '@/theme/hum';
+import { cosmic } from '@/theme/cosmic';
 import { practiceKey, type PracticeSkill } from '../data/catalog';
 
 export const practiceStatus = {
-  correct: { label: 'Đúng', icon: 'checkmark', ink: colors.success, fill: hum.mint, edge: hum.mintRule },
-  incorrect: { label: 'Sai', icon: 'close', ink: colors.error, fill: hum.coralSoft, edge: hum.coralEdge },
-  unanswered: { label: 'Chưa làm', icon: 'ellipse-outline', ink: colors.textMuted, fill: colors.white, edge: hum.rule },
-  completed: { label: 'Đã làm', icon: 'checkmark-done', ink: hum.blue, fill: hum.sky, edge: hum.skyEdge },
+  correct: { label: 'Đúng', icon: 'checkmark', ink: colors.success, fill: cosmic.mintSurface, edge: cosmic.mintEdge },
+  incorrect: { label: 'Sai', icon: 'close', ink: colors.error, fill: cosmic.dangerSurface, edge: cosmic.dangerEdge },
+  unanswered: { label: 'Chưa làm', icon: 'ellipse-outline', ink: colors.textMuted, fill: cosmic.panel, edge: cosmic.border },
+  completed: { label: 'Đã làm', icon: 'checkmark-done', ink: cosmic.ice, fill: cosmic.iceSurface, edge: cosmic.iceEdge },
 } as const;
 
 export type PracticeStatus = keyof typeof practiceStatus;

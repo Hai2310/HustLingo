@@ -1,0 +1,180 @@
+:root {
+  color-scheme: dark;
+  --cosmic-canvas: #080a17;
+  --cosmic-glass: #151b32e8;
+  --cosmic-border: #3a4868;
+  --cosmic-text: #f4f5ff;
+  --cosmic-ice: #88e9fc;
+  --cosmic-violet: #d2baff;
+  --cosmic-mint: #80ebc4;
+  --cosmic-rose: #ffb3df;
+  --cosmic-focus: #a3eeff;
+  --cosmic-glow: #7860f93b;
+  --cosmic-aurora: #225b762f;
+  --cosmic-violet-haze: #5233ba5e;
+  --cosmic-rose-haze: #672a565e;
+  --cosmic-line: #8fafe414;
+  --cosmic-star: #bccdf0a8;
+  --cosmic-hot-star: #a3eeff8c;
+}
+
+html, body, #root { background-color: var(--cosmic-canvas); }
+html:has(#hustlingo-cosmic), body:has(#hustlingo-cosmic) { overflow-x: clip; }
+
+#cosmic-background {
+  background:
+    radial-gradient(ellipse at 14% 0%, var(--cosmic-aurora), transparent 53%),
+    radial-gradient(ellipse at 82% 0%, var(--cosmic-violet-haze), transparent 56%),
+    var(--cosmic-canvas);
+}
+
+#cosmic-background::before, #cosmic-background::after {
+  position: absolute;
+  content: '';
+  pointer-events: none;
+}
+
+#cosmic-background::before {
+  inset: -24% -18% 0;
+  background:
+    radial-gradient(ellipse 52% 33% at 32% 40%, var(--cosmic-aurora), transparent 77%),
+    radial-gradient(ellipse 39% 36% at 65% 32%, var(--cosmic-rose-haze), transparent 84%),
+    radial-gradient(ellipse 47% 23% at 72% 36%, var(--cosmic-violet-haze), transparent 83%);
+  transform: rotate(-19deg);
+  opacity: .72;
+}
+
+#cosmic-background::after {
+  inset: 0;
+  opacity: .48;
+  background:
+    radial-gradient(circle at 1px 1px, var(--cosmic-star) 1px, transparent 1.4px) 18px 28px / 137px 171px,
+    radial-gradient(circle at 1px 1px, var(--cosmic-hot-star) 1px, transparent 1.6px) 81px 57px / 233px 209px;
+}
+
+#hustlingo-cosmic :is(a, button, [role="button"], [role="tab"], [role="radio"], [role="switch"], input, textarea):focus-visible {
+  outline: 2px solid var(--cosmic-focus);
+  outline-offset: 3px;
+}
+
+#hustlingo-cosmic [role="heading"] { overflow-wrap: break-word; min-width: 0; }
+#home-hero-slide { touch-action: pan-y; }
+#home-hero-title { text-wrap: balance; }
+
+#home-topbar {
+  background-image: linear-gradient(90deg, var(--cosmic-line) 1px, transparent 1px);
+  background-size: 72px 100%;
+}
+
+#home-hero, #cosmic-practice-stage, [id^="cosmic-module-"] {
+  box-shadow: 0 16px 48px var(--cosmic-glow), inset 0 1px 0 var(--cosmic-line);
+}
+
+#home-hero::after, #cosmic-practice-stage::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 1px 0 var(--cosmic-ice);
+  opacity: .55;
+}
+
+@supports (mask-composite: exclude) {
+  #home-hero::after, #cosmic-practice-stage::after {
+    padding: 1px;
+    box-shadow: none;
+    background: linear-gradient(112deg, var(--cosmic-ice), transparent 35%, var(--cosmic-rose) 73%, var(--cosmic-violet));
+    mask: linear-gradient(white 0 0) content-box, linear-gradient(white 0 0);
+    mask-composite: exclude;
+  }
+}
+
+#hustlingo-cosmic [role="tablist"] {
+  backdrop-filter: blur(12px);
+  box-shadow: 0 -12px 40px var(--cosmic-glow);
+}
+
+#cosmic-sidebar { box-shadow: 10px 0 28px #080a1766; }
+
+#hustlingo-cosmic #home-skills [id^="home-skill-card-"]:focus-visible {
+  box-shadow: 0 0 24px var(--cosmic-glow);
+}
+
+#hustlingo-cosmic [role="tab"][aria-selected="true"] {
+  background: linear-gradient(180deg, var(--cosmic-line), transparent 76%);
+}
+
+@media (hover: hover) {
+  #hustlingo-cosmic :is(a, button, [role="button"]):not([aria-disabled="true"]):hover {
+    box-shadow: inset 0 0 0 1px var(--cosmic-line), 0 0 18px var(--cosmic-glow);
+  }
+  #home-vocabulary:hover #home-vocabulary-sample { transform: translateY(-3px) rotate(-4deg); }
+  #home-grammar:hover #home-grammar-icon { transform: rotate(-10deg) scale(1.1); }
+  #hustlingo-cosmic #home-skills [id^="home-skill-card-"]:hover {
+    box-shadow: 0 7px 24px var(--cosmic-glow), inset 0 0 0 1px var(--cosmic-line);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [id^="cosmic-lift-"] { transition: transform 200ms cubic-bezier(.18,.8,.3,1), opacity 160ms ease-out; }
+  #cosmic-vocabulary-art { animation: cosmic-art-drift 5.5s ease-in-out 2 alternate; }
+  [id^="cosmic-bom-celebrate"] { animation: cosmic-bom-bounce 550ms cubic-bezier(.2,1,.4,1.2); }
+  #cosmic-background::before { animation: aurora-drift 23s ease-in-out infinite alternate; }
+  #cosmic-background::after { animation: cosmic-stars 9s ease-in-out infinite alternate; }
+  #home-hero::after, #cosmic-practice-stage::after { animation: cosmic-edge 4s ease-out both; }
+  [id^="cosmic-screen-"] > div { animation: cosmic-enter 240ms cubic-bezier(.22,.76,.31,1) both; }
+  #home-vocabulary-sample, #home-grammar-icon { transition: transform 210ms cubic-bezier(.25,1.65,.4,1); }
+  :is(#home-lesson-action-face, #home-vocabulary-face, #home-grammar-face) { transition: transform 170ms cubic-bezier(.25,1.55,.4,1); }
+  :is(#home-lesson-action, #home-vocabulary, #home-grammar):active > div { transform: translateY(2px) scale(.975); }
+  #hustlingo-cosmic [id^="cosmic-press-"] { transition: opacity 150ms ease-out; }
+  #home-skills :is([id^="home-skill-card-"], [id^="home-skill-art-"], [id^="home-skill-orbit-"]) {
+    transition: transform 240ms cubic-bezier(.21,.85,.3,1.35), box-shadow 180ms ease-out;
+  }
+  #home-skills [id^="home-skill-card-"]:focus-visible [id^="home-skill-art-"] {
+    transform: translateY(-4px) rotate(-5deg) scale(1.065);
+  }
+  #home-skills [id^="home-skill-card-"]:active { transform: translateY(1px) scale(.985); }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  #hustlingo-cosmic [id^="cosmic-lift-"]:hover { transform: translateY(-3px); }
+  #hustlingo-cosmic [id^="cosmic-lift-"]:active { transform: translateY(0) scale(.98); }
+  #home-skills [id^="home-skill-card-"]:hover:not(:active) { transform: translateY(-4px); }
+  #home-skills [id^="home-skill-card-"]:hover [id^="home-skill-art-"] {
+    transform: translateY(-4px) rotate(-5deg) scale(1.065);
+  }
+  #home-skills [id^="home-skill-card-"]:hover [id^="home-skill-orbit-"] { transform: scale(1.08); }
+}
+
+@keyframes cosmic-art-drift {
+  to { transform: translate3d(0, -3px, 0) scale(1.035); }
+}
+
+@keyframes cosmic-bom-bounce {
+  30% { transform: translateY(-10px) rotate(-7deg); }
+  67% { transform: translateY(2px) rotate(3deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #home-vocabulary:hover #home-vocabulary-sample, #home-grammar:hover #home-grammar-icon { transform: none; }
+}
+
+@keyframes aurora-drift {
+  to { transform: translate3d(6%, -6%, 0) rotate(-12deg) scale(1.08); opacity: .94; }
+}
+
+@keyframes cosmic-stars {
+  to { opacity: .73; }
+}
+
+@keyframes cosmic-edge {
+  0% { opacity: .32; }
+  45% { opacity: .93; }
+  100% { opacity: .55; }
+}
+
+@keyframes cosmic-enter {
+  from { transform: translate3d(0, 7px, 0); opacity: .78; }
+  to { transform: translate3d(0, 0, 0); opacity: 1; }
+}

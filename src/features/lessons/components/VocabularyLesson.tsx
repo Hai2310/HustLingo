@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@/theme/colors';
-import { hum } from '@/theme/hum';
+import { cosmic } from '@/theme/cosmic';
 import { useLearning } from '@/contexts/LearningContext';
 import type { LocalVocabularyRecord } from '@/data/vocabulary-en';
 import type { CatalogLesson } from '../types';
@@ -31,12 +31,12 @@ export function VocabularyLesson({ lesson, words, onPageChange }: { lesson: Cata
     {pages > 1 && pagination}
     <View style={styles.grid}>{words.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE).map((word, index) => <View key={word.id} style={{ width: cardWidth }}><Reveal><VocabularyWordCard word={word} number={page * PAGE_SIZE + index + 1} studied={complete || completed.includes(`word:${word.id}`)} saved={state.savedWordIds.includes(word.id)} ready={ready} speaking={speaking === word.id} onSave={() => toggleSaved(word.id)} onSpeak={() => { void speak(word.id, word.term); }} onStudy={() => markLessonStep(lesson.id, `word:${word.id}`, required, word.id)} /></Reveal></View>)}</View>
     {pages > 1 && pagination}
-    <View style={styles.tip}><Ionicons name="bulb-outline" size={19} color={hum.pearInk} /><Text style={styles.tipText}><Text style={{ fontWeight: '700' }}>Make it stick. </Text>Say a new sentence aloud using one of these words.</Text></View>
+    <View style={styles.tip}><Ionicons name="bulb-outline" size={19} color={cosmic.violet} /><Text style={styles.tipText}><Text style={{ fontWeight: '700' }}>Make it stick. </Text>Say a new sentence aloud using one of these words.</Text></View>
   </View>;
 }
 
 const styles = StyleSheet.create({
-  collectionHeading: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginTop: 32 }, collectionKicker: { fontSize: 8, letterSpacing: 1.2, color: colors.textMuted, fontWeight: '800', marginBottom: 7 }, collectionTitle: { fontSize: 23, lineHeight: 31, fontWeight: '800', letterSpacing: -.5, color: colors.text }, countBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 7, backgroundColor: hum.mint, borderRadius: 99 }, countText: { color: hum.greenInk, fontSize: 10, fontWeight: '700' },
+  collectionHeading: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginTop: 32 }, collectionKicker: { fontSize: 8, letterSpacing: 1.2, color: colors.textMuted, fontWeight: '800', marginBottom: 7 }, collectionTitle: { fontSize: 23, lineHeight: 31, fontWeight: '800', letterSpacing: -.5, color: colors.text }, countBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 7, backgroundColor: cosmic.mintSurface, borderRadius: 99 }, countText: { color: cosmic.mint, fontSize: 10, fontWeight: '700' },
   listHeading: { marginTop: 16, marginBottom: 17, gap: 7 }, wordRange: { fontSize: 9, fontWeight: '800', color: colors.textSecondary, letterSpacing: .8 }, hint: { fontSize: 12, lineHeight: 19, color: colors.textMuted }, grid: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start', gap: 16 },
-  pagination: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 4, marginBottom: 20, paddingTop: 14 }, page: { alignItems: 'center', gap: 4 }, pageText: { fontSize: 11, fontWeight: '700', color: colors.textSecondary }, pageHint: { fontSize: 8, color: colors.textMuted }, tip: { marginTop: 24, flexDirection: 'row', alignItems: 'center', gap: 10, padding: 17, backgroundColor: hum.pearSoft, borderRadius: 13 }, tipText: { flex: 1, fontSize: 12, lineHeight: 20, color: hum.pearInk },
+  pagination: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 4, marginBottom: 20, paddingTop: 14 }, page: { alignItems: 'center', gap: 4 }, pageText: { fontSize: 11, fontWeight: '700', color: colors.textSecondary }, pageHint: { fontSize: 8, color: colors.textMuted }, tip: { marginTop: 24, flexDirection: 'row', alignItems: 'center', gap: 10, padding: 17, backgroundColor: cosmic.violetSurface, borderRadius: 13 }, tipText: { flex: 1, fontSize: 12, lineHeight: 20, color: cosmic.violet },
 });

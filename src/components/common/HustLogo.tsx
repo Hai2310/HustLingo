@@ -14,7 +14,7 @@ export function HustLogo({ size = 54, inverted = false, showWordmark = true }: {
         </View>
       ) : (
         <View style={[styles.fallback, { width: size, height: size, backgroundColor: inverted ? colors.white : colors.primary }]}>
-          <Text style={[styles.fallbackText, { color: inverted ? colors.primary : colors.white, fontSize: Math.max(13, size * 0.25) }]}>H</Text>
+          <Text style={[styles.fallbackText, { color: colors.black, fontSize: Math.max(13, size * 0.25) }]}>H</Text>
         </View>
       )}
       {showWordmark ? (

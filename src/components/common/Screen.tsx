@@ -1,7 +1,6 @@
 import React, { useId } from 'react';
 import { ScrollView, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors } from '@/theme/colors';
 import { maxContentWidth } from '@/theme/layout';
 import { AmbientBackground } from './AmbientBackground';
 
@@ -9,7 +8,7 @@ export function Screen({ children, scroll = true, contentStyle, ambient = false,
   const id = useId();
   const body = <View style={[styles.content, contentStyle]}>{children}</View>;
   return (
-    <SafeAreaView nativeID={'hum-screen-' + id} edges={['top']} style={styles.safe}>
+    <SafeAreaView nativeID={'cosmic-screen-' + id} edges={['top']} style={styles.safe}>
       {ambient && <AmbientBackground />}
       {scroll ? <ScrollView ref={scrollRef} contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>{body}</ScrollView> : body}
     </SafeAreaView>
@@ -17,7 +16,7 @@ export function Screen({ children, scroll = true, contentStyle, ambient = false,
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   scroll: { flexGrow: 1, alignItems: 'center', paddingBottom: 108 },
   content: { width: '100%', maxWidth: maxContentWidth, paddingHorizontal: 18, paddingTop: 14 },
 });

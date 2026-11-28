@@ -1,6 +1,6 @@
-[id^="learner-name-star-"] { --rank-ink: #80510a; --rank-sheen: #a36308; --rank-glint: #f8d47c; --rank-duration: 1.7s; }
-[id^="learner-name-solar-"] { --rank-ink: #963714; --rank-sheen: #b44c0c; --rank-glint: #ffb875; --rank-duration: 2.1s; }
-[id^="learner-name-galactus-"] { --rank-ink: #582a88; --rank-sheen: #8950a4; --rank-glint: #c89af5; --rank-duration: 2.6s; }
+[id^="learner-name-star-"] { --rank-ink: #fbd791; --rank-sheen: #fff0b2; --rank-glint: #fbd79185; --rank-duration: 1.7s; }
+[id^="learner-name-solar-"] { --rank-ink: #ffbf9c; --rank-sheen: #ffe4cf; --rank-glint: #ffbf9c80; --rank-duration: 2.1s; }
+[id^="learner-name-galactus-"] { --rank-ink: #d2baff; --rank-sheen: #f4eaff; --rank-glint: #d2baffa0; --rank-duration: 2.6s; }
 
 @supports ((background-clip: text) and (-webkit-text-fill-color: transparent)) {
   :is([id^="learner-name-star-"], [id^="learner-name-solar-"], [id^="learner-name-galactus-"]) {
@@ -10,11 +10,11 @@
   }
 }
 
-[id^="learner-badge-star-"]:not([id$="-ladder"]) { --rank-halo: #f8d47c; --rank-flashes: 1; }
-[id^="learner-badge-solar-"]:not([id$="-ladder"]) { --rank-halo: #ffb875; --rank-flashes: 2; }
-[id^="learner-badge-galactus-"]:not([id$="-ladder"]) { --rank-halo: #c89af5; --rank-flashes: 3; }
+[id^="learner-badge-star-"]:not([id$="-ladder"]) { --rank-halo: #fbd79185; --rank-flashes: 1; }
+[id^="learner-badge-solar-"]:not([id$="-ladder"]) { --rank-halo: #ffbf9c80; --rank-flashes: 2; }
+[id^="learner-badge-galactus-"]:not([id$="-ladder"]) { --rank-halo: #d2baffa0; --rank-flashes: 3; }
 
-[id^="learner-badge-active-"]:not([id$="-ladder"]) { box-shadow: 0 0 3px #a3e5d0; }
+[id^="learner-badge-active-"]:not([id$="-ladder"]) { box-shadow: 0 0 3px #80ebc481; }
 
 :is([id^="learner-badge-star-"], [id^="learner-badge-solar-"], [id^="learner-badge-galactus-"]):not([id$="-ladder"]) {
   box-shadow: 0 0 7px var(--rank-halo);

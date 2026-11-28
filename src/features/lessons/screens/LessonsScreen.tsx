@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Screen } from '@/components/Screen';
 import { colors } from '@/theme/colors';
-import { hum, paperCard } from '@/theme/hum';
+import { cosmic, glassCard } from '@/theme/cosmic';
 import { useLearning } from '@/contexts/LearningContext';
 import { useLessonCatalog } from '../hooks/useLessonCatalog';
 import { isLessonLevel, lessonStats, topicStats } from '../data/catalog';
@@ -35,8 +35,7 @@ export function LessonsScreen() {
     const left = featuredIds.indexOf(a.id), right = featuredIds.indexOf(b.id);
     return (left < 0 ? 99 : left) - (right < 0 ? 99 : right) || a.title.localeCompare(b.title);
   });
-  const availableWidth = Math.min(width, 1120) - 36;
-  const topicWidth = wide ? (availableWidth - 24) / 3 : width >= 560 ? (availableWidth - 12) / 2 : availableWidth;
+  const topicWidth = wide ? '32%' : width >= 560 ? '48%' : '100%';
 
   return <Screen ambient={false} contentStyle={ui.content}><Reveal>
     <View style={styles.top}><Text accessibilityRole="header" style={ui.heading}>{kind === 'vocabulary' ? 'Vocabulary' : 'Grammar'}</Text><SyncLabel /></View>
@@ -48,7 +47,7 @@ export function LessonsScreen() {
     </View>)}
 
     {catalog?.notice && <Notice text={catalog.notice} retry={retry} busy={loading} />}
-    <View style={styles.filters}><LessonSearch value={search} onChange={setSearch} /><Text style={styles.filterLabel}>CHOOSE YOUR LEVEL</Text><LevelFilter value={level} onChange={setLevel} /><KindFilter options={['vocabulary', 'grammar']} value={kind} onChange={value => router.setParams({ type: value })} /></View>
+    <View style={styles.filters}><KindFilter options={['vocabulary', 'grammar']} value={kind} onChange={value => router.setParams({ type: value })} /><LessonSearch value={search} onChange={setSearch} /><Text style={styles.filterLabel}>Choose your level</Text><LevelFilter value={level} onChange={setLevel} /></View>
 
     {loading && !catalog ? <LessonState kind="loading" title="Opening your library" description="Loading published lessons and your learning options." /> : error ? <LessonState kind="error" title="The library could not load" description={error} action="Try again" onAction={retry} /> : catalog && <>
       {kind === 'vocabulary' && !searchQuery && orderedTopics.length > 0 && <><View style={ui.sectionHeader}><Text style={ui.sectionHeading}>Explore by topic</Text><Pressable accessibilityRole="button" onPress={() => setShowTopics(value => !value)} style={styles.textButton}><Text style={styles.textButtonLabel}>{showTopics ? 'Show less' : 'See all topics'}</Text><Ionicons name={showTopics ? 'chevron-up' : 'arrow-forward'} size={15} color={colors.primary} /></Pressable></View>
@@ -56,8 +55,8 @@ export function LessonsScreen() {
           const selected = catalog.lessons.filter(lesson => lesson.topicId === topic.id && (level === 'all' || lesson.level === level) && lesson.kind === 'vocabulary');
           const stats = topicStats(selected, state);
           const illustrated = topic.id !== 'grammar';
-          return <Pressable key={topic.id} accessibilityRole="button" accessibilityLabel={`${topic.title}, ${stats.count} lessons, ${stats.percent}% complete`} onPress={() => router.push({ pathname: '/lessons/topics/[topicId]', params: { topicId: topic.id, level, type: kind } })} style={({ pressed }) => [styles.topicCard, { width: topicWidth }, illustrated && styles.illustratedTopicCard, pressed && { opacity: .8 }]}>
-            {illustrated ? <VocabularyTopicCover topicId={topic.id} /> : <View style={styles.topicTop}><View style={[styles.topicIcon, { backgroundColor: hum.sky }]}><Ionicons name={topic.icon} color={hum.blue} size={24} /></View><Ionicons name="arrow-forward" size={18} color={colors.textMuted} /></View>}
+          return <Pressable key={topic.id} nativeID={'cosmic-lift-topic-' + topic.id} accessibilityRole="button" accessibilityLabel={`${topic.title}, ${stats.count} lessons, ${stats.percent}% complete`} onPress={() => router.push({ pathname: '/lessons/topics/[topicId]', params: { topicId: topic.id, level, type: kind } })} style={({ pressed }) => [styles.topicCard, { width: topicWidth }, illustrated && styles.illustratedTopicCard, pressed && { opacity: .8 }]}>
+            {illustrated ? <VocabularyTopicCover topicId={topic.id} /> : <View style={styles.topicTop}><View style={[styles.topicIcon, { backgroundColor: cosmic.iceSurface }]}><Ionicons name={topic.icon} color={cosmic.ice} size={24} /></View><Ionicons name="arrow-forward" size={18} color={colors.textMuted} /></View>}
             <View style={illustrated ? styles.topicBody : undefined}><Text style={[styles.topicTitle, illustrated && { marginTop: 0 }]}>{topic.title}</Text><Text style={styles.topicDescription} numberOfLines={2}>{topic.description}</Text><View style={styles.topicProgress}><Text style={styles.topicMeta}>{stats.count ? `${stats.complete} / ${stats.count} lessons completed` : 'No lessons at this level'}</Text><Text style={styles.topicMeta}>{stats.percent}%</Text></View><ProgressBar percent={stats.percent} label={`${topic.title} progress`} /></View>
           </Pressable>;
         })}</View></>}
@@ -73,16 +72,16 @@ export default LessonsScreen;
 
 const styles = StyleSheet.create({
   top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' },
-  grammarHero: { ...paperCard, backgroundColor: hum.sky, borderColor: hum.skyEdge, borderRadius: 23, padding: 23, marginTop: 22, flexDirection: 'row', gap: 20 },
+  grammarHero: { ...glassCard, backgroundColor: cosmic.iceSurface, borderColor: cosmic.iceEdge, borderRadius: 23, padding: 23, marginTop: 22, flexDirection: 'row', gap: 20 },
   heroKicker: { color: colors.textSecondary, fontSize: 10, fontWeight: '700', marginBottom: 9 },
   heroTitle: { color: colors.text, fontSize: 29, fontWeight: '800', lineHeight: 37, letterSpacing: -.7 },
   heroDescription: { color: colors.textSecondary, fontSize: 13, lineHeight: 21, marginTop: 10, maxWidth: 530 },
   heroAction: { flexDirection: 'row', alignItems: 'center', gap: 15, flexWrap: 'wrap', marginTop: 22 }, heroLevel: { color: colors.textSecondary, fontSize: 11, fontWeight: '600' },
-  heroSummary: { width: 220, backgroundColor: hum.card, padding: 21, borderRadius: 16 }, summaryNumber: { color: colors.text, fontSize: 40, fontWeight: '800', lineHeight: 46 }, summaryLabel: { color: colors.textSecondary, fontSize: 12, lineHeight: 19 },
-  summaryRule: { height: 1, backgroundColor: hum.rule, marginVertical: 13 }, summaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }, summaryValue: { color: colors.text, fontSize: 13, fontWeight: '700' },
-  filters: { marginTop: 26 }, filterLabel: { marginBottom: 12, color: colors.textSecondary, fontSize: 10, fontWeight: '800', letterSpacing: 1 },
+  heroSummary: { width: 220, backgroundColor: cosmic.glass, padding: 21, borderRadius: 16 }, summaryNumber: { color: colors.text, fontSize: 40, fontWeight: '800', lineHeight: 46 }, summaryLabel: { color: colors.textSecondary, fontSize: 12, lineHeight: 19 },
+  summaryRule: { height: 1, backgroundColor: cosmic.border, marginVertical: 13 }, summaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }, summaryValue: { color: colors.text, fontSize: 13, fontWeight: '700' },
+  filters: { marginTop: 13 }, filterLabel: { marginBottom: 7, color: colors.textSecondary, fontSize: 12, fontWeight: '800' },
   textButton: { minHeight: 40, flexDirection: 'row', gap: 6, alignItems: 'center' }, textButtonLabel: { fontSize: 12, color: colors.primary, fontWeight: '700' },
-  topicGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 }, topicCard: { ...paperCard, padding: 19 },
+  topicGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 }, topicCard: { ...glassCard, padding: 19 },
   illustratedTopicCard: { padding: 0, overflow: 'hidden' }, topicBody: { padding: 19 },
   topicTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }, topicIcon: { width: 47, height: 47, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   topicTitle: { fontSize: 18, fontWeight: '700', color: colors.text, marginTop: 17 }, topicDescription: { fontSize: 12, lineHeight: 19, color: colors.textSecondary, marginTop: 6, minHeight: 38 },

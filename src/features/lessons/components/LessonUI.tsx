@@ -3,9 +3,12 @@ import React, { useEffect, useRef } from 'react';
 import { ActivityIndicator, Animated, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '@/theme/colors';
-import { hum, paperButton, paperCard } from '@/theme/hum';
+import { actionGradient, cosmic, gameButton, glassCard } from '@/theme/cosmic';
 import { useLearning } from '@/contexts/LearningContext';
+import { CosmicMeter } from '@/components/common/CosmicMeter';
+import { MotionPressable } from '@/components/motion/Motion';
 import { lessonStats } from '../data/catalog';
 import { useReducedLessonMotion } from '../hooks/useReducedLessonMotion';
 import type { CatalogLesson, LessonKind, LessonLevel, LessonTopic } from '../types';
@@ -23,12 +26,24 @@ export function Reveal({ children }: { children: React.ReactNode }) {
 }
 
 export function ProgressBar({ percent, label }: { percent: number; label: string }) {
-  return <View accessibilityRole="progressbar" accessibilityLabel={label} accessibilityValue={{ min: 0, max: 100, now: percent }} aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent} style={ui.track}><View style={[ui.fill, { width: `${Math.max(0, Math.min(100, percent))}%` }, percent === 100 && { backgroundColor: colors.success }]} /></View>;
+  return <CosmicMeter value={percent} label={label} color={percent === 100 ? cosmic.mint : cosmic.ice} style={ui.track} />;
 }
 
 export function LessonButton({ label, onPress, secondary = false, disabled = false, icon }: { label: string; onPress(): void; secondary?: boolean; disabled?: boolean; icon?: keyof typeof Ionicons.glyphMap }) {
-  return <Pressable accessibilityRole="button" accessibilityLabel={label} disabled={disabled} onPress={onPress} style={({ pressed }) => [ui.button, secondary && ui.buttonSecondary, disabled && { opacity: .45 }, pressed && !disabled && { opacity: .8 }]}>{icon && <Ionicons aria-hidden name={icon} size={18} color={colors.text} />}<Text style={ui.buttonText}>{label}</Text></Pressable>;
+  return (
+    <MotionPressable accessibilityRole="button" accessibilityLabel={label} disabled={disabled} onPress={onPress}
+      style={[ui.button, secondary && ui.buttonSecondary, !secondary && styles.litButton, disabled && { opacity: .45 }]}>
+      {!secondary && <LinearGradient pointerEvents="none" colors={actionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+        style={StyleSheet.absoluteFill} />}
+      {icon && <Ionicons aria-hidden name={icon} size={18} color={colors.text} />}
+      <Text style={ui.buttonText}>{label}</Text>
+    </MotionPressable>
+  );
 }
+
+const styles = StyleSheet.create({
+  litButton: { overflow: 'hidden', boxShadow: '0 4px 16px #5233ba58' },
+});
 
 export function LessonState({ kind, title, description, action, onAction }: { kind: 'loading' | 'empty' | 'error'; title: string; description: string; action?: string; onAction?: () => void }) {
   return <View style={ui.state} accessibilityLiveRegion="polite">{kind === 'loading' ? <ActivityIndicator color={colors.primary} size="large" /> : <View style={ui.stateIcon}><Ionicons name={kind === 'error' ? 'cloud-offline-outline' : 'book-outline'} size={32} color={colors.primary} /></View>}<Text style={ui.stateTitle}>{title}</Text><Text style={ui.stateDescription}>{description}</Text>{action && onAction && <LessonButton label={action} onPress={onAction} />}</View>;
@@ -75,7 +90,7 @@ export function LessonSearch({ value, onChange }: { value: string; onChange(valu
 export function LessonCard({ lesson, topic }: { lesson: CatalogLesson; topic?: LessonTopic }) {
   const { state, ready } = useLearning(), stats = lessonStats(lesson, state);
   const levelLabel = getLevelLabel(lesson.level);
-  return <Pressable accessibilityRole="button" accessibilityLabel={`${lesson.title}, ${levelLabel}, ${stats.percent}% complete`} onPress={() => router.push({ pathname: '/lessons/[lessonId]', params: { lessonId: lesson.id } })} style={({ pressed }) => [ui.lessonCard, pressed && { opacity: .85 }]}><View style={ui.lessonTop}><View style={[ui.lessonIcon, { backgroundColor: lesson.kind === 'grammar' ? colors.blueSoft : hum.coralSoft }]}><Ionicons name={lesson.kind === 'grammar' ? 'library-outline' : 'text-outline'} size={22} color={lesson.kind === 'grammar' ? colors.blue : hum.coralEdge} /></View><View style={{ flex: 1 }}><Text style={ui.lessonKicker}>{lesson.kind === 'grammar' ? 'GRAMMAR' : topic?.title.toUpperCase() || 'VOCABULARY'} · {levelLabel}</Text><Text style={ui.lessonTitle}>{lesson.title}</Text></View><Ionicons name={stats.complete ? 'checkmark-circle' : 'arrow-forward'} size={23} color={stats.complete ? colors.success : colors.textMuted} /></View><Text style={ui.lessonMeta}>{lesson.kind === 'grammar' ? `${lesson.grammarIds.length} grammar point${lesson.grammarIds.length === 1 ? '' : 's'} · rule, examples & common mistakes` : `${lesson.vocabularyIds.length} words · pronunciation & examples`}</Text><View style={ui.progressLabel}><Text style={[ui.progressText, stats.complete && { color: colors.success }]}>{!ready ? 'Loading progress…' : stats.complete ? 'Completed' : stats.done ? 'In progress' : 'Not started'}</Text><Text style={ui.progressText}>{stats.percent}%</Text></View><ProgressBar percent={stats.percent} label={`${lesson.title} progress`} /></Pressable>;
+  return <Pressable accessibilityRole="button" accessibilityLabel={`${lesson.title}, ${levelLabel}, ${stats.percent}% complete`} onPress={() => router.push({ pathname: '/lessons/[lessonId]', params: { lessonId: lesson.id } })} style={({ pressed }) => [ui.lessonCard, pressed && { opacity: .85 }]}><View style={ui.lessonTop}><View style={[ui.lessonIcon, { backgroundColor: lesson.kind === 'grammar' ? colors.blueSoft : cosmic.roseSurface }]}><Ionicons name={lesson.kind === 'grammar' ? 'library-outline' : 'text-outline'} size={22} color={lesson.kind === 'grammar' ? colors.blue : cosmic.roseEdge} /></View><View style={{ flex: 1 }}><Text style={ui.lessonKicker}>{lesson.kind === 'grammar' ? 'GRAMMAR' : topic?.title.toUpperCase() || 'VOCABULARY'} · {levelLabel}</Text><Text style={ui.lessonTitle}>{lesson.title}</Text></View><Ionicons name={stats.complete ? 'checkmark-circle' : 'arrow-forward'} size={23} color={stats.complete ? colors.success : colors.textMuted} /></View><Text style={ui.lessonMeta}>{lesson.kind === 'grammar' ? `${lesson.grammarIds.length} grammar point${lesson.grammarIds.length === 1 ? '' : 's'} · rule, examples & common mistakes` : `${lesson.vocabularyIds.length} words · pronunciation & examples`}</Text><View style={ui.progressLabel}><Text style={[ui.progressText, stats.complete && { color: colors.success }]}>{!ready ? 'Loading progress…' : stats.complete ? 'Completed' : stats.done ? 'In progress' : 'Not started'}</Text><Text style={ui.progressText}>{stats.percent}%</Text></View><ProgressBar percent={stats.percent} label={`${lesson.title} progress`} /></Pressable>;
 }
 
 export const ui = StyleSheet.create({
@@ -85,12 +100,11 @@ export const ui = StyleSheet.create({
   description: { color: colors.textSecondary, fontSize: 14, lineHeight: 22, marginTop: 7 },
   sectionHeading: { fontSize: 21, fontWeight: '800', color: colors.text, letterSpacing: -.45 },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 28, marginBottom: 16 },
-  track: { height: 5, backgroundColor: hum.mintTrack, borderRadius: 99, overflow: 'hidden' },
-  fill: { height: '100%', borderRadius: 99, backgroundColor: hum.greenInk },
-  button: { ...paperButton, minHeight: 46, backgroundColor: colors.action, borderColor: colors.actionEdge, paddingVertical: 12, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  track: { height: 5 },
+  button: { ...gameButton, minHeight: 46, backgroundColor: colors.action, borderColor: colors.actionEdge, paddingVertical: 12, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
   buttonSecondary: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.borderStrong },
   buttonText: { fontSize: 14, fontWeight: '700', color: colors.text, textAlign: 'center', flexShrink: 1 },
-  state: { ...paperCard, minHeight: 230, alignItems: 'center', justifyContent: 'center', padding: 28, gap: 14, marginTop: 20 },
+  state: { ...glassCard, minHeight: 230, alignItems: 'center', justifyContent: 'center', padding: 28, gap: 14, marginTop: 20 },
   stateIcon: { width: 62, height: 62, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
   stateTitle: { fontSize: 20, fontWeight: '700', color: colors.text, textAlign: 'center' },
   stateDescription: { fontSize: 14, lineHeight: 22, color: colors.textSecondary, maxWidth: 430, textAlign: 'center' },
@@ -107,7 +121,7 @@ export const ui = StyleSheet.create({
   kind: { paddingVertical: 12, borderBottomWidth: 2, borderBottomColor: 'transparent' }, kindSelected: { borderBottomColor: colors.primary }, kindText: { fontSize: 14, fontWeight: '700', color: colors.textMuted },
   search: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: colors.surface, borderRadius: 12, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 14, minHeight: 46, marginBottom: 17 },
   searchInput: { flex: 1, color: colors.text, fontSize: 14, minHeight: 46, paddingVertical: 10 },
-  lessonCard: { ...paperCard, padding: 20 },
+  lessonCard: { ...glassCard, padding: 20 },
   lessonTop: { flexDirection: 'row', alignItems: 'center', gap: 13 },
   lessonIcon: { width: 46, height: 46, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   lessonKicker: { color: colors.textMuted, fontSize: 9, fontWeight: '800', letterSpacing: .7, marginBottom: 5 },

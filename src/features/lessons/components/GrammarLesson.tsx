@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@/theme/colors';
-import { hum, paperCard } from '@/theme/hum';
+import { cosmic, glassCard } from '@/theme/cosmic';
 import { useLearning } from '@/contexts/LearningContext';
 import type { GrammarPoint } from '../data/grammar';
 import type { CatalogLesson } from '../types';
@@ -45,9 +45,9 @@ export function GrammarLesson({ lesson, points, onSectionChange }: { lesson: Cat
 }
 
 const styles = StyleSheet.create({
-  wrap: { marginTop: 24 }, tabs: { flexDirection: 'row', flexWrap: 'wrap', gap: 9, marginBottom: 17 }, tab: { flexDirection: 'row', gap: 7, alignItems: 'center', paddingVertical: 12, paddingHorizontal: 14, borderRadius: 11, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface }, activeTab: { backgroundColor: colors.primarySoft, borderColor: hum.skyEdge }, tabText: { fontSize: 12, fontWeight: '700', color: colors.textSecondary },
-  paper: { ...paperCard, padding: 23, borderRadius: 20, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface }, kicker: { color: colors.violet, fontSize: 9, lineHeight: 16, letterSpacing: .8, fontWeight: '800' }, title: { color: colors.text, fontWeight: '800', fontSize: 23, lineHeight: 32, marginTop: 7, marginBottom: 23 },
-  label: { color: colors.textMuted, fontSize: 10, fontWeight: '800', letterSpacing: .9, marginBottom: 11 }, pattern: { padding: 20, backgroundColor: colors.violetSoft, borderRadius: 13, marginBottom: 26 }, patternText: { color: hum.blue, fontSize: 18, lineHeight: 29, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' }, explanation: { color: colors.textSecondary, fontSize: 15, lineHeight: 26 }, sectionLead: { color: colors.textSecondary, fontSize: 14, lineHeight: 23, marginBottom: 17 },
+  wrap: { marginTop: 24 }, tabs: { flexDirection: 'row', flexWrap: 'wrap', gap: 9, marginBottom: 17 }, tab: { flexDirection: 'row', gap: 7, alignItems: 'center', paddingVertical: 12, paddingHorizontal: 14, borderRadius: 11, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface }, activeTab: { backgroundColor: colors.primarySoft, borderColor: cosmic.iceEdge }, tabText: { fontSize: 12, fontWeight: '700', color: colors.textSecondary },
+  paper: { ...glassCard, padding: 23, borderRadius: 20, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface }, kicker: { color: colors.violet, fontSize: 9, lineHeight: 16, letterSpacing: .8, fontWeight: '800' }, title: { color: colors.text, fontWeight: '800', fontSize: 23, lineHeight: 32, marginTop: 7, marginBottom: 23 },
+  label: { color: colors.textMuted, fontSize: 10, fontWeight: '800', letterSpacing: .9, marginBottom: 11 }, pattern: { padding: 20, backgroundColor: colors.violetSoft, borderRadius: 13, marginBottom: 26 }, patternText: { color: cosmic.ice, fontSize: 18, lineHeight: 29, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' }, explanation: { color: colors.textSecondary, fontSize: 15, lineHeight: 26 }, sectionLead: { color: colors.textSecondary, fontSize: 14, lineHeight: 23, marginBottom: 17 },
   example: { borderTopWidth: 1, borderTopColor: colors.border, paddingVertical: 20, flexDirection: 'row', alignItems: 'center', gap: 13 }, exampleText: { fontSize: 17, color: colors.text, lineHeight: 27, fontWeight: '600' }, translation: { color: colors.textSecondary, fontSize: 13, lineHeight: 22, marginTop: 7 }, listen: { minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }, mistake: { padding: 18, borderRadius: 13, marginBottom: 15 }, mistakeLabel: { fontSize: 9, letterSpacing: 1, fontWeight: '800', marginBottom: 9 },
   bottom: { borderTopWidth: 1, borderTopColor: colors.border, marginTop: 26, paddingTop: 22, gap: 13 }, bottomHint: { color: colors.textMuted, fontSize: 12, lineHeight: 19 }, points: { gap: 10, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', marginBottom: 17 }, counter: { color: colors.textSecondary, fontSize: 12 },
 });

@@ -10,7 +10,7 @@ export function TutorCard({ tutor, onPress }: { tutor: TutorProfile; onPress: ()
   return (
     <AppCard onPress={onPress} style={styles.card}>
       <View style={styles.top}>
-        <TutorAvatar initials={tutor.initials || tutor.name.slice(0, 2).toUpperCase()} accent={tutor.accent} />
+        <TutorAvatar tutorId={tutor.id} initials={tutor.initials || tutor.name.slice(0, 2).toUpperCase()} accent={tutor.accent} />
         <View style={styles.copy}>
           <Text style={styles.name}>{tutor.name}</Text>
           <Text style={styles.role}>{tutor.role}</Text>

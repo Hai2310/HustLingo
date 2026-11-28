@@ -11,9 +11,11 @@ import { TutorDataState } from '../components/TutorDataState';
 import type { TutorProfile, TutorScenario } from '../types';
 import { useTutorChat } from '../hooks/useTutorChat';
 import { colors } from '@/theme/colors';
-import { hum, paperButton, paperCard } from '@/theme/hum';
+import { cosmic, gameButton, glassCard } from '@/theme/cosmic';
 import { useMotionPreference } from '@/theme/MotionPreference';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLessonSpeech } from '@/features/lessons/hooks/useLessonSpeech';
+import { TutorAvatar } from '../components/TutorAvatar';
 
 export default function TutorChatScreen() {
   const { user } = useAuth();
@@ -30,13 +32,19 @@ export default function TutorChatScreen() {
 
 function TutorChatWorkspace({ scenario, tutor }: { scenario: TutorScenario; tutor: TutorProfile }) {
   const chat = useTutorChat(scenario, tutor.id);
+  const speech = useLessonSpeech();
   const [draft, setDraft] = useState('');
+  const [composing, setComposing] = useState(false);
   const [confirmEnd, setConfirmEnd] = useState(false);
   const listRef = useRef<FlatList>(null);
   const { width } = useWindowDimensions();
   const isDesktop = width >= 1024;
   const isMobile = width < 700;
   const motion = useMotionPreference() === false;
+  const lastReply = [...chat.session.messages].reverse().find(message => message.role === 'tutor');
+  const playableReply = chat.session.messages.find(message => message.id === speech.speaking) ?? lastReply;
+  const avatarState = speech.speaking ? 'speaking' : chat.status === 'loading' ? 'thinking' : composing ? 'listening' : 'idle';
+  const avatarLabel = { speaking: 'Đang phát câu trả lời', thinking: 'Đang chuẩn bị phản hồi', listening: 'Đang chờ bạn nhập', idle: 'Sẵn sàng hội thoại' }[avatarState];
 
   useEffect(() => { listRef.current?.scrollToEnd({ animated: motion }); }, [chat.session.messages.length, chat.status, motion]);
 
@@ -91,6 +99,18 @@ function TutorChatWorkspace({ scenario, tutor }: { scenario: TutorScenario; tuto
             </View>
           )}
           <View style={[styles.chatPane, isDesktop && styles.desktopChatPane]}>
+            <View style={styles.tutorPresence}>
+              <TutorAvatar tutorId={tutor.id} initials={tutor.initials || tutor.name.slice(0, 2)} accent={cosmic.actionEdge} size={46} state={avatarState} />
+              <View style={styles.presenceCopy}>
+                <Text style={styles.presenceName}>{tutor.name}</Text>
+                <Text accessibilityLiveRegion="polite" style={styles.presenceState}>{avatarLabel}</Text>
+              </View>
+              {playableReply && <Pressable accessibilityRole="button" accessibilityLabel={speech.speaking ? 'Dừng phát câu trả lời' : 'Nghe câu trả lời gần nhất'}
+                onPress={() => { void speech.speak(playableReply.id, playableReply.text); }} style={styles.listen}>
+                <Ionicons aria-hidden name={speech.speaking ? 'stop-circle-outline' : 'volume-high-outline'} size={22} color={cosmic.ice} />
+              </Pressable>}
+            </View>
+            {speech.audioError && <Text accessibilityLiveRegion="polite" style={styles.presenceState}>Thiết bị này chưa phát được âm thanh.</Text>}
             <View style={[styles.status, isMobile && styles.mobileStatus]}><View style={styles.statusDot} /><Text style={styles.statusText}>{chat.isDemo ? 'Demo · đăng nhập để luyện với AI thật' : chat.status === 'hydrating' ? 'Đang khôi phục phiên...' : 'AI practice'}</Text><Text style={styles.counter}>{chat.session.messages.filter(item => item.role === 'learner').length}/30</Text></View>
             <FlatList
               ref={listRef}
@@ -125,7 +145,7 @@ function TutorChatWorkspace({ scenario, tutor }: { scenario: TutorScenario; tuto
               <Pressable disabled={!chat.canSend} onPress={chat.requestCorrection} style={[styles.tool, isMobile && styles.mobileTool]}><Ionicons name="sparkles-outline" size={15} color={colors.violet} /><Text style={styles.toolText}>{isMobile ? 'Correct' : 'Correct last'}</Text></Pressable>
               <Pressable onPress={endSession} style={[styles.tool, styles.finishTool, isMobile && styles.mobileTool, isMobile && styles.finishToolMobile]}><Ionicons name="stop-circle-outline" size={15} color={colors.primary} /><Text style={styles.finishText}>Finish</Text></Pressable>
             </View>
-            <View style={[styles.composer, isMobile && styles.mobileComposer]}><TextInput value={draft} onChangeText={setDraft} onSubmitEditing={send} accessibilityLabel="Your reply" placeholder="Write your reply..." placeholderTextColor={colors.textMuted} multiline maxLength={500} style={styles.input} /><Pressable accessibilityRole="button" accessibilityLabel="Send reply" onPress={send} disabled={!draft.trim() || !chat.canSend} style={[styles.send, (!draft.trim() || !chat.canSend) && styles.sendDisabled]}><Ionicons aria-hidden name="arrow-up" size={20} color={colors.text} /></Pressable></View>
+            <View style={[styles.composer, isMobile && styles.mobileComposer]}><TextInput value={draft} onChangeText={setDraft} onFocus={() => setComposing(true)} onBlur={() => setComposing(false)} onSubmitEditing={send} accessibilityLabel="Your reply" placeholder="Write your reply..." placeholderTextColor={colors.textMuted} multiline maxLength={500} style={styles.input} /><Pressable accessibilityRole="button" accessibilityLabel="Send reply" onPress={send} disabled={!draft.trim() || !chat.canSend} style={[styles.send, (!draft.trim() || !chat.canSend) && styles.sendDisabled]}><Ionicons aria-hidden name="arrow-up" size={20} color={colors.text} /></Pressable></View>
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -134,6 +154,11 @@ function TutorChatWorkspace({ scenario, tutor }: { scenario: TutorScenario; tuto
 }
 
 const styles = StyleSheet.create({
+  tutorPresence: { flexDirection: 'row', alignItems: 'center', gap: 10, marginHorizontal: 12, paddingBottom: 8, borderBottomWidth: 1, borderColor: cosmic.border },
+  presenceCopy: { flex: 1, minWidth: 0, gap: 2 },
+  presenceName: { color: cosmic.text, fontSize: 15, fontWeight: '900' },
+  presenceState: { color: cosmic.muted, fontSize: 12 },
+  listen: { width: 44, height: 44, borderRadius: 13, backgroundColor: cosmic.iceSurface, alignItems: 'center', justifyContent: 'center' },
   screenContent: { flex: 1, alignSelf: 'center', paddingHorizontal: 0, paddingTop: 8 },
   container: { flex: 1, width: '100%', maxWidth: 1120, alignSelf: 'center' },
   header: { paddingHorizontal: 18 },
@@ -142,7 +167,7 @@ const styles = StyleSheet.create({
   confirmEnd: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: 12, padding: 12, marginBottom: 8, backgroundColor: colors.primarySoft, borderRadius: 12 },
   workspace: { flex: 1, minHeight: 0 },
   desktopWorkspace: { flexDirection: 'row', gap: 18, borderRadius: 18 },
-  sessionRail: { ...paperCard, width: 250, alignSelf: 'flex-start', padding: 18, backgroundColor: hum.mint, borderColor: hum.mintRule },
+  sessionRail: { ...glassCard, width: 250, alignSelf: 'flex-start', padding: 18, backgroundColor: cosmic.mintSurface, borderColor: cosmic.mintEdge },
   railEyebrow: { fontSize: 9, fontWeight: '900', letterSpacing: 1.1, color: colors.violet },
   railObjective: { marginTop: 14, fontSize: 16, lineHeight: 23, fontWeight: '900', color: colors.text },
   railRole: { marginTop: 10, fontSize: 11, lineHeight: 17, color: colors.textSecondary },
@@ -150,8 +175,8 @@ const styles = StyleSheet.create({
   progressLabelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   progressLabel: { fontSize: 10, fontWeight: '900', color: colors.text },
   progressValue: { fontSize: 10, fontWeight: '800', color: colors.textMuted },
-  progressTrack: { height: 6, marginTop: 8, overflow: 'hidden', borderRadius: 6, backgroundColor: hum.mintTrack },
-  progressFill: { height: '100%', borderRadius: 6, backgroundColor: hum.greenInk },
+  progressTrack: { height: 6, marginTop: 8, overflow: 'hidden', borderRadius: 6, backgroundColor: cosmic.mintTrack },
+  progressFill: { height: '100%', borderRadius: 6, backgroundColor: cosmic.mint },
   railSection: { marginTop: 26, fontSize: 11, fontWeight: '900', color: colors.text },
   railPhrases: { gap: 8, marginTop: 10 },
   railPhrase: { fontSize: 10.5, lineHeight: 16, color: colors.textSecondary },
@@ -165,7 +190,7 @@ const styles = StyleSheet.create({
   list: { flex: 1 },
   messages: { paddingHorizontal: 18, paddingTop: 8, paddingBottom: 10 },
   desktopMessages: { paddingHorizontal: 26, paddingTop: 16 },
-  hintPanel: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginHorizontal: 18, marginBottom: 6, paddingHorizontal: 11, paddingVertical: 9, borderRadius: 11, backgroundColor: colors.orangeSoft, borderWidth: 1, borderColor: hum.pearEdge },
+  hintPanel: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginHorizontal: 18, marginBottom: 6, paddingHorizontal: 11, paddingVertical: 9, borderRadius: 11, backgroundColor: colors.orangeSoft, borderWidth: 1, borderColor: cosmic.actionEdge },
   mobileHintPanel: { marginHorizontal: 12 },
   hintText: { flex: 1, fontSize: 10.5, lineHeight: 16, color: colors.textSecondary },
   suggestionList: { flexGrow: 0, maxHeight: 44 },
@@ -184,7 +209,7 @@ const styles = StyleSheet.create({
   composer: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, paddingHorizontal: 18, paddingTop: 8, paddingBottom: Platform.OS === 'ios' ? 12 : 9, backgroundColor: colors.surface },
   mobileComposer: { paddingHorizontal: 12, paddingBottom: Platform.OS === 'ios' ? 16 : 10 },
   input: { flex: 1, maxHeight: 92, minHeight: 46, paddingHorizontal: 14, paddingVertical: 12, borderRadius: 15, backgroundColor: colors.surfaceAlt, color: colors.text, fontSize: 13, lineHeight: 19 },
-  send: { ...paperButton, width: 46, height: 46, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.action, borderColor: colors.actionEdge },
+  send: { ...gameButton, width: 46, height: 46, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.action, borderColor: colors.actionEdge },
   sendDisabled: { opacity: 0.45 },
   error: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 3, padding: 11, borderRadius: 12, backgroundColor: colors.errorSoft },
   errorText: { flex: 1, fontSize: 10.5, lineHeight: 16, color: colors.error },

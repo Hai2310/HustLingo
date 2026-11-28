@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@/theme/colors';
-import { hum, paperCard } from '@/theme/hum';
+import { cosmic, glassCard } from '@/theme/cosmic';
 import type { TutorCorrection } from '../types';
 
 export function CorrectionCard({ correction }: { correction: TutorCorrection }) {
@@ -18,7 +18,7 @@ export function CorrectionCard({ correction }: { correction: TutorCorrection }) 
 }
 
 const styles = StyleSheet.create({
-  card: { ...paperCard, marginTop: 2, marginBottom: 14, padding: 14, backgroundColor: hum.mint, borderColor: hum.mintRule },
+  card: { ...glassCard, marginTop: 2, marginBottom: 14, padding: 14, backgroundColor: cosmic.mintSurface, borderColor: cosmic.mintEdge },
   header: { flexDirection: 'row', alignItems: 'center', gap: 7 },
   title: { fontSize: 8.5, fontWeight: '900', letterSpacing: 1, color: colors.violet },
   original: { marginTop: 10, fontSize: 12, color: colors.textSecondary, textDecorationLine: 'line-through' },

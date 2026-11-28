@@ -1,14 +1,18 @@
 import { getLevelLabel } from '@/utils/levelLabels';
 import React, { useCallback, useRef, useState } from 'react';
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Image, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { AppButton } from '@/components/common/Buttons';
+import { ModuleGlyph } from '@/components/common/ModuleGlyph';
+import { RewardBurst } from '@/components/common/RewardBurst';
 import { Screen } from '@/components/common/Screen';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLearning } from '@/contexts/LearningContext';
 import { useLessonSpeech } from '@/features/lessons/hooks/useLessonSpeech';
-import { hum, paperButton } from '@/theme/hum';
+import { cosmic, gameButton, glassCard, moduleSpectra } from '@/theme/cosmic';
+import { explorerBom } from '@/theme/cosmicArt';
+import { useMotionPreference } from '@/theme/MotionPreference';
 import { SpeakingResponse, WritingResponse } from '../components/PracticeResponses';
 import { PracticeStatusBadge } from '../components/PracticeStatus';
 import { PracticeNotice, practiceStyles, skillLabels } from '../components/PracticeUI';
@@ -96,7 +100,7 @@ function Comprehension({ exercise }: { exercise: Extract<SkillExercise, { skill:
   const speech = useLessonSpeech();
   return <>
     {exercise.skill === 'reading' ? (
-      <View style={[practiceStyles.sheet, styles.reading]}><Text style={styles.passage}>{exercise.text}</Text></View>
+      <View style={[practiceStyles.sheet, styles.reading, { backgroundColor: moduleSpectra.reading.surface, borderColor: moduleSpectra.reading.edge }]}><Text style={styles.passage}>{exercise.text}</Text></View>
     ) : (
       <View style={[practiceStyles.sheet, styles.reading]}>
         <AppButton title={speech.speaking ? 'Dừng phát' : 'Nghe đoạn hội thoại'} icon="volume-high-outline" onPress={() => { void speech.speak(exercise.id, exercise.transcript); }} />
@@ -109,10 +113,14 @@ function Comprehension({ exercise }: { exercise: Extract<SkillExercise, { skill:
 }
 
 function ExerciseHeading({ skill, label, title }: { skill: PracticeSkill; label: string; title: string }) {
+  const spectrum = moduleSpectra[skill];
   return (
-    <View style={styles.heading}>
-      <Text style={practiceStyles.label}>{skillLabels[skill].label} / {label}</Text>
-      <Text accessibilityRole="header" aria-level={1} style={practiceStyles.title}>{title}</Text>
+    <View style={[styles.heading, { backgroundColor: spectrum.surface, borderColor: spectrum.edge }]}>
+      <ModuleGlyph module={skill} size={47} />
+      <View style={styles.headingCopy}>
+        <Text style={[practiceStyles.label, { color: spectrum.main }]}>{skillLabels[skill].label} / {label}</Text>
+        <Text accessibilityRole="header" aria-level={1} style={practiceStyles.title}>{title}</Text>
+      </View>
     </View>
   );
 }
@@ -123,6 +131,8 @@ function ChoiceExercise({ practiceId, question, options, answer, review }: {
   const { state, ready, recordAnswer } = useLearning();
   const [selected, setSelected] = useState<number | null>(null);
   const [checked, setChecked] = useState(false);
+  const motion = useMotionPreference() === false;
+  const [feedback] = useState(() => new Animated.Value(0));
   const recorded = useRef(false);
   const correct = selected === answer;
   const previousResult = ready ? state.practiceResults[practiceId] : undefined;
@@ -145,22 +155,33 @@ function ChoiceExercise({ practiceId, question, options, answer, review }: {
           onPress={() => setSelected(index)}
           style={[styles.option, index === selected && styles.selected, checked && index === answer && styles.correct, checked && index === selected && !correct && styles.incorrect]}
         >
-          <Ionicons aria-hidden name={checked && index === answer ? 'checkmark-circle' : index === selected ? 'radio-button-on' : 'radio-button-off'} size={19} color={hum.ink} />
+          <Ionicons aria-hidden name={checked && index === answer ? 'checkmark-circle' : index === selected ? 'radio-button-on' : 'radio-button-off'} size={19} color={cosmic.text} />
           <Text style={styles.optionText}>{option}</Text>
         </Pressable>
       ))}
       {checked ? (
-        <View aria-live="polite" accessibilityLiveRegion="polite" style={[styles.result, correct ? styles.correct : styles.incorrect]}>
-          <Text style={practiceStyles.heading}>{correct ? 'Chính xác!' : 'Chưa đúng.'}</Text>
-          <Text style={styles.passage}>Đáp án đúng: {options[answer]}</Text>
-          {review && <Text style={practiceStyles.detail}>{review}</Text>}
-        </View>
+        <Animated.View aria-live="polite" accessibilityLiveRegion="polite" style={[styles.result, correct ? styles.correct : styles.incorrect, { transform: [{ translateX: feedback }] }]}>
+          <View style={styles.resultRow}>
+            <View style={styles.headingCopy}>
+              <Text style={practiceStyles.heading}>{correct ? 'Chính xác!' : 'Chưa đúng.'}</Text>
+              <Text style={styles.passage}>Đáp án đúng: {options[answer]}</Text>
+              {review && <Text style={practiceStyles.detail}>{review}</Text>}
+            </View>
+            <Image nativeID={correct ? 'cosmic-bom-celebrate' : undefined} source={explorerBom} style={styles.feedbackArt} resizeMode="contain" accessible={false} />
+          </View>
+          {correct && <RewardBurst />}
+        </Animated.View>
       ) : (
         <AppButton title="Kiểm tra đáp án" icon="checkmark-outline" disabled={selected === null || !ready} onPress={() => {
           if (selected === null || !ready || recorded.current) return;
           recorded.current = true;
           recordAnswer(correct, practiceId);
           setChecked(true);
+          if (!correct && motion) {
+            Animated.sequence([-5, 4, -2, 0].map(toValue => Animated.timing(feedback, {
+              toValue, duration: 45, useNativeDriver: Platform.OS !== 'web', isInteraction: false,
+            }))).start();
+          }
         }} />
       )}
     </View>
@@ -170,16 +191,19 @@ function ChoiceExercise({ practiceId, question, options, answer, review }: {
 const styles = StyleSheet.create({
   page: { maxWidth: 800 },
   back: { alignSelf: 'flex-start' },
-  heading: { gap: 6 },
-  reading: { backgroundColor: hum.sky, borderColor: hum.skyEdge },
-  passage: { color: hum.ink, fontSize: 16, lineHeight: 25 },
+  heading: { ...glassCard, flexDirection: 'row', alignItems: 'center', gap: 13, padding: 15 },
+  headingCopy: { gap: 4, flex: 1, minWidth: 0 },
+  reading: { backgroundColor: cosmic.iceSurface, borderColor: cosmic.iceEdge },
+  passage: { color: cosmic.text, fontSize: 16, lineHeight: 25 },
   previousResult: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 7 },
-  option: { ...paperButton, flexDirection: 'row', alignItems: 'center', backgroundColor: hum.card, borderColor: hum.rule, gap: 10, padding: 11, minHeight: 46 },
-  optionText: { flex: 1, color: hum.ink, fontSize: 15, lineHeight: 21 },
-  selected: { backgroundColor: hum.pearSoft, borderColor: hum.pearEdge },
-  correct: { backgroundColor: hum.mint, borderColor: hum.mintRule },
-  incorrect: { backgroundColor: hum.coralSoft, borderColor: hum.coralEdge },
+  option: { ...gameButton, flexDirection: 'row', alignItems: 'center', backgroundColor: cosmic.glass, borderColor: cosmic.border, gap: 10, padding: 11, minHeight: 46 },
+  optionText: { flex: 1, color: cosmic.text, fontSize: 15, lineHeight: 21 },
+  selected: { backgroundColor: cosmic.violetSurface, borderColor: cosmic.actionEdge },
+  correct: { backgroundColor: cosmic.mintSurface, borderColor: cosmic.mintEdge },
+  incorrect: { backgroundColor: cosmic.dangerSurface, borderColor: cosmic.dangerEdge },
   result: { borderRadius: 12, borderWidth: 1, padding: 13, gap: 4 },
+  resultRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  feedbackArt: { width: 64, height: 64 },
   source: { gap: 4 },
-  sourceLink: { color: hum.blue, fontSize: 14, fontWeight: '700', textDecorationLine: 'underline', paddingVertical: 8 },
+  sourceLink: { color: cosmic.ice, fontSize: 14, fontWeight: '700', textDecorationLine: 'underline', paddingVertical: 8 },
 });

@@ -4,8 +4,9 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Screen } from '@/components/Screen';
+import { RewardBurst } from '@/components/common/RewardBurst';
 import { colors } from '@/theme/colors';
-import { hum, paperCard } from '@/theme/hum';
+import { cosmic, glassCard } from '@/theme/cosmic';
 import { useLearning } from '@/contexts/LearningContext';
 import { loadLessonContent } from '@/services/learningContent';
 import { useLessonCatalog } from '../hooks/useLessonCatalog';
@@ -33,10 +34,23 @@ export default function LessonDetailScreen() {
   }, [lesson, catalog, attempt]);
   const content = detail?.id === lessonId ? detail.content : null;
   const stats = lesson ? lessonStats(lesson, state) : null;
+  const previous = useRef<{ id: string; complete: boolean } | null>(null);
+  const [celebrated, setCelebrated] = useState<string | null>(null);
+  const complete = stats?.complete;
+  useEffect(() => {
+    if (!ready || !lessonId || complete === undefined) { previous.current = null; return; }
+    if (previous.current?.id === lessonId && !previous.current.complete && complete) setCelebrated(lessonId);
+    previous.current = { id: lessonId, complete };
+  }, [complete, lessonId, ready]);
+  useEffect(() => {
+    if (!celebrated) return;
+    const timeout = setTimeout(() => setCelebrated(null), 1000);
+    return () => clearTimeout(timeout);
+  }, [celebrated]);
   const next = lesson && catalog?.lessons.filter(item => item.level === lesson.level && item.kind === lesson.kind && item.id !== lesson.id).find(item => !lessonStats(item, state).complete);
   const moveToTop = () => scroll.current?.scrollTo({ y: 0, animated: !reduced });
 
-  return <Screen ambient={false} contentStyle={ui.content} scrollRef={scroll}><Reveal><LessonBack />
+  return <View style={styles.stage}><Screen ambient={false} contentStyle={ui.content} scrollRef={scroll}><Reveal><LessonBack />
     {loading && !catalog ? <LessonState kind="loading" title="Loading your lesson" description="Opening the published library." /> : catalogError ? <LessonState kind="error" title="The library could not load" description={catalogError} action="Try again" onAction={retryCatalog} /> : !lesson ? <LessonState kind="empty" title="Lesson not found" description="This lesson is unavailable or has not been published. You can return to the library and choose another lesson." action="Browse lessons" onAction={() => router.replace('/(tabs)/lessons')} /> : <>
       {lesson.kind === 'vocabulary' ? <VocabularyLessonHeader lesson={lesson} /> : <><View style={styles.header}><Text style={ui.kicker}>{getLevelLabel(lesson.level)} · GRAMMAR LESSON</Text><SyncLabel /></View><Text style={ui.heading}>{lesson.title}</Text><Text style={ui.description}>Understand the pattern, read the examples and spot common mistakes.</Text>
       <View style={styles.progressCard}><View style={styles.progressTop}><Text style={styles.progressDescription}>{!ready ? 'Loading saved progress…' : stats?.complete ? 'Lesson completed' : `${stats?.done} of ${stats?.total} study steps completed`}</Text><Text style={[styles.percent, stats?.complete && { color: colors.success }]}>{stats?.percent}%</Text></View><ProgressBar percent={stats?.percent || 0} label="Lesson completion" /></View></>}
@@ -47,11 +61,15 @@ export default function LessonDetailScreen() {
         {stats?.complete && <View style={styles.nextActions}>{next && <LessonButton label="Next lesson" icon="arrow-forward" onPress={() => { router.replace({ pathname: '/lessons/[lessonId]', params: { lessonId: next.id } }); moveToTop(); }} />}<LessonButton secondary label="Back to the library" onPress={() => router.replace('/(tabs)/lessons')} /></View>}
       </>}
     </>}
-  </Reveal></Screen>;
+  </Reveal></Screen>
+    {celebrated === lessonId && <View style={styles.celebration} pointerEvents="none" aria-hidden><RewardBurst lesson /></View>}
+  </View>;
 }
 
 const styles = StyleSheet.create({
+  stage: { flex: 1 },
+  celebration: { ...StyleSheet.absoluteFillObject, zIndex: 3 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' },
-  progressCard: { ...paperCard, padding: 20, marginTop: 24, backgroundColor: hum.mint, borderColor: hum.mintRule }, progressTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 15, marginBottom: 12 }, progressDescription: { flex: 1, color: colors.textSecondary, fontSize: 13, lineHeight: 19 }, percent: { color: hum.greenInk, fontSize: 23, fontWeight: '700' },
-  completed: { flexDirection: 'row', alignItems: 'center', gap: 15, padding: 20, borderRadius: 16, borderWidth: 1, borderColor: hum.mintRule, backgroundColor: colors.successSoft, marginTop: 22 }, check: { width: 44, alignItems: 'center' }, completedTitle: { fontSize: 17, fontWeight: '700', color: hum.greenInk }, completedDescription: { fontSize: 12, lineHeight: 19, marginTop: 5, color: hum.greenInk }, nextActions: { gap: 12, marginTop: 24 },
+  progressCard: { ...glassCard, padding: 20, marginTop: 24, backgroundColor: cosmic.mintSurface, borderColor: cosmic.mintEdge }, progressTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 15, marginBottom: 12 }, progressDescription: { flex: 1, color: colors.textSecondary, fontSize: 13, lineHeight: 19 }, percent: { color: cosmic.mint, fontSize: 23, fontWeight: '700' },
+  completed: { flexDirection: 'row', alignItems: 'center', gap: 15, padding: 20, borderRadius: 16, borderWidth: 1, borderColor: cosmic.mintEdge, backgroundColor: colors.successSoft, marginTop: 22 }, check: { width: 44, alignItems: 'center' }, completedTitle: { fontSize: 17, fontWeight: '700', color: cosmic.mint }, completedDescription: { fontSize: 12, lineHeight: 19, marginTop: 5, color: cosmic.mint }, nextActions: { gap: 12, marginTop: 24 },
 });

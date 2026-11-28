@@ -1,0 +1,186 @@
+#home-aurora {
+  background: linear-gradient(180deg, #0e1024d9, #090b18f0 72%, #090b18f7);
+}
+
+#home-aurora::before {
+  content: '';
+  position: absolute;
+  inset: -18% -12% 0;
+  background:
+    radial-gradient(ellipse 48% 35% at 71% 27%, #8847d550, transparent 78%),
+    radial-gradient(ellipse 46% 31% at 35% 34%, #2c6ba432, transparent 82%),
+    radial-gradient(ellipse 35% 19% at 81% 42%, #b04b9f2b, transparent 82%);
+  transform: rotate(-11deg);
+}
+
+#home-lesson {
+  box-shadow: 0 14px 46px #3d21696e, inset 0 1px #e3bfff87, inset 0 0 24px #b76eff26;
+}
+
+#home-lesson-heading { text-wrap: balance; }
+
+#home-hero-light {
+  background:
+    radial-gradient(ellipse at 12% 112%, #1d416a75, transparent 59%),
+    linear-gradient(132deg, #13172a9e, #1c1835 49%, #271841 75%, #141a30);
+}
+
+#home-hero-nebula {
+  background:
+    radial-gradient(ellipse 49% 71% at 83% 37%, #814cef83 0%, #613ed76b 22%, #4c3ab334 59%, transparent 95%),
+    radial-gradient(ellipse 43% 35% at 73% 93%, #df6fda4d, #623cb75c 42%, transparent 84%),
+    radial-gradient(ellipse 25% 59% at 96% 60%, #487eef61, transparent 81%);
+}
+
+[id^="home-hero-star-"] {
+  transform: rotate(45deg);
+  box-shadow: 0 0 6px 1px #e3b7ffd0;
+}
+
+#home-hero-floor {
+  background:
+    radial-gradient(ellipse 38% 43% at 59% 52%, #ffe2b663 0%, #f594e266 27%, transparent 84%),
+    radial-gradient(ellipse 54% 50% at 58% 54%, #c46cff69 0%, #674ffa35 69%, transparent 100%);
+}
+
+#home-hero-orbit { box-shadow: 0 3px 12px #9b75ff77, inset 0 -2px 7px #bc9dff5e; }
+#home-hero-orbit-distant { box-shadow: 0 1px 8px #7589ff44; }
+[id^="home-hero-crystal-"] { filter: drop-shadow(0 0 7px #b99aff9e); }
+
+#home-lesson .hust-mascot[data-position="hero"] .hust-mascot-frame {
+  filter: drop-shadow(-1px -1px 2px #ffeeff7a) drop-shadow(0 5px 13px #bf60f38a);
+}
+
+#hustlingo-cosmic #home-lesson .hust-mascot-trigger:hover { box-shadow: none; }
+
+#home-lesson .hust-mascot[data-position="hero"] .hust-mascot-trigger::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  inset: 85% 8% 1%;
+  background: radial-gradient(ellipse at 50% 83%, #ffc4aa40, transparent 69%);
+}
+
+#home-lesson-action-face {
+  background-image:
+    linear-gradient(124deg, #fff3 0%, transparent 34%, transparent 77%, #e6a8ff30 100%),
+    linear-gradient(169deg, #966af1, #663dc3 43%, #4f2e9c 100%);
+  box-shadow: inset 0 1px #ffebffc9, inset 0 0 12px #d595ff40;
+}
+
+#home-lesson-action { box-shadow: 0 5px 20px #9a57ff5e; }
+
+#home-rank { box-shadow: inset 0 1px #a7eaff31, inset 0 0 19px #85dfff12; }
+
+#home-xp > div {
+  background-image: radial-gradient(ellipse 60% 90% at 24% 0%, #f8c66f42, transparent 88%);
+  box-shadow: inset 0 1px #ffe7ad68, inset 0 0 9px #d1a1ff34;
+}
+
+#home-skills [id^="home-skill-card-"] {
+  --home-spotlight: 0;
+  --home-art-glow: .5;
+  box-shadow: inset 0 1px #e3daff32;
+}
+
+#home-skills [id^="home-skill-light-"] { opacity: 0; }
+
+@supports (mask-image: radial-gradient(#000, transparent)) {
+  #home-skills [id^="home-skill-light-"] {
+    opacity: 1;
+    mask-image:
+      radial-gradient(ellipse 62% 85% at 80% 25%, rgb(0 0 0 / var(--home-art-glow)), transparent 76%),
+      radial-gradient(circle at calc(var(--home-light-x, 68) * 1%) calc(var(--home-light-y, 35) * 1%), rgb(0 0 0 / var(--home-spotlight)), transparent 125px);
+  }
+}
+
+#home-skills [id^="home-skill-art-"] {
+  filter: drop-shadow(-1px -2px 2px #fff6) drop-shadow(0 5px 7px #050512b0);
+}
+
+#home-skills [id^="home-skill-orbit-"] { box-shadow: inset 0 0 23px #f2dcff28; }
+
+#home-skills [id^="home-skill-card-"]:focus-visible {
+  --home-art-glow: .63;
+  --home-spotlight: .19;
+}
+
+@supports (mask-composite: exclude) {
+  #home-rank [id^="learner-badge-"]::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(124deg, #f9dec66b 0%, transparent 28%, #fff3d6 49%, #f0c3ff 53%, transparent 68%, #c2a4ff94 100%) 100% / 280% 100%;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #home-skills [id^="home-skill-card-"]:hover {
+    --home-art-glow: .61;
+    --home-spotlight: .32;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #home-aurora::before { animation: home-aurora-drift 25s ease-in-out 3 alternate both; }
+
+  #home-hero-nebula { animation: home-hero-nebula-drift 20s ease-in-out 3 alternate both; }
+  [id^="home-hero-crystal-"] { animation: home-hero-crystal-drift 6s ease-in-out 2; }
+  #home-hero-crystal-far { animation-delay: 600ms; }
+  #home-hero-crystal-high { animation-delay: 1.4s; }
+
+  #home-lesson .hust-mascot[data-position="hero"] .hust-mascot-frame {
+    animation: hust-mascot-greet 850ms cubic-bezier(.22,1,.36,1) both, home-mascot-float 4.7s ease-in-out 900ms 2;
+  }
+  #home-lesson .hust-mascot-blink { animation: home-bom-blink 9s linear both; }
+
+  #home-rank [id^="learner-badge-"]::after { animation: home-edge-shimmer 1.35s ease-out 650ms both; }
+  #home-rank:focus-within [id^="learner-badge-"]::after { background-position: 0; }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  [id^="home-topic-"] { transition: transform 200ms ease-out, box-shadow 180ms ease-out; }
+
+  [id^="home-topic-"]:hover {
+    transform: perspective(560px) rotateX(calc((50 - var(--home-light-y, 50)) * .09deg)) rotateY(calc((var(--home-light-x, 50) - 50) * .085deg)) translateY(-2px);
+  }
+
+  [id^="topic-destination-art-"] { transition: transform 300ms ease-out; }
+  [id^="home-topic-"]:hover [id^="topic-destination-art-"] { transform: scale(1.035); }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #home-skills [id^="home-skill-light-"] { --home-light-x: 68; --home-light-y: 35; }
+}
+
+@keyframes home-aurora-drift {
+  to { transform: translate3d(-4%, 2%, 0) rotate(-6deg); }
+}
+
+@keyframes home-mascot-float {
+  50% { transform: translateY(-5px) rotate(-1.3deg); }
+}
+
+@keyframes home-hero-nebula-drift {
+  to { transform: translate3d(-4%, 4%, 0) scale(1.08); }
+}
+
+@keyframes home-hero-crystal-drift {
+  50% { translate: 0 -6px; }
+}
+
+@keyframes home-bom-blink {
+  0%, 39.9%, 42.3%, 93.5%, 95.9%, 100% { opacity: 0; }
+  40.6%, 41.6%, 94.2%, 95.2% { opacity: 1; }
+}
+
+@keyframes home-edge-shimmer {
+  from { background-position: 100%; }
+  to { background-position: 0; }
+}

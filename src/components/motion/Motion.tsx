@@ -29,10 +29,10 @@ export function MotionPressable({ children, style, onPressIn, onPressOut, ...pro
   useEffect(() => { if (reduced) lift.setValue(0); }, [lift, reduced]);
   const animate = (toValue: number) => {
     if (reduced) return;
-    Animated.timing(lift, { toValue, duration: 90, useNativeDriver: Platform.OS !== 'web', isInteraction: false }).start();
+    Animated.spring(lift, { toValue, stiffness: 340, damping: 18, mass: 0.55, useNativeDriver: Platform.OS !== 'web', isInteraction: false }).start();
   };
   return (
-    <Animated.View style={{ transform: [{ translateY: lift }] }}>
+    <Animated.View style={{ transform: [{ translateY: lift }, { scale: lift.interpolate({ inputRange: [0, 2], outputRange: [1, 0.975] }) }] }}>
       <Pressable
         {...props}
         onPressIn={(e) => { animate(2); onPressIn?.(e); }}
@@ -56,16 +56,16 @@ export function Pulse({ children, style }: { children: React.ReactNode; style?: 
   return <Animated.View style={[style, { transform: [{ scale: p.interpolate({ inputRange: [0, 1], outputRange: [1, 1.035] }) }] }]}>{children}</Animated.View>;
 }
 
-export function Float({ children, distance = 7, duration = 2200, delay = 0, style }: { children: React.ReactNode; distance?: number; duration?: number; delay?: number; style?: StyleProp<ViewStyle> }) {
+export function Float({ children, distance = 7, duration = 2200, delay = 0, iterations = -1, style }: { children: React.ReactNode; distance?: number; duration?: number; delay?: number; iterations?: number; style?: StyleProp<ViewStyle> }) {
   const p = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     const loop = Animated.loop(Animated.sequence([
-      Animated.timing(p, { toValue: 1, duration, delay, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
-      Animated.timing(p, { toValue: 0, duration, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
-    ]));
+      Animated.timing(p, { toValue: 1, duration, delay, easing: Easing.inOut(Easing.sin), useNativeDriver: true, isInteraction: false }),
+      Animated.timing(p, { toValue: 0, duration, easing: Easing.inOut(Easing.sin), useNativeDriver: true, isInteraction: false }),
+    ]), { iterations });
     loop.start();
     return () => loop.stop();
-  }, [delay, duration, p]);
+  }, [delay, duration, iterations, p]);
   return <Animated.View style={[style, { transform: [{ translateY: p.interpolate({ inputRange: [0, 1], outputRange: [0, -distance] }) }] }]}>{children}</Animated.View>;
 }
 

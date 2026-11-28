@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { hum, paperButton } from '@/theme/hum';
+import { cosmic, gameButton } from '@/theme/cosmic';
 import type { PronunciationResult } from '../data/pronunciation';
 import { practiceStyles } from './PracticeUI';
 
@@ -76,16 +76,16 @@ export function PronunciationFeedback({ result, demo = false }: { result: Pronun
 }
 
 const styles = StyleSheet.create({
-  result: { gap: 10, borderTopWidth: 1, borderColor: hum.rule, paddingTop: 14 },
+  result: { gap: 10, borderTopWidth: 1, borderColor: cosmic.border, paddingTop: 14 },
   score: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 },
-  total: { color: hum.greenInk, fontSize: 30, fontWeight: '700', fontVariant: ['tabular-nums'] },
+  total: { color: cosmic.mint, fontSize: 30, fontWeight: '700', fontVariant: ['tabular-nums'] },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  metric: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: hum.sky, borderRadius: 8, paddingHorizontal: 9, paddingVertical: 6 },
-  word: { ...paperButton, minHeight: 49, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 10, paddingVertical: 4 },
-  good: { backgroundColor: hum.mint, borderColor: hum.mintRule },
-  review: { backgroundColor: hum.pearSoft, borderColor: hum.pearEdge },
-  selected: { borderColor: hum.blue },
-  wordText: { color: hum.ink, fontSize: 15, fontWeight: '700' },
-  focus: { gap: 8, backgroundColor: hum.sky, borderRadius: 10, padding: 10 },
-  phoneme: { color: hum.ink, backgroundColor: hum.card, borderRadius: 7, paddingHorizontal: 8, paddingVertical: 5, fontSize: 15 },
+  metric: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: cosmic.iceSurface, borderRadius: 8, paddingHorizontal: 9, paddingVertical: 6 },
+  word: { ...gameButton, minHeight: 49, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 10, paddingVertical: 4 },
+  good: { backgroundColor: cosmic.mintSurface, borderColor: cosmic.mintEdge },
+  review: { backgroundColor: cosmic.violetSurface, borderColor: cosmic.actionEdge },
+  selected: { borderColor: cosmic.ice },
+  wordText: { color: cosmic.text, fontSize: 15, fontWeight: '700' },
+  focus: { gap: 8, backgroundColor: cosmic.iceSurface, borderRadius: 10, padding: 10 },
+  phoneme: { color: cosmic.text, backgroundColor: cosmic.glass, borderRadius: 7, paddingHorizontal: 8, paddingVertical: 5, fontSize: 15 },
 });

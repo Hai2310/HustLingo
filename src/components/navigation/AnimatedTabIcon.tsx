@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Platform, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { hum } from '@/theme/hum';
+import { cosmic } from '@/theme/cosmic';
 import { useMotionPreference } from '@/theme/MotionPreference';
 
 export function AnimatedTabIcon({ name, focused, color, size }: { name:keyof typeof Ionicons.glyphMap; focused:boolean; color:string; size:number }) {
@@ -9,7 +9,7 @@ export function AnimatedTabIcon({ name, focused, color, size }: { name:keyof typ
   const lift = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     if (reduced) { lift.setValue(0); return; }
-    const animation = Animated.timing(lift, { toValue: focused ? -2 : 0, duration: 140, useNativeDriver: Platform.OS !== 'web', isInteraction: false });
+    const animation = Animated.spring(lift, { toValue: focused ? -3 : 0, stiffness: 310, damping: 16, mass: 0.6, useNativeDriver: Platform.OS !== 'web', isInteraction: false });
     animation.start();
     return () => animation.stop();
   }, [focused, lift, reduced]);
@@ -22,5 +22,5 @@ export function AnimatedTabIcon({ name, focused, color, size }: { name:keyof typ
 const styles = StyleSheet.create({
   wrap: { width: 42, height: 35, alignItems: 'center', justifyContent: 'center' },
   bg: { width: 39, height: 31, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
-  bgOn: { backgroundColor: hum.pear, borderWidth: 1, borderBottomWidth: 3, borderColor: hum.pearEdge },
+  bgOn: { backgroundColor: cosmic.iceSurface, borderWidth: 1, borderColor: cosmic.iceEdge, boxShadow: '0 0 14px #4c8da966' },
 });

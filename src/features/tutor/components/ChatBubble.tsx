@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { colors } from '@/theme/colors';
-import { hum } from '@/theme/hum';
+import { cosmic } from '@/theme/cosmic';
 import type { TutorMessage } from '../types';
 
 export function ChatBubble({ message }: { message: TutorMessage }) {
@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
   desktopBubble: { maxWidth: 650 },
   mobileBubble: { maxWidth: '90%', paddingHorizontal: 13, paddingVertical: 11 },
   tutorBubble: { backgroundColor: colors.surface, borderWidth: 1, borderBottomWidth: 3, borderColor: colors.border, borderBottomLeftRadius: 5 },
-  learnerBubble: { backgroundColor: hum.sky, borderWidth: 1, borderBottomWidth: 3, borderColor: hum.skyEdge, borderBottomRightRadius: 5 },
+  learnerBubble: { backgroundColor: cosmic.iceSurface, borderWidth: 1, borderBottomWidth: 3, borderColor: cosmic.iceEdge, borderBottomRightRadius: 5 },
   label: { marginBottom: 4, fontSize: 8, fontWeight: '900', letterSpacing: 1, color: colors.primary },
   text: { fontSize: 13, lineHeight: 20, color: colors.text },
   mobileText: { fontSize: 14, lineHeight: 21 },

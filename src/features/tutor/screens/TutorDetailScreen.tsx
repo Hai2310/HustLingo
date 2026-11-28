@@ -8,7 +8,7 @@ import { TutorAvatar, ScenarioCard } from '../components';
 import { useTutorCatalog } from '../hooks/useTutorCatalog';
 import { TutorDataState } from '../components/TutorDataState';
 import { colors } from '@/theme/colors';
-import { hum, paperCard } from '@/theme/hum';
+import { cosmic, glassCard } from '@/theme/cosmic';
 
 export default function TutorDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -23,7 +23,7 @@ export default function TutorDetailScreen() {
     <Screen>
       <PageHeader title={tutor.name} subtitle="Tutor profile" />
       <View style={styles.profile}>
-        <TutorAvatar initials={tutor.initials || tutor.name.slice(0, 2).toUpperCase()} accent={tutor.accent} size={74} />
+        <TutorAvatar tutorId={tutor.id} initials={tutor.initials || tutor.name.slice(0, 2).toUpperCase()} accent={tutor.accent} size={88} />
         <View style={styles.profileCopy}><Text style={styles.name}>{tutor.name}</Text><Text style={styles.role}>{tutor.role}</Text><Text style={styles.tone}>{tutor.tone}</Text></View>
       </View>
       <View style={styles.tags}>{(tutor.specialties || []).map(item => <View key={item} style={styles.tag}><Text style={styles.tagText}>{item}</Text></View>)}</View>
@@ -43,7 +43,7 @@ export default function TutorDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  profile: { ...paperCard, flexDirection: 'row', alignItems: 'center', gap: 16, padding: 17, backgroundColor: hum.sky, borderColor: hum.skyEdge },
+  profile: { ...glassCard, flexDirection: 'row', alignItems: 'center', gap: 16, padding: 17, backgroundColor: cosmic.iceSurface, borderColor: cosmic.iceEdge },
   profileCopy: { flex: 1 },
   name: { fontSize: 26, fontWeight: '900', color: colors.text },
   role: { marginTop: 3, fontSize: 11, fontWeight: '800', color: colors.primary },
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginTop: 14 },
   tag: { paddingHorizontal: 9, paddingVertical: 6, borderRadius: 9, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
   tagText: { fontSize: 9.5, fontWeight: '800', color: colors.textSecondary },
-  levelPanel: { ...paperCard, marginTop: 20, padding: 15 },
+  levelPanel: { ...glassCard, marginTop: 20, padding: 15 },
   levelTitle: { fontSize: 12, fontWeight: '900', color: colors.text },
   levels: { flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginTop: 10 },
   levelBadge: { paddingHorizontal: 10, paddingVertical: 7, borderRadius: 9, backgroundColor: colors.primarySoft },

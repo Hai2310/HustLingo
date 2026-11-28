@@ -1,13 +1,39 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/components/Screen';
 import { PageHeader } from '@/components/PageHeader';
-import { AppCard } from '@/components/AppCard';
+import { RankProgress } from '@/components/common/LearnerRank';
+import { HomeProgress } from '@/components/home/HomeProgress';
 import { useLearning } from '@/contexts/LearningContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { colors } from '@/theme/colors';
-import { hum } from '@/theme/hum';
+import { cosmic, glassCard } from '@/theme/cosmic';
 
-export default function Progress(){const{state,accuracy}=useLearning();const{user}=useAuth();const goal=user?.dailyMinutes||15;const pct=Math.min(100,Math.round(state.minutesToday/goal*100));const stats=[['Từ đã học',state.studiedWordIds.length,'book-outline'],['Từ cần ôn',state.reviewWordIds.length,'refresh-outline'],['Từ đã lưu',state.savedWordIds.length,'bookmark-outline'],['Bài hoàn thành',state.completedLessonIds.length,'checkmark-circle-outline']] as const;return <Screen><PageHeader title="Tiến độ học tập" subtitle="Theo dõi hoạt động English của bạn"/><AppCard style={styles.hero}><Text style={styles.kicker}>MỤC TIÊU HÔM NAY</Text><Text style={styles.big}>{state.minutesToday} / {goal} phút</Text><View style={styles.track}><View style={[styles.fill,{width:`${pct}%`} as any]}/></View><Text style={styles.pct}>{pct}% hoàn thành</Text></AppCard><View style={styles.grid}>{stats.map(([label,value,icon])=><AppCard key={label} style={styles.stat}><Ionicons name={icon} size={22} color={colors.primary}/><Text style={styles.num}>{value}</Text><Text style={styles.label}>{label}</Text></AppCard>)}</View><AppCard><Text style={styles.section}>Độ chính xác</Text><Text style={styles.accuracy}>{accuracy}%</Text><Text style={styles.desc}>{state.totalAnswers?`${state.correctAnswers}/${state.totalAnswers} câu trả lời đúng.`:'Hãy làm quiz để bắt đầu có thống kê.'}</Text></AppCard></Screen>}
-const styles=StyleSheet.create({hero:{backgroundColor:hum.mint,borderColor:hum.mintRule,marginBottom:14},kicker:{fontSize:10,fontWeight:'900',color:hum.greenInk},big:{fontSize:30,fontWeight:'900',color:hum.ink,marginTop:7},track:{height:9,backgroundColor:hum.mintTrack,borderRadius:99,overflow:'hidden',marginTop:15},fill:{height:'100%',backgroundColor:hum.greenInk,borderRadius:99},pct:{fontSize:11,color:hum.greenInk,marginTop:8},grid:{flexDirection:'row',flexWrap:'wrap',justifyContent:'space-between',gap:9,marginBottom:12},stat:{width:'48%',backgroundColor:hum.card},num:{fontSize:24,fontWeight:'900',color:colors.text,marginTop:8},label:{fontSize:11.5,color:colors.textSecondary,marginTop:2},section:{fontSize:16,fontWeight:'900',color:colors.text},accuracy:{fontSize:44,fontWeight:'900',color:colors.primary,marginTop:6},desc:{fontSize:12.5,color:colors.textSecondary,marginTop:3}});
+export default function Progress() {
+  const { state, accuracy, ready } = useLearning();
+  const { user } = useAuth();
+  const { width } = useWindowDimensions();
+  const goal = user.dailyMinutes && user.dailyMinutes > 0 ? user.dailyMinutes : 15;
+
+  return (
+    <Screen>
+      <PageHeader title="Tiến độ học tập" />
+      <HomeProgress state={state} accuracy={accuracy} ready={ready} dailyGoal={goal} wide={width >= 680} />
+      <View style={styles.achievement}>
+        {ready && <RankProgress lessons={state.completedLessonIds.length} practice={state.completedPracticeIds.length} />}
+        <View style={styles.saved}>
+          <Ionicons name="bookmark-outline" size={22} color={cosmic.rose} aria-hidden />
+          <Text style={styles.label}>Từ đã lưu</Text>
+          <Text style={styles.count}>{ready ? state.savedWordIds.length : '—'}</Text>
+        </View>
+      </View>
+    </Screen>
+  );
+}
+
+const styles = StyleSheet.create({
+  achievement: { marginTop: 17 },
+  saved: { ...glassCard, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  label: { flex: 1, fontSize: 15, fontWeight: '700', color: cosmic.text },
+  count: { fontSize: 22, fontWeight: '800', color: cosmic.rose, fontVariant: ['tabular-nums'] },
+});

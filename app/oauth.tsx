@@ -79,7 +79,7 @@ export default function OAuthComplete() {
   }, []);
 
   return (
-    <View nativeID="hum-screen-oauth" style={styles.page}>
+    <View nativeID="cosmic-screen-oauth" style={styles.page}>
       {!errorMessage ? <ActivityIndicator size="large" color={colors.primary} /> : null}
       <Text style={styles.title}>
         {errorMessage ? 'Đăng nhập chưa hoàn tất' : 'Đang hoàn tất đăng nhập…'}
@@ -97,7 +97,7 @@ export default function OAuthComplete() {
 }
 
 const styles = StyleSheet.create({
-  page: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background, padding: 24 },
+  page: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
   title: { marginTop: 16, fontSize: 18, fontWeight: '900', color: colors.text },
   sub: { marginTop: 7, fontSize: 12.5, lineHeight: 19, textAlign: 'center', color: colors.textSecondary },
   link: { marginTop: 18, color: colors.primary, fontSize: 13, fontWeight: '800' },

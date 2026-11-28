@@ -5,5 +5,5 @@ import { useReducedLessonMotion } from '@/features/lessons/hooks/useReducedLesso
 
 export default function LessonLayout() {
   const reduced = useReducedLessonMotion();
-  return <Stack screenOptions={{ headerShown: false, animation: reduced || Platform.OS === 'web' ? 'none' : 'slide_from_right' }} />;
+  return <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' }, animation: reduced || Platform.OS === 'web' ? 'none' : 'fade_from_bottom' }} />;
 }

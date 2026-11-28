@@ -1,0 +1,69 @@
+:is(#home-plan-plus, #pricing-plan-plus) {
+  box-shadow: inset 0 1px #d6faff71, inset 0 0 17px #47c3ff29, 0 0 14px #1fb7ff29;
+}
+
+:is(#home-plan-pro, #pricing-plan-pro) {
+  box-shadow: inset 0 1px #f7d7fc79, inset 0 0 20px #ffca6b23, 0 0 15px #be73ff35;
+}
+
+:is(#home-plan-pro, #pricing-plan-pro)::before {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(116deg, transparent 25%, #fbbc5840 43%, #ffe3a67d 48%, #fff4cc9c 50%, #fbc95c52 53%, transparent 65%);
+  transform: translateX(-105%);
+  opacity: 0;
+}
+
+[id^="paid-pro-emblem-"]::before, [id^="paid-pro-emblem-"]::after {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+  width: 29%;
+  height: 29%;
+  background: #fff0bb;
+  clip-path: polygon(50% 0, 61% 38%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 38%);
+  opacity: .55;
+}
+
+[id^="paid-pro-emblem-"]::before { top: 2%; right: 6%; }
+[id^="paid-pro-emblem-"]::after { bottom: 11%; left: 1%; width: 21%; height: 21%; }
+
+@supports (mask-composite: exclude) {
+  :is(#home-plan-pro, #pricing-plan-pro)::after {
+    content: '';
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(105deg, #d0a0fa 4%, #9081d7 18%, #8a95e1 30%, #ce90e6 43%, #ffe6a5 52%, #f3c878 57%, #be94ef 69%, #8694ed 86%, #f0c989) 100% / 230% 100%;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :is(#home-plan-pro, #pricing-plan-pro)[data-plan-revealed]::before { animation: paid-pro-sweep 1.25s ease-out 160ms both; }
+  :is(#home-plan-pro, #pricing-plan-pro)[data-plan-revealed]::after { animation: paid-pro-shimmer 1.55s ease-in-out 240ms both; }
+  [data-plan-revealed] [id^="paid-pro-emblem-"]::before { animation: paid-pro-sparkle 1.85s ease-out 230ms 2 both; }
+  [data-plan-revealed] [id^="paid-pro-emblem-"]::after { animation: paid-pro-sparkle 1.85s ease-out 540ms 2 both; }
+}
+
+@keyframes paid-pro-sweep {
+  30% { opacity: .8; }
+  100% { transform: translateX(105%); opacity: 0; }
+}
+
+@keyframes paid-pro-sparkle {
+  0%, 70%, 100% { opacity: .55; transform: scale(.8); }
+  28% { opacity: 1; transform: scale(1.6) rotate(15deg); }
+}
+
+@keyframes paid-pro-shimmer {
+  55% { background-position: 24%; }
+  100% { background-position: 0; }
+}

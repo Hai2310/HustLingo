@@ -7,7 +7,7 @@ import { AppButton } from '@/components/common/Buttons';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLearning } from '@/contexts/LearningContext';
 import { useLessonSpeech } from '@/features/lessons/hooks/useLessonSpeech';
-import { hum } from '@/theme/hum';
+import { cosmic } from '@/theme/cosmic';
 import { practiceKey, type SkillExercise } from '../data/catalog';
 import { usePronunciationAssessment } from '../hooks/usePronunciationAssessment';
 import { practiceStyles } from './PracticeUI';
@@ -60,7 +60,7 @@ export function WritingResponse({ exercise, storageKey }: {
       <TextInput
         accessibilityLabel="Bài viết của bạn"
         placeholder={loaded ? 'Viết câu trả lời bằng tiếng Anh…' : 'Đang mở bản nháp…'}
-        placeholderTextColor={hum.muted}
+        placeholderTextColor={cosmic.muted}
         value={draft}
         onChangeText={value => { setDraft(value); setMessage(''); }}
         editable={loaded && !saving}
@@ -256,5 +256,5 @@ const styles = StyleSheet.create({
   writing: { minHeight: 170 },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   retry: { alignSelf: 'flex-start' },
-  signIn: { color: hum.blue, fontWeight: '700', textDecorationLine: 'underline' },
+  signIn: { color: cosmic.ice, fontWeight: '700', textDecorationLine: 'underline' },
 });

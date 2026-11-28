@@ -1,7 +1,7 @@
 import React, { forwardRef, useEffect, useState } from 'react';
-import { Animated, Easing, Platform, Pressable, StyleSheet } from 'react-native';
+import { Animated, Platform, Pressable, StyleSheet } from 'react-native';
 import type { PressableProps, StyleProp, ViewStyle } from 'react-native';
-import { paperButton } from '@/theme/hum';
+import { gameButton } from '@/theme/cosmic';
 
 type Props = Omit<PressableProps, 'children' | 'style' | 'onPressIn' | 'onPressOut'> & {
   children: React.ReactNode;
@@ -24,11 +24,13 @@ export const HomePaperPressable = forwardRef<React.ComponentRef<typeof Pressable
 
     const move = (pressed: boolean) => {
       if (!nativeMotion) return;
-      Animated.timing(offset, {
+      Animated.spring(offset, {
         toValue: pressed ? 3 : 0,
-        duration: pressed ? 75 : primary ? 160 : 130,
-        easing: !pressed && primary ? Easing.out(Easing.back(1.35)) : Easing.out(Easing.quad),
+        stiffness: pressed ? 380 : 290,
+        damping: primary ? 15 : 19,
+        mass: 0.55,
         useNativeDriver: true,
+        isInteraction: false,
       }).start();
     };
 
@@ -53,6 +55,6 @@ export const HomePaperPressable = forwardRef<React.ComponentRef<typeof Pressable
 );
 
 const styles = StyleSheet.create({
-  hitArea: { overflow: 'hidden', borderRadius: paperButton.borderRadius },
+  hitArea: { overflow: 'hidden', borderRadius: gameButton.borderRadius },
   face: { flexGrow: 1, pointerEvents: 'none' },
 });

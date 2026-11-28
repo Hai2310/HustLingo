@@ -5,7 +5,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { Screen } from '@/components/Screen';
 import { useLearning } from '@/contexts/LearningContext';
 import { colors } from '@/theme/colors';
-import { hum, paperCard } from '@/theme/hum';
+import { cosmic, glassCard } from '@/theme/cosmic';
 import { useLessonCatalog } from '../hooks/useLessonCatalog';
 import { isLessonLevel, normaliseLessonTopic, topicStats } from '../data/catalog';
 import type { LessonKind, LessonLevel } from '../types';
@@ -24,7 +24,7 @@ export default function TopicDetailScreen() {
   const stats = topicStats(lessons, state);
   return <Screen ambient={false} contentStyle={ui.content}><Reveal><LessonBack />
     {loading && !catalog ? <LessonState kind="loading" title="Loading topic" description="Finding lessons for this topic." /> : error ? <LessonState kind="error" title="Topic could not load" description={error} action="Try again" onAction={retry} /> : !topic ? <LessonState kind="empty" title="Topic not found" description="This topic may have moved or is not published yet. Go back to choose another topic." action="Reload library" onAction={retry} /> : <>
-      <View style={styles.header}><View style={[styles.icon, { backgroundColor: hum.sky }]}><Ionicons name={topic.icon} size={28} color={hum.blue} /></View><SyncLabel /></View>
+      <View style={styles.header}><View style={[styles.icon, { backgroundColor: cosmic.iceSurface }]}><Ionicons name={topic.icon} size={28} color={cosmic.ice} /></View><SyncLabel /></View>
       {kind === 'vocabulary' && <View style={styles.topicArtwork}><VocabularyTopicCover topicId={topic.id} /></View>}
       <Text style={ui.kicker}>EXPLORE A TOPIC</Text><Text style={ui.heading}>{topic.title}</Text><Text style={ui.description}>{topic.description}</Text>
       <View style={styles.topicProgress}><View style={styles.progressLabel}><Text style={styles.progressTitle}>{stats.complete} of {stats.count} lessons completed</Text><Text style={styles.percent}>{stats.percent}%</Text></View><ProgressBar percent={stats.percent} label={`${topic.title} progress`} /></View>
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 },
   icon: { width: 62, height: 62, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   topicArtwork: { borderRadius: 20, overflow: 'hidden', marginBottom: 22, borderWidth: 1, borderColor: colors.border },
-  topicProgress: { ...paperCard, padding: 21, marginTop: 24, backgroundColor: hum.mint, borderColor: hum.mintRule },
+  topicProgress: { ...glassCard, padding: 21, marginTop: 24, backgroundColor: cosmic.mintSurface, borderColor: cosmic.mintEdge },
   progressLabel: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 13, gap: 10 },
   progressTitle: { color: colors.textSecondary, fontSize: 13, flex: 1 }, percent: { fontSize: 20, fontWeight: '800', color: colors.primary }, count: { fontSize: 12, color: colors.textMuted },
 });

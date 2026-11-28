@@ -5,22 +5,19 @@
   z-index: 12;
   inset-inline-end: max(18px, env(safe-area-inset-right));
   bottom: calc(var(--mascot-bottom) + env(safe-area-inset-bottom, 0px));
-  color: #161820;
+  color: var(--cosmic-text);
   font: 15px/1.45 system-ui, sans-serif;
 }
 
 .hust-mascot[data-position="tab"] { --mascot-bottom: 92px; }
 .hust-mascot[data-position="chat"] { --mascot-bottom: 148px; }
 .hust-mascot[data-position="hero"] {
-  --mascot-size: clamp(78px, 12vw, 128px);
+  --mascot-size: clamp(112px, 15.5vw, 210px);
   position: absolute;
-  inset-inline-end: clamp(16px, 8%, 82px);
-  top: 4px;
-  bottom: auto;
-  transform: translateY(-100%);
+  inset-inline-end: 3%;
+  top: auto;
+  bottom: 11%;
 }
-
-#home-greeting { padding-inline-end: clamp(108px, 24%, 224px); }
 
 .hust-mascot-trigger {
   position: relative;
@@ -30,12 +27,19 @@
   height: var(--mascot-size);
   box-sizing: border-box;
   padding: 5px;
-  border: 1px solid #d9d0b9;
+  border: 1px solid var(--cosmic-border);
   border-bottom-width: 3px;
   border-radius: 50%;
-  background: #fffcf3;
-  box-shadow: 0 5px 17px rgb(80 38 12 / 13%);
+  background: var(--cosmic-glass);
+  box-shadow: 0 5px 17px var(--cosmic-glow);
   cursor: pointer;
+}
+
+.hust-mascot-frame {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
 .hust-mascot-art {
@@ -46,9 +50,11 @@
   transition: transform 160ms ease-out;
 }
 
+.hust-mascot-blink { position: absolute; inset: 0; opacity: 0; }
+
 .hust-mascot[data-position="hero"] .hust-mascot-trigger {
   display: block;
-  height: calc(var(--mascot-size) * 0.74);
+  height: var(--mascot-size);
   padding: 0;
   border: 0;
   border-radius: 12px;
@@ -56,34 +62,16 @@
   box-shadow: none;
 }
 
-.hust-mascot-peek {
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
-.hust-mascot-pose {
-  /* The polygon follows the raised paw on the original square portrait. */
-  --mascot-paw-outline: 69% 58%, 72% 51.5%, 75% 48.5%, 79% 47%, 83% 47.5%, 87% 50%, 89% 54%, 88% 58%, 85% 62%, 80% 66%, 74% 67%, 69% 64%;
-  position: relative;
-  display: block;
-  width: 100%;
-  aspect-ratio: 1;
-}
-
-.hust-mascot-paw { display: none; }
-
 .hust-mascot-name {
   position: absolute;
   inset-inline-start: 50%;
   bottom: -5px;
   transform: translateX(-50%);
   padding: 0 8px;
-  border: 1px solid #b3952e;
+  border: 1px solid var(--cosmic-violet);
   border-radius: 999px;
-  color: #332605;
-  background: #f3d642;
+  color: var(--cosmic-text);
+  background: #38265d;
   font: 700 12px/18px system-ui, sans-serif;
 }
 
@@ -101,20 +89,58 @@
   box-sizing: border-box;
   overflow: auto;
   padding: 12px 15px 15px;
-  border: 1px solid #d9d0b9;
+  border: 1px solid var(--cosmic-border);
   border-bottom-width: 3px;
   border-radius: 18px 18px 5px 18px;
-  color: #161820;
-  background: #fffcf3;
-  box-shadow: 0 8px 26px rgb(80 38 12 / 16%);
+  color: var(--cosmic-text);
+  background: var(--cosmic-glass);
+  box-shadow: 0 8px 26px var(--cosmic-glow);
 }
 
-.hust-mascot[data-position="hero"] .hust-mascot-panel {
-  top: calc(100% + 15px);
-  bottom: auto;
-  width: min(280px, calc(100vw - clamp(16px, 8vw, 82px) - 36px));
-  max-height: 50dvh;
-  border-radius: 18px 5px 18px 18px;
+.hust-mascot-hero-bubble {
+  --bubble-edge: #d7b3fe;
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  z-index: 1000;
+  width: min(296px, calc(100vw - 24px));
+  box-sizing: border-box;
+  border: 1px solid var(--bubble-edge);
+  border-radius: 25px 25px 25px 13px;
+  color: var(--cosmic-text);
+  background: linear-gradient(155deg, #302046, #19162d 75%);
+  box-shadow: 0 12px 38px #050411cc, 0 0 20px #b66de755, inset 0 1px #efceff49;
+  font: 15px/1.45 system-ui, sans-serif;
+}
+
+.hust-mascot-hero-bubble::before {
+  content: '';
+  position: absolute;
+  top: -9px;
+  left: var(--bubble-tail-x, 50%);
+  width: 15px;
+  height: 15px;
+  transform: translateX(-50%) rotate(45deg);
+  border: solid var(--bubble-edge);
+  border-width: 1px 0 0 1px;
+  border-radius: 3px 0 0;
+  background: #302046;
+}
+
+.hust-mascot-hero-bubble[data-side="above"]::before {
+  top: auto;
+  bottom: -9px;
+  transform: translateX(-50%) rotate(225deg);
+  background: #19162d;
+}
+
+.hust-mascot-bubble-body {
+  box-sizing: border-box;
+  max-height: calc(100dvh - 26px);
+  overflow: auto;
+  padding: 10px 15px 15px;
 }
 
 .hust-mascot-panel-top {
@@ -123,8 +149,8 @@
   justify-content: space-between;
 }
 
-.hust-mascot-panel-top strong { color: #a81635; font-size: 18px; }
-.hust-mascot-panel p { margin: 0 0 10px; }
+.hust-mascot-panel-top strong { color: var(--cosmic-rose); font-size: 18px; }
+.hust-mascot-panel p, .hust-mascot-hero-bubble p { margin: 0 0 10px; }
 
 .hust-mascot-close {
   display: grid;
@@ -146,85 +172,39 @@
   box-sizing: border-box;
   min-height: 44px;
   padding: 6px 10px;
-  border: 1px solid #9bb3ca;
+  border: 1px solid var(--cosmic-ice);
   border-bottom-width: 3px;
   border-radius: 11px;
-  background: #d7e7f3;
-  color: #24548c;
+  background: #132c43;
+  color: var(--cosmic-ice);
   font-weight: 700;
   text-decoration: none;
 }
 
-.hust-mascot :is(button, a):focus-visible {
-  outline: 2px solid #24548c;
+:is(.hust-mascot, .hust-mascot-hero-bubble) :is(button, a):focus-visible {
+  outline: 2px solid var(--cosmic-ice);
   outline-offset: 3px;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .hust-mascot-pose {
-    animation: hust-mascot-rise 570ms cubic-bezier(0.22, 1, 0.36, 1) 100ms both;
-  }
-
-  .hust-mascot-body {
-    clip-path: polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, var(--mascot-paw-outline), 69% 58%, 0 0);
-  }
-
-  .hust-mascot-paw {
-    display: block;
-    position: absolute;
-    inset: 0;
-    clip-path: polygon(var(--mascot-paw-outline));
-    transform-origin: 74% 64%;
-    animation: hust-mascot-wave 970ms ease-in-out 470ms;
-  }
-
-  .hust-mascot[data-position="hero"] .hust-mascot-trigger::before,
-  .hust-mascot[data-position="hero"] .hust-mascot-trigger::after {
-    content: "";
-    position: absolute;
-    z-index: 1;
-    top: 57%;
-    right: 4%;
-    width: 9%;
-    height: 13%;
-    border-top: 2px solid #a66126;
-    border-right: 2px solid #a66126;
-    border-top-right-radius: 100%;
-    opacity: 0;
-    pointer-events: none;
-    animation: hust-mascot-wave-mark 420ms ease-out 520ms 2;
-  }
-
-  .hust-mascot[data-position="hero"] .hust-mascot-trigger::after {
-    top: 51%;
-    right: -1%;
-    width: 11%;
-    height: 17%;
-    animation-delay: 565ms;
+  .hust-mascot[data-position="hero"] .hust-mascot-frame {
+    animation: hust-mascot-greet 850ms cubic-bezier(.22, 1, .36, 1) both;
   }
 }
 
-@keyframes hust-mascot-rise {
-  from { transform: translateY(56%); }
-  74% { transform: translateY(-3%); }
-  to { transform: none; }
+@keyframes hust-mascot-greet {
+  0% { transform: translateY(9px) scale(.97); }
+  42% { transform: translateY(-6px) rotate(-4deg); }
+  70% { transform: translateY(0) rotate(2deg); }
 }
 
-@keyframes hust-mascot-wave {
-  0%, 100% { transform: none; }
-  25%, 68% { transform: rotate(13deg); }
-  45%, 85% { transform: rotate(-7deg); }
-}
-
-@keyframes hust-mascot-wave-mark {
-  0%, 100% { opacity: 0; }
-  32% { opacity: 1; transform: translate(-1px, 1px) rotate(-8deg); }
-  82% { transform: translate(3px, -1px) rotate(10deg); }
+@media (min-width: 1050px) {
+  .hust-mascot[data-position="tab"] { --mascot-bottom: 21px; }
 }
 
 @media (hover: hover) {
   .hust-mascot:not([data-position="hero"]) .hust-mascot-trigger:hover .hust-mascot-art { transform: translateY(-3px) rotate(-4deg); }
-  .hust-mascot-close:hover { background: #f2ebd8; }
+  .hust-mascot-close:hover { background: #202842; }
   .hust-mascot-action:hover { text-decoration: underline; }
 }
 

@@ -3,8 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } fr
 import { Link, router, useLocalSearchParams } from 'expo-router';
 import { AppButton } from '@/components/common/Buttons';
 import { Screen } from '@/components/common/Screen';
-import { colors } from '@/theme/colors';
-import { hum, paperButton } from '@/theme/hum';
+import { cosmic, gameButton } from '@/theme/cosmic';
 import { PracticeNotice, practiceStyles } from '../components/PracticeUI';
 import { practiceStatus, PracticeStatusBadge, usePracticeStatus } from '../components/PracticeStatus';
 import { grammarPageSize, grammarTopicLabel, grammarTopicTitle, loadGrammarPage } from '../data/catalog';
@@ -86,8 +85,8 @@ const styles = StyleSheet.create({
   heading: { gap: 5 },
   legend: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', columnGap: '2%', rowGap: 8 },
-  question: { ...paperButton, borderColor: hum.rule, backgroundColor: colors.white, width: '32%', minHeight: 52, padding: 6, flexDirection: 'row', gap: 4, alignItems: 'center', justifyContent: 'center' },
+  question: { ...gameButton, borderColor: cosmic.border, backgroundColor: cosmic.glass, width: '32%', minHeight: 52, padding: 6, flexDirection: 'row', gap: 4, alignItems: 'center', justifyContent: 'center' },
   questionWide: { width: '15%' },
-  number: { flexShrink: 1, color: hum.ink, fontSize: 15, fontWeight: '700', textAlign: 'center', fontVariant: ['tabular-nums'] },
+  number: { flexShrink: 1, color: cosmic.text, fontSize: 15, fontWeight: '700', textAlign: 'center', fontVariant: ['tabular-nums'] },
   pagination: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'center', justifyContent: 'space-between' },
 });
